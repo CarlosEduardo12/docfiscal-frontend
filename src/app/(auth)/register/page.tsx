@@ -37,7 +37,9 @@ export default function RegisterPage() {
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long and contain at least one letter');
+      setError(
+        'Password must be at least 6 characters long and contain at least one letter'
+      );
       setIsLoading(false);
       return;
     }
@@ -148,7 +150,8 @@ export default function RegisterPage() {
                 autoComplete="new-password"
               />
               <p id="password-help" className="text-xs text-gray-500">
-                Password must be at least 6 characters long and contain at least one letter
+                Password must be at least 6 characters long and contain at least
+                one letter
               </p>
             </div>
             <div className="space-y-2">
