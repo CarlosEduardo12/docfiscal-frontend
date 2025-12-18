@@ -15,17 +15,24 @@ export function middleware(req: NextRequest) {
   const response = NextResponse.next();
 
   // Content Security Policy for enhanced security
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
-    "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
-    "img-src 'self' data: https:",
-    "font-src 'self'",
-    "connect-src 'self' https: http://localhost:8000", // Allow connection to backend
+    "style-src 'self' 'unsafe-inline' data:", // Tailwind and Next.js styles
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' data:",
+    isDevelopment 
+      ? "connect-src 'self' https: http: ws: wss:" // Allow all connections in development
+      : "connect-src 'self' https: http://localhost:8000", // Restrict in production
     "frame-ancestors 'none'",
   ].join('; ');
 
-  response.headers.set('Content-Security-Policy', csp);
+  // Temporarily disable CSP in development for debugging
+  if (process.env.NODE_ENV !== 'development') {
+    response.headers.set('Content-Security-Policy', csp);
+  }
   response.headers.set('X-Robots-Tag', 'noindex, nofollow'); // Prevent indexing of sensitive pages
 
   return response;
