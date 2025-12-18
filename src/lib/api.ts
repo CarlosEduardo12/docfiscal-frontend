@@ -25,7 +25,7 @@ class ApiClient {
 
   constructor() {
     this.baseURL = API_BASE_URL;
-    
+
     // Initialize tokens from localStorage if available
     if (typeof window !== 'undefined') {
       this.accessToken = localStorage.getItem('access_token');
@@ -38,7 +38,7 @@ class ApiClient {
     options: RequestInit & { skipAuth?: boolean } = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ class ApiClient {
             return await retryResponse.json();
           }
         }
-        
+
         throw new Error(data.message || `HTTP ${response.status}`);
       }
 
@@ -107,10 +107,10 @@ class ApiClient {
       skipAuth: true,
     });
 
-    if (response.success && response.data?.tokens) {
+    if (response.success && (response.data as any)?.tokens) {
       this.setTokens(
-        response.data.tokens.access_token,
-        response.data.tokens.refresh_token
+        (response.data as any).tokens.access_token,
+        (response.data as any).tokens.refresh_token
       );
     }
 
@@ -127,10 +127,10 @@ class ApiClient {
         skipAuth: true,
       });
 
-      if (response.success && response.data?.tokens) {
+      if (response.success && (response.data as any)?.tokens) {
         this.setTokens(
-          response.data.tokens.access_token,
-          response.data.tokens.refresh_token || this.refreshToken
+          (response.data as any).tokens.access_token,
+          (response.data as any).tokens.refresh_token || this.refreshToken
         );
         return true;
       }
@@ -200,11 +200,14 @@ class ApiClient {
   }
 
   async downloadOrder(orderId: string): Promise<Blob> {
-    const response = await fetch(`${this.baseURL}/api/orders/${orderId}/download`, {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const response = await fetch(
+      `${this.baseURL}/api/orders/${orderId}/download`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Download failed');
@@ -220,10 +223,13 @@ class ApiClient {
   }
 
   // Payments
-  async initiatePayment(orderId: string, options?: {
-    return_url?: string;
-    cancel_url?: string;
-  }): Promise<ApiResponse> {
+  async initiatePayment(
+    orderId: string,
+    options?: {
+      return_url?: string;
+      cancel_url?: string;
+    }
+  ): Promise<ApiResponse> {
     const defaultOptions = {
       return_url: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL,
       cancel_url: process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL,
@@ -241,22 +247,28 @@ class ApiClient {
   }
 
   // User management
-  async updateProfile(userId: string, data: {
-    name?: string;
-    email?: string;
-  }): Promise<ApiResponse> {
+  async updateProfile(
+    userId: string,
+    data: {
+      name?: string;
+      email?: string;
+    }
+  ): Promise<ApiResponse> {
     return this.request(`/api/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  async getUserOrders(userId: string, params?: {
-    page?: number;
-    limit?: number;
-    sort_by?: string;
-    sort_order?: 'asc' | 'desc';
-  }): Promise<ApiResponse> {
+  async getUserOrders(
+    userId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      sort_by?: string;
+      sort_order?: 'asc' | 'desc';
+    }
+  ): Promise<ApiResponse> {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -264,7 +276,9 @@ class ApiClient {
     if (params?.sort_order) searchParams.set('sort_order', params.sort_order);
 
     const query = searchParams.toString();
-    return this.request(`/api/users/${userId}/orders${query ? `?${query}` : ''}`);
+    return this.request(
+      `/api/users/${userId}/orders${query ? `?${query}` : ''}`
+    );
   }
 
   // Health check
@@ -278,7 +292,7 @@ class ApiClient {
   private setTokens(accessToken: string, refreshToken: string): void {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', accessToken);
       localStorage.setItem('refresh_token', refreshToken);
@@ -288,7 +302,7 @@ class ApiClient {
   private clearTokens(): void {
     this.accessToken = null;
     this.refreshToken = null;
-    
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');

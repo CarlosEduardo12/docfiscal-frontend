@@ -26,7 +26,7 @@ export default function PaymentCancelPage() {
           </div>
 
           <div className="space-y-2">
-            <Button 
+            <Button
               onClick={() => router.push('/dashboard')}
               className="w-full"
               size="lg"
@@ -35,7 +35,7 @@ export default function PaymentCancelPage() {
               Tentar Novamente
             </Button>
 
-            <Button 
+            <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
               className="w-full"

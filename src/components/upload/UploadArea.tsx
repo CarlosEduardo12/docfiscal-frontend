@@ -325,7 +325,7 @@ export function UploadArea({
             <div className="flex items-center space-x-2 text-green-700">
               <FileText className="h-4 w-4" aria-hidden="true" />
               <p className="text-sm font-medium">
-                File uploaded successfully! Order ID: {uploadResponse.orderId}
+                File uploaded successfully! Order ID: {uploadResponse.order_id}
               </p>
             </div>
           </div>

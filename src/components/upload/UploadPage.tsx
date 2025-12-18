@@ -19,8 +19,8 @@ export function UploadPage() {
     useFileUpload({
       onSuccess: (response) => {
         // Navigate to order status page after successful upload
-        if (response.orderId) {
-          router.push(`/pedido/${response.orderId}`);
+        if (response.order_id) {
+          router.push(`/pedido/${response.order_id}`);
         }
       },
       onError: (errorMessage) => {
@@ -85,7 +85,7 @@ export function UploadPage() {
                   </p>
                 </div>
                 <div className="text-xs text-green-600">
-                  Order ID: {uploadResponse.orderId}
+                  Order ID: {uploadResponse.order_id}
                 </div>
               </div>
             </CardContent>

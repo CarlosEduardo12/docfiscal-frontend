@@ -114,7 +114,7 @@ export function useFileUpload(
         setAbortController(null);
       }
     },
-    [handleProgress]
+    []
   );
 
   const uploadFile = useCallback(
@@ -141,7 +141,8 @@ export function useFileUpload(
         setProgress(100);
         onSuccess?.(response);
       } catch (uploadError) {
-        const errorMessage = uploadError instanceof Error ? uploadError.message : 'Upload failed';
+        const errorMessage =
+          uploadError instanceof Error ? uploadError.message : 'Upload failed';
         setError(errorMessage);
         setProgress(0);
         onError?.(errorMessage);

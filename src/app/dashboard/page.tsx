@@ -26,8 +26,8 @@ export default function DashboardPage() {
   } = useUserOrders(user?.id || '', {
     page: 1,
     limit: 50,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sort_by: 'created_at',
+    sort_order: 'desc',
   });
 
   // Download file mutation
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold text-green-600">
                   {
                     ordersData.orders.filter(
-                      (order) => order.status === 'completed'
+                      (order: any) => order.status === 'completed'
                     ).length
                   }
                 </div>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold text-blue-600">
                   {
                     ordersData.orders.filter(
-                      (order) =>
+                      (order: any) =>
                         order.status === 'processing' || order.status === 'paid'
                     ).length
                   }

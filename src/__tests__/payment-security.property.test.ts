@@ -46,9 +46,7 @@ describe('Payment Security Property Tests', () => {
               mockPaymentResponse
             );
 
-            const result = await apiClient.initiatePayment(
-              paymentData.orderId
-            );
+            const result = await apiClient.initiatePayment(paymentData.orderId);
 
             // Property: Payment creation should always return secure HTTPS URLs
             expect(result.success).toBe(true);

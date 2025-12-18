@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
@@ -16,13 +16,7 @@ export default function PaymentSuccessPage() {
   const paymentId = searchParams.get('payment_id');
   const orderId = searchParams.get('order_id');
 
-  useEffect(() => {
-    if (orderId) {
-      loadOrderDetails();
-    }
-  }, [orderId]);
-
-  const loadOrderDetails = async () => {
+  const loadOrderDetails = useCallback(async () => {
     try {
       const response = await apiClient.getOrder(orderId!);
       if (response.success) {
@@ -33,7 +27,13 @@ export default function PaymentSuccessPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    if (orderId) {
+      loadOrderDetails();
+    }
+  }, [orderId, loadOrderDetails]);
 
   const handleDownload = async () => {
     if (!orderId) return;
@@ -76,25 +76,19 @@ export default function PaymentSuccessPage() {
           <div className="text-center text-gray-600">
             <p>Seu arquivo foi processado com sucesso.</p>
             {order && (
-              <p className="mt-2 font-medium">
-                Arquivo: {order.filename}
-              </p>
+              <p className="mt-2 font-medium">Arquivo: {order.filename}</p>
             )}
           </div>
 
           <div className="space-y-2">
             {order?.status === 'completed' && (
-              <Button 
-                onClick={handleDownload}
-                className="w-full"
-                size="lg"
-              >
+              <Button onClick={handleDownload} className="w-full" size="lg">
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Arquivo Convertido
               </Button>
             )}
 
-            <Button 
+            <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
               className="w-full"
@@ -112,5 +106,13 @@ export default function PaymentSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

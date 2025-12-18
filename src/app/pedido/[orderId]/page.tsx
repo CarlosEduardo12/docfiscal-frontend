@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { OrderStatusCard } from '@/components/order/OrderStatusCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
-import { paymentService, orderService } from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { useOrderStatus, useInvalidateQueries } from '@/lib/react-query';
 import type { Order } from '@/types';
 
@@ -38,9 +38,9 @@ export default function OrderStatusPage() {
         window.open(order.paymentUrl, '_blank');
       } else {
         // Create new payment
-        const paymentResponse = await paymentService.createPayment(order.id);
-        if (paymentResponse.success && paymentResponse.data?.paymentUrl) {
-          window.open(paymentResponse.data.paymentUrl, '_blank');
+        const paymentResponse = await apiClient.initiatePayment(order.id);
+        if (paymentResponse.success && paymentResponse.data?.payment_url) {
+          window.open(paymentResponse.data.payment_url, '_blank');
         }
       }
     } catch (error) {
@@ -60,7 +60,7 @@ export default function OrderStatusPage() {
         window.open(order.downloadUrl, '_blank');
       } else {
         // Download through service
-        const blob = await orderService.downloadFile(order.id);
+        const blob = await apiClient.downloadOrder(order.id);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

@@ -85,7 +85,11 @@ export const queryClient = new QueryClient({
       gcTime: 24 * 60 * 60 * 1000, // 24 hours for better persistence
       retry: (failureCount, error) => {
         // Retry network errors up to 3 times
-        if (error instanceof Error && error.message.includes('fetch') && failureCount < 3) {
+        if (
+          error instanceof Error &&
+          error.message.includes('fetch') &&
+          failureCount < 3
+        ) {
           return true;
         }
         return false;
@@ -98,7 +102,11 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: (failureCount, error) => {
         // Don't retry mutations by default, except for network errors
-        if (error instanceof Error && error.message.includes('fetch') && failureCount < 2) {
+        if (
+          error instanceof Error &&
+          error.message.includes('fetch') &&
+          failureCount < 2
+        ) {
           return true;
         }
         return false;
@@ -184,7 +192,10 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
     onError: (error) => {
-      console.error('Login failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        'Login failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     },
   });
 };
@@ -205,7 +216,10 @@ export const useRegister = () => {
       queryClient.setQueryData(queryKeys.auth.currentUser, data.user);
     },
     onError: (error) => {
-      console.error('Registration failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        'Registration failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     },
   });
 };
@@ -305,7 +319,10 @@ export const useFileUpload = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
     onError: (error) => {
-      console.error('Upload failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        'Upload failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     },
   });
 };
@@ -400,7 +417,10 @@ export const useDownloadFile = () => {
       return { success: true };
     },
     onError: (error) => {
-      console.error('Download failed:', error instanceof Error ? error.message : 'Unknown error');
+      console.error(
+        'Download failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     },
   });
 };
@@ -479,7 +499,9 @@ export const usePrefetchQueries = () => {
         queryFn: async () => {
           const response = await apiClient.getUserOrders(userId, params);
           if (!response.success || !response.data) {
-            throw new Error(response.message || 'Failed to prefetch user orders');
+            throw new Error(
+              response.message || 'Failed to prefetch user orders'
+            );
           }
           return response.data;
         },
