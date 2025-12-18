@@ -78,7 +78,12 @@ export default function RegisterPage() {
         router.push('/dashboard');
       }
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      console.error('Registration error:', error);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }

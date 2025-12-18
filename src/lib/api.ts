@@ -57,9 +57,16 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
-
+      
       if (!response.ok) {
+        // Try to parse error response
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { message: `HTTP ${response.status}` };
+        }
+
         // Handle token refresh on 401
         if (response.status === 401 && this.refreshToken && !options.skipAuth) {
           const refreshed = await this.refreshAccessToken();
@@ -74,9 +81,10 @@ class ApiClient {
           }
         }
 
-        throw new Error(data.message || `HTTP ${response.status}`);
+        throw new Error(errorData.message || `HTTP ${response.status}`);
       }
 
+      const data = await response.json();
       return data;
     } catch (error) {
       console.error('API Error:', error);
