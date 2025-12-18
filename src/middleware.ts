@@ -21,7 +21,7 @@ export function middleware(req: NextRequest) {
     "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
     "img-src 'self' data: https:",
     "font-src 'self'",
-    "connect-src 'self' https:",
+    "connect-src 'self' https: http://localhost:8000", // Allow connection to backend
     "frame-ancestors 'none'",
   ].join('; ');
 

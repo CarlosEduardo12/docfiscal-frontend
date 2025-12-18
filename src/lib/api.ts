@@ -1,5 +1,12 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+// Debug: Log the API URL
+console.log('🔧 API_BASE_URL:', API_BASE_URL);
+console.log('🔧 Environment variables:', {
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  NODE_ENV: process.env.NODE_ENV
+});
+
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -56,13 +63,18 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(url, config);
+      console.log('🔄 Making request to:', url);
+      console.log('📦 Request config:', config);
       
+      const response = await fetch(url, config);
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         // Try to parse error response
         let errorData;
         try {
           errorData = await response.json();
+          console.log('❌ Error response data:', errorData);
         } catch {
           errorData = { message: `HTTP ${response.status}` };
         }
@@ -85,9 +97,13 @@ class ApiClient {
       }
 
       const data = await response.json();
+      console.log('✅ Success response data:', data);
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error('💥 API Error:', error);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to server. Please check if the backend is running.');
+      }
       throw error;
     }
   }
