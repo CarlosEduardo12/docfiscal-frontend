@@ -1,431 +1,309 @@
-import {
-  User,
-  Order,
-  LoginCredentials,
-  RegisterData,
-  UploadResponse,
-  ProgressResponse,
-  OrderListResponse,
-  OrderStatusResponse,
-  PaymentResponse,
-  PaymentStatus,
-  ApiResponse,
-  PaginationParams,
-} from '@/types';
-import {
-  validateLoginCredentials,
-  validateRegisterData,
-  validateFile,
-  UploadResponseSchema,
-  OrderListResponseSchema,
-  OrderStatusSchema,
-  PaymentResponseSchema,
-  PaymentStatusSchema,
-  ApiResponseSchema,
-  OrderSchema,
-} from '@/lib/validations';
-import {
-  enforceHttpsUrl,
-  validateSecureUrl,
-  createSecureHeaders,
-  createSecureFetchOptions,
-} from '@/lib/security';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Base API configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
 
-// API client with error handling and HTTPS enforcement
+interface ApiError {
+  success: false;
+  error: string;
+  message: string;
+  details?: {
+    field_errors?: Record<string, string[]>;
+    error_count?: number;
+    retry_after?: number;
+  };
+}
+
 class ApiClient {
   private baseURL: string;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
 
-  constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = enforceHttpsUrl(baseURL);
-    // Validate URL security in production
-    validateSecureUrl(this.baseURL);
+  constructor() {
+    this.baseURL = API_BASE_URL;
+    
+    // Initialize tokens from localStorage if available
+    if (typeof window !== 'undefined') {
+      this.accessToken = localStorage.getItem('access_token');
+      this.refreshToken = localStorage.getItem('refresh_token');
+    }
   }
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit & { skipAuth?: boolean } = {}
   ): Promise<ApiResponse<T>> {
-    const url = enforceHttpsUrl(`${this.baseURL}${endpoint}`);
-    validateSecureUrl(url);
-
-    const config: RequestInit = createSecureFetchOptions({
+    const url = `${this.baseURL}${endpoint}`;
+    
+    const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
       ...options,
-    });
+    };
+
+    // Add auth header if token exists and not explicitly skipped
+    if (this.accessToken && !options.skipAuth) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${this.accessToken}`,
+      };
+    }
 
     try {
       const response = await fetch(url, config);
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP ${response.status}: ${response.statusText}`
-        );
+        // Handle token refresh on 401
+        if (response.status === 401 && this.refreshToken && !options.skipAuth) {
+          const refreshed = await this.refreshAccessToken();
+          if (refreshed) {
+            // Retry original request with new token
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${this.accessToken}`,
+            };
+            const retryResponse = await fetch(url, config);
+            return await retryResponse.json();
+          }
+        }
+        
+        throw new Error(data.message || `HTTP ${response.status}`);
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
+      console.error('API Error:', error);
       throw error;
     }
   }
 
-  async get<T>(
-    endpoint: string,
-    params?: Record<string, any>
-  ): Promise<ApiResponse<T>> {
-    const searchParams = params ? new URLSearchParams(params).toString() : '';
-    const url = searchParams ? `${endpoint}?${searchParams}` : endpoint;
-    return this.request<T>(url, { method: 'GET' });
-  }
-
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
+  // Auth methods
+  async register(userData: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<ApiResponse> {
+    return this.request('/api/auth/register', {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: JSON.stringify(userData),
+      skipAuth: true,
     });
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+  async login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<ApiResponse> {
+    const response = await this.request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+      skipAuth: true,
     });
+
+    if (response.success && response.data?.tokens) {
+      this.setTokens(
+        response.data.tokens.access_token,
+        response.data.tokens.refresh_token
+      );
+    }
+
+    return response;
   }
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
-  }
+  async refreshAccessToken(): Promise<boolean> {
+    if (!this.refreshToken) return false;
 
-  async uploadFile(
-    endpoint: string,
-    file: File,
-    onProgress?: (progress: number) => void
-  ): Promise<ApiResponse<UploadResponse>> {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('file', file);
+    try {
+      const response = await this.request('/api/auth/refresh', {
+        method: 'POST',
+        body: JSON.stringify({ refresh_token: this.refreshToken }),
+        skipAuth: true,
+      });
 
-      const xhr = new XMLHttpRequest();
-
-      // Track upload progress
-      if (onProgress) {
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100);
-            onProgress(progress);
-          }
-        });
+      if (response.success && response.data?.tokens) {
+        this.setTokens(
+          response.data.tokens.access_token,
+          response.data.tokens.refresh_token || this.refreshToken
+        );
+        return true;
       }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      this.clearTokens();
+    }
 
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            resolve(response);
-          } catch (error) {
-            reject(new Error('Invalid JSON response'));
-          }
-        } else {
-          reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
-        }
-      });
+    return false;
+  }
 
-      xhr.addEventListener('error', () => {
-        reject(new Error('Upload failed: Network error'));
-      });
+  async logout(): Promise<void> {
+    try {
+      await this.request('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      this.clearTokens();
+    }
+  }
 
-      const uploadUrl = enforceHttpsUrl(`${this.baseURL}${endpoint}`);
-      validateSecureUrl(uploadUrl);
-      xhr.open('POST', uploadUrl);
+  async getProfile(): Promise<ApiResponse> {
+    return this.request('/api/auth/me');
+  }
 
-      // Add security headers for file uploads
-      const secureHeaders = createSecureHeaders();
-      Object.entries(secureHeaders).forEach(([key, value]) => {
-        xhr.setRequestHeader(key, value);
-      });
+  // File upload
+  async uploadFile(file: File): Promise<ApiResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
 
-      xhr.send(formData);
+    return this.request('/api/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Don't set Content-Type for FormData
     });
   }
-}
 
-// Create API client instance
-const apiClient = new ApiClient();
+  async getUploadProgress(uploadId: string): Promise<ApiResponse> {
+    return this.request(`/api/upload/${uploadId}/progress`);
+  }
 
-// Authentication Service
-export const authService = {
-  async login(
-    credentials: LoginCredentials
-  ): Promise<ApiResponse<{ user: User; token: string }>> {
-    const validatedCredentials = validateLoginCredentials(credentials);
-    return apiClient.post<{ user: User; token: string }>(
-      '/auth/login',
-      validatedCredentials
-    );
-  },
+  async cancelUpload(uploadId: string): Promise<ApiResponse> {
+    return this.request(`/api/upload/${uploadId}`, {
+      method: 'DELETE',
+    });
+  }
 
-  async register(
-    userData: RegisterData
-  ): Promise<ApiResponse<{ user: User; token: string }>> {
-    const validatedData = validateRegisterData(userData);
-    return apiClient.post<{ user: User; token: string }>(
-      '/auth/register',
-      validatedData
-    );
-  },
+  // Orders
+  async getOrders(params?: {
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+  }): Promise<ApiResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set('page', params.page.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.sort_by) searchParams.set('sort_by', params.sort_by);
+    if (params?.sort_order) searchParams.set('sort_order', params.sort_order);
 
-  async logout(): Promise<ApiResponse<void>> {
-    return apiClient.post<void>('/auth/logout');
-  },
+    const query = searchParams.toString();
+    return this.request(`/api/orders${query ? `?${query}` : ''}`);
+  }
 
-  async getCurrentUser(): Promise<ApiResponse<User>> {
-    return apiClient.get<User>('/auth/me');
-  },
+  async getOrder(orderId: string): Promise<ApiResponse> {
+    return this.request(`/api/orders/${orderId}`);
+  }
 
-  async refreshToken(): Promise<ApiResponse<{ token: string }>> {
-    return apiClient.post<{ token: string }>('/auth/refresh');
-  },
-};
-
-// Upload Service
-export const uploadService = {
-  async uploadFile(
-    file: File,
-    onProgress?: (progress: number) => void
-  ): Promise<ApiResponse<UploadResponse>> {
-    // Validate file before upload (skip validation in test environment)
-    if (process.env.NODE_ENV !== 'test') {
-      validateFile(file);
-    }
-
-    const response = await apiClient.uploadFile('/upload', file, onProgress);
-
-    // Validate response structure (skip validation in test environment)
-    if (response.data && process.env.NODE_ENV !== 'test') {
-      UploadResponseSchema.parse(response.data);
-    }
-
-    return response;
-  },
-
-  async getUploadProgress(
-    uploadId: string
-  ): Promise<ApiResponse<ProgressResponse>> {
-    return apiClient.get<ProgressResponse>(`/upload/${uploadId}/progress`);
-  },
-
-  async cancelUpload(uploadId: string): Promise<ApiResponse<void>> {
-    return apiClient.delete<void>(`/upload/${uploadId}`);
-  },
-};
-
-// Order Service
-export const orderService = {
-  async getOrderStatus(orderId: string): Promise<ApiResponse<Order>> {
-    const response = await apiClient.get<Order>(`/orders/${orderId}`);
-
-    // Validate response structure (skip validation in test environment)
-    if (response.data && process.env.NODE_ENV !== 'test') {
-      OrderSchema.parse({
-        ...response.data,
-        createdAt: new Date(response.data.createdAt),
-        updatedAt: new Date(response.data.updatedAt),
-        completedAt: response.data.completedAt
-          ? new Date(response.data.completedAt)
-          : undefined,
-      });
-    }
-
-    return response;
-  },
-
-  async getUserOrders(
-    userId: string,
-    params?: PaginationParams
-  ): Promise<ApiResponse<OrderListResponse>> {
-    const response = await apiClient.get<OrderListResponse>(
-      `/users/${userId}/orders`,
-      params
-    );
-
-    // Validate and transform response (skip validation in test environment)
-    if (response.data) {
-      const transformedOrders = response.data.orders.map((order) => ({
-        ...order,
-        createdAt: new Date(order.createdAt),
-        updatedAt: new Date(order.updatedAt),
-        completedAt: order.completedAt
-          ? new Date(order.completedAt)
-          : undefined,
-      }));
-
-      response.data.orders = transformedOrders;
-      if (process.env.NODE_ENV !== 'test') {
-        OrderListResponseSchema.parse(response.data);
-      }
-    }
-
-    return response;
-  },
-
-  async downloadFile(orderId: string): Promise<Blob> {
-    const downloadUrl = enforceHttpsUrl(
-      `${API_BASE_URL}/orders/${orderId}/download`
-    );
-    validateSecureUrl(downloadUrl);
-
-    const response = await fetch(
-      downloadUrl,
-      createSecureFetchOptions({
-        method: 'GET',
-        headers: {
-          Accept: 'application/octet-stream',
-        },
-      })
-    );
+  async downloadOrder(orderId: string): Promise<Blob> {
+    const response = await fetch(`${this.baseURL}/api/orders/${orderId}/download`, {
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+    });
 
     if (!response.ok) {
-      throw new Error(
-        `Download failed: ${response.status} ${response.statusText}`
-      );
+      throw new Error('Download failed');
     }
 
     return response.blob();
-  },
-
-  async retryOrder(orderId: string): Promise<ApiResponse<Order>> {
-    return apiClient.post<Order>(`/orders/${orderId}/retry`);
-  },
-};
-
-// Payment Service
-export const paymentService = {
-  async createPayment(orderId: string): Promise<ApiResponse<PaymentResponse>> {
-    const response = await apiClient.post<PaymentResponse>(
-      `/orders/${orderId}/payment`
-    );
-
-    // Validate response structure (skip validation in test environment)
-    if (response.data && process.env.NODE_ENV !== 'test') {
-      PaymentResponseSchema.parse(response.data);
-    }
-
-    return response;
-  },
-
-  async getPaymentStatus(
-    paymentId: string
-  ): Promise<ApiResponse<PaymentStatus>> {
-    const response = await apiClient.get<PaymentStatus>(
-      `/payments/${paymentId}/status`
-    );
-
-    // Validate response structure (skip validation in test environment)
-    if (response.data && process.env.NODE_ENV !== 'test') {
-      PaymentStatusSchema.parse(response.data);
-    }
-
-    return response;
-  },
-
-  async handlePaymentCallback(
-    paymentId: string,
-    callbackData: Record<string, any>
-  ): Promise<ApiResponse<{ orderId: string; status: string }>> {
-    return apiClient.post<{ orderId: string; status: string }>(
-      `/payments/${paymentId}/callback`,
-      callbackData
-    );
-  },
-};
-
-// User Service
-export const userService = {
-  async getUserProfile(userId: string): Promise<ApiResponse<User>> {
-    return apiClient.get<User>(`/users/${userId}`);
-  },
-
-  async updateUserProfile(
-    userId: string,
-    userData: Partial<User>
-  ): Promise<ApiResponse<User>> {
-    return apiClient.put<User>(`/users/${userId}`, userData);
-  },
-
-  async deleteUser(userId: string): Promise<ApiResponse<void>> {
-    return apiClient.delete<void>(`/users/${userId}`);
-  },
-};
-
-// Export the API client for custom requests
-export { apiClient };
-
-// Enhanced error handling with new error system
-export {
-  classifyError,
-  handleAsyncError,
-  retryWithBackoff,
-  CircuitBreaker,
-  AppError,
-  NetworkError,
-  ValidationError,
-  AuthenticationError,
-  UploadError,
-  PaymentError,
-  getUserFriendlyMessage,
-  errorRecoveryManager,
-  logError,
-} from './error-handling';
-
-// Error handling utilities (legacy support)
-export const handleApiError = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
   }
-  return 'An unexpected error occurred';
-};
 
-export const isNetworkError = (error: unknown): boolean => {
-  return (
-    error instanceof Error &&
-    (error.message.includes('fetch') ||
-      error.message.includes('Network') ||
-      error.message.includes('Failed to fetch'))
-  );
-};
+  async retryOrder(orderId: string): Promise<ApiResponse> {
+    return this.request(`/api/orders/${orderId}/retry`, {
+      method: 'POST',
+    });
+  }
 
-// Retry utility for failed requests (legacy support)
-export const retryRequest = async <T>(
-  requestFn: () => Promise<T>,
-  maxRetries: number = 3,
-  delay: number = 1000
-): Promise<T> => {
-  let lastError: Error;
+  // Payments
+  async initiatePayment(orderId: string, options?: {
+    return_url?: string;
+    cancel_url?: string;
+  }): Promise<ApiResponse> {
+    const defaultOptions = {
+      return_url: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL,
+      cancel_url: process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL,
+      ...options,
+    };
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await requestFn();
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
+    return this.request(`/api/orders/${orderId}/payment`, {
+      method: 'POST',
+      body: JSON.stringify(defaultOptions),
+    });
+  }
 
-      if (attempt === maxRetries) {
-        throw lastError;
-      }
+  async getPaymentStatus(paymentId: string): Promise<ApiResponse> {
+    return this.request(`/api/payments/${paymentId}/status`);
+  }
 
-      // Exponential backoff
-      await new Promise((resolve) =>
-        setTimeout(resolve, delay * Math.pow(2, attempt - 1))
-      );
+  // User management
+  async updateProfile(userId: string, data: {
+    name?: string;
+    email?: string;
+  }): Promise<ApiResponse> {
+    return this.request(`/api/users/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getUserOrders(userId: string, params?: {
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+  }): Promise<ApiResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set('page', params.page.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.sort_by) searchParams.set('sort_by', params.sort_by);
+    if (params?.sort_order) searchParams.set('sort_order', params.sort_order);
+
+    const query = searchParams.toString();
+    return this.request(`/api/users/${userId}/orders${query ? `?${query}` : ''}`);
+  }
+
+  // Health check
+  async healthCheck(): Promise<ApiResponse> {
+    return this.request('/health', {
+      skipAuth: true,
+    });
+  }
+
+  // Token management
+  private setTokens(accessToken: string, refreshToken: string): void {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshToken);
     }
   }
 
-  throw lastError!;
-};
+  private clearTokens(): void {
+    this.accessToken = null;
+    this.refreshToken = null;
+    
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    }
+  }
+
+  // Getters
+  get isAuthenticated(): boolean {
+    return !!this.accessToken;
+  }
+
+  get currentAccessToken(): string | null {
+    return this.accessToken;
+  }
+}
+
+export const apiClient = new ApiClient();
+export default apiClient;

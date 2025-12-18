@@ -3,6 +3,12 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
+    NEXT_PUBLIC_PAYMENT_RETURN_URL: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL,
+    NEXT_PUBLIC_PAYMENT_CANCEL_URL: process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL,
+  },
   // Security headers configuration
   async headers() {
     return [

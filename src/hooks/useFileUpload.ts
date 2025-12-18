@@ -1,9 +1,16 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { uploadService, handleApiError, retryRequest } from '@/lib/api';
-import { validateFile, FILE_VALIDATION_CONFIG } from '@/lib/validations';
-import type { UploadResponse, FileUpload } from '@/types';
+import { apiClient } from '@/lib/api';
+
+interface UploadResponse {
+  upload_id: string;
+  order_id: string;
+  filename: string;
+  file_size: number;
+  status: string;
+  progress: number;
+}
 
 export interface UseFileUploadOptions {
   maxRetries?: number;
@@ -58,27 +65,20 @@ export function useFileUpload(
   const validateFileInput = useCallback((file: File): string | null => {
     try {
       // Validate file type
-      if (
-        !FILE_VALIDATION_CONFIG.acceptedFileTypes.includes(file.type as any)
-      ) {
+      if (file.type !== 'application/pdf') {
         return 'Only PDF files are allowed';
       }
 
-      // Validate file size
-      if (file.size > FILE_VALIDATION_CONFIG.maxFileSize) {
-        const maxSizeMB = Math.round(
-          FILE_VALIDATION_CONFIG.maxFileSize / (1024 * 1024)
-        );
-        return `File size must be less than ${maxSizeMB}MB`;
+      // Validate file size (10MB max)
+      const maxFileSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxFileSize) {
+        return 'File size must be less than 10MB';
       }
 
       // Validate file name
       if (!file.name || file.name.trim().length === 0) {
         return 'File must have a name';
       }
-
-      // Additional validation using Zod schema
-      validateFile(file);
 
       return null;
     } catch (validationError) {
@@ -103,21 +103,10 @@ export function useFileUpload(
       setAbortController(controller);
 
       try {
-        const response = await retryRequest(
-          async () => {
-            // Check if upload was cancelled
-            if (controller.signal.aborted) {
-              throw new Error('Upload cancelled');
-            }
-
-            return uploadService.uploadFile(file, handleProgress);
-          },
-          maxRetries,
-          retryDelay
-        );
+        const response = await apiClient.uploadFile(file);
 
         if (!response.success || !response.data) {
-          throw new Error(response.error || 'Upload failed');
+          throw new Error(response.message || 'Upload failed');
         }
 
         return response.data;
@@ -125,7 +114,7 @@ export function useFileUpload(
         setAbortController(null);
       }
     },
-    [maxRetries, retryDelay, handleProgress]
+    [handleProgress]
   );
 
   const uploadFile = useCallback(
@@ -152,7 +141,7 @@ export function useFileUpload(
         setProgress(100);
         onSuccess?.(response);
       } catch (uploadError) {
-        const errorMessage = handleApiError(uploadError);
+        const errorMessage = uploadError instanceof Error ? uploadError.message : 'Upload failed';
         setError(errorMessage);
         setProgress(0);
         onError?.(errorMessage);
