@@ -10,11 +10,9 @@ import { FILE_VALIDATION_CONFIG } from '@/lib/validations';
 
 // Mock the API service
 jest.mock('@/lib/api', () => ({
-  uploadService: {
+  apiClient: {
     uploadFile: jest.fn(),
   },
-  handleApiError: jest.fn((error) => error?.message || 'Unknown error'),
-  retryRequest: jest.fn((fn) => fn()),
 }));
 
 describe('Upload Workflow Property Tests', () => {

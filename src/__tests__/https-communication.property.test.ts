@@ -13,13 +13,7 @@ import {
   auditSecurity,
   SECURITY_CONFIG,
 } from '@/lib/security';
-import {
-  apiClient,
-  authService,
-  orderService,
-  uploadService,
-  paymentService,
-} from '@/lib/api';
+import { apiClient } from '@/lib/api';
 
 // Mock fetch for API calls
 global.fetch = jest.fn();
@@ -407,10 +401,10 @@ describe('HTTPS Communication Security Property Tests', () => {
 
               // Test various API services
               const apiCalls = [
-                () => authService.login(testData.credentials),
-                () => orderService.getOrderStatus(testData.orderId),
-                () => orderService.getUserOrders(testData.userId),
-                () => paymentService.getPaymentStatus(testData.paymentId),
+                () => apiClient.login(testData.credentials),
+                () => apiClient.getOrder(testData.orderId),
+                () => apiClient.getUserOrders(testData.userId),
+                () => apiClient.getPaymentStatus(testData.paymentId),
               ];
 
               for (const apiCall of apiCalls) {

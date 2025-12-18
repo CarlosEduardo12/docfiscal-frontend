@@ -7,25 +7,67 @@ import {
 } from '@tanstack/react-query';
 import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import {
-  authService,
-  uploadService,
-  orderService,
-  paymentService,
-  userService,
-  retryRequest,
-  isNetworkError,
-  handleApiError,
-} from '@/lib/api';
-import type {
-  User,
-  Order,
-  LoginCredentials,
-  RegisterData,
-  PaginationParams,
-  UploadResponse,
-  PaymentResponse,
-} from '@/types';
+import { apiClient } from '@/lib/api';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Order {
+  id: string;
+  filename: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  file_size: number;
+  processed_at?: string;
+  error?: string;
+  payment?: {
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+  };
+}
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+interface UploadResponse {
+  upload_id: string;
+  order_id: string;
+  filename: string;
+  file_size: number;
+  status: string;
+  progress: number;
+}
+
+interface PaymentResponse {
+  payment_id: string;
+  payment_url: string;
+  amount: number;
+  currency: string;
+  expires_at: string;
+}
 
 // Create persister for localStorage
 const localStoragePersister = createSyncStoragePersister({
@@ -43,7 +85,7 @@ export const queryClient = new QueryClient({
       gcTime: 24 * 60 * 60 * 1000, // 24 hours for better persistence
       retry: (failureCount, error) => {
         // Retry network errors up to 3 times
-        if (isNetworkError(error) && failureCount < 3) {
+        if (error instanceof Error && error.message.includes('fetch') && failureCount < 3) {
           return true;
         }
         return false;
@@ -56,7 +98,7 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: (failureCount, error) => {
         // Don't retry mutations by default, except for network errors
-        if (isNetworkError(error) && failureCount < 2) {
+        if (error instanceof Error && error.message.includes('fetch') && failureCount < 2) {
           return true;
         }
         return false;
@@ -114,9 +156,9 @@ export const useCurrentUser = () => {
   return useQuery({
     queryKey: queryKeys.auth.currentUser,
     queryFn: async () => {
-      const response = await authService.getCurrentUser();
+      const response = await apiClient.getProfile();
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get current user');
+        throw new Error(response.message || 'Failed to get current user');
       }
       return response.data;
     },
@@ -129,9 +171,9 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const response = await authService.login(credentials);
+      const response = await apiClient.login(credentials);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Login failed');
+        throw new Error(response.message || 'Login failed');
       }
       return response.data;
     },
@@ -142,7 +184,7 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
     onError: (error) => {
-      console.error('Login failed:', handleApiError(error));
+      console.error('Login failed:', error instanceof Error ? error.message : 'Unknown error');
     },
   });
 };
@@ -152,9 +194,9 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
-      const response = await authService.register(userData);
+      const response = await apiClient.register(userData);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Registration failed');
+        throw new Error(response.message || 'Registration failed');
       }
       return response.data;
     },
@@ -163,7 +205,7 @@ export const useRegister = () => {
       queryClient.setQueryData(queryKeys.auth.currentUser, data.user);
     },
     onError: (error) => {
-      console.error('Registration failed:', handleApiError(error));
+      console.error('Registration failed:', error instanceof Error ? error.message : 'Unknown error');
     },
   });
 };
@@ -173,10 +215,7 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await authService.logout();
-      if (!response.success) {
-        throw new Error(response.error || 'Logout failed');
-      }
+      await apiClient.logout();
     },
     onSuccess: () => {
       // Clear all cached data
@@ -190,9 +229,9 @@ export const useOrderStatus = (orderId: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: queryKeys.orders.byId(orderId),
     queryFn: async () => {
-      const response = await orderService.getOrderStatus(orderId);
+      const response = await apiClient.getOrder(orderId);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get order status');
+        throw new Error(response.message || 'Failed to get order status');
       }
       return response.data;
     },
@@ -212,9 +251,9 @@ export const useUserOrders = (userId: string, params?: PaginationParams) => {
   return useQuery({
     queryKey: queryKeys.orders.userOrders(userId, params),
     queryFn: async () => {
-      const response = await orderService.getUserOrders(userId, params);
+      const response = await apiClient.getUserOrders(userId, params);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get user orders');
+        throw new Error(response.message || 'Failed to get user orders');
       }
       return response.data;
     },
@@ -228,9 +267,9 @@ export const useRetryOrder = () => {
 
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const response = await orderService.retryOrder(orderId);
+      const response = await apiClient.retryOrder(orderId);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to retry order');
+        throw new Error(response.message || 'Failed to retry order');
       }
       return response.data;
     },
@@ -255,9 +294,9 @@ export const useFileUpload = () => {
       file: File;
       onProgress?: (progress: number) => void;
     }) => {
-      const response = await uploadService.uploadFile(file, onProgress);
+      const response = await apiClient.uploadFile(file);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Upload failed');
+        throw new Error(response.message || 'Upload failed');
       }
       return response.data;
     },
@@ -266,7 +305,7 @@ export const useFileUpload = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
     onError: (error) => {
-      console.error('Upload failed:', handleApiError(error));
+      console.error('Upload failed:', error instanceof Error ? error.message : 'Unknown error');
     },
   });
 };
@@ -278,9 +317,9 @@ export const useUploadProgress = (
   return useQuery({
     queryKey: queryKeys.uploads.progress(uploadId),
     queryFn: async () => {
-      const response = await uploadService.getUploadProgress(uploadId);
+      const response = await apiClient.getUploadProgress(uploadId);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get upload progress');
+        throw new Error(response.message || 'Failed to get upload progress');
       }
       return response.data;
     },
@@ -302,9 +341,9 @@ export const useCreatePayment = () => {
 
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const response = await paymentService.createPayment(orderId);
+      const response = await apiClient.initiatePayment(orderId);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to create payment');
+        throw new Error(response.message || 'Failed to create payment');
       }
       return response.data;
     },
@@ -324,9 +363,9 @@ export const usePaymentStatus = (
   return useQuery({
     queryKey: queryKeys.payments.byId(paymentId),
     queryFn: async () => {
-      const response = await paymentService.getPaymentStatus(paymentId);
+      const response = await apiClient.getPaymentStatus(paymentId);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get payment status');
+        throw new Error(response.message || 'Failed to get payment status');
       }
       return response.data;
     },
@@ -346,7 +385,7 @@ export const usePaymentStatus = (
 export const useDownloadFile = () => {
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const blob = await orderService.downloadFile(orderId);
+      const blob = await apiClient.downloadOrder(orderId);
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
@@ -361,7 +400,7 @@ export const useDownloadFile = () => {
       return { success: true };
     },
     onError: (error) => {
-      console.error('Download failed:', handleApiError(error));
+      console.error('Download failed:', error instanceof Error ? error.message : 'Unknown error');
     },
   });
 };
@@ -371,9 +410,9 @@ export const useUserProfile = (userId: string) => {
   return useQuery({
     queryKey: queryKeys.users.byId(userId),
     queryFn: async () => {
-      const response = await userService.getUserProfile(userId);
+      const response = await apiClient.getProfile();
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to get user profile');
+        throw new Error(response.message || 'Failed to get user profile');
       }
       return response.data;
     },
@@ -393,9 +432,9 @@ export const useUpdateUserProfile = () => {
       userId: string;
       userData: Partial<User>;
     }) => {
-      const response = await userService.updateUserProfile(userId, userData);
+      const response = await apiClient.updateProfile(userId, userData);
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to update user profile');
+        throw new Error(response.message || 'Failed to update user profile');
       }
       return response.data;
     },
@@ -438,9 +477,9 @@ export const usePrefetchQueries = () => {
       await queryClient.prefetchQuery({
         queryKey: queryKeys.orders.userOrders(userId, params),
         queryFn: async () => {
-          const response = await orderService.getUserOrders(userId, params);
+          const response = await apiClient.getUserOrders(userId, params);
           if (!response.success || !response.data) {
-            throw new Error(response.error || 'Failed to prefetch user orders');
+            throw new Error(response.message || 'Failed to prefetch user orders');
           }
           return response.data;
         },
@@ -452,10 +491,10 @@ export const usePrefetchQueries = () => {
       await queryClient.prefetchQuery({
         queryKey: queryKeys.orders.byId(orderId),
         queryFn: async () => {
-          const response = await orderService.getOrderStatus(orderId);
+          const response = await apiClient.getOrder(orderId);
           if (!response.success || !response.data) {
             throw new Error(
-              response.error || 'Failed to prefetch order status'
+              response.message || 'Failed to prefetch order status'
             );
           }
           return response.data;

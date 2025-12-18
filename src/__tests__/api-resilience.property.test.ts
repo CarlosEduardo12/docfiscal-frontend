@@ -5,15 +5,7 @@
 
 import * as fc from 'fast-check';
 import { QueryClient } from '@tanstack/react-query';
-import {
-  authService,
-  orderService,
-  uploadService,
-  paymentService,
-  retryRequest,
-  isNetworkError,
-  handleApiError,
-} from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { queryClient, queryKeys } from '@/lib/react-query';
 
 // Mock fetch for API calls
@@ -197,7 +189,7 @@ describe('API Resilience and Caching Property Tests', () => {
 
             // Test error handling
             try {
-              await orderService.getOrderStatus('test-order-id');
+              await apiClient.getOrder('test-order-id');
               // Should not reach here
               expect(true).toBe(false);
             } catch (error) {
@@ -255,7 +247,7 @@ describe('API Resilience and Caching Property Tests', () => {
 
             // Make concurrent API calls
             const promises = concurrentRequests.map((request) =>
-              orderService.getOrderStatus(request.orderId)
+              apiClient.getOrder(request.orderId)
             );
 
             const results = await Promise.all(promises);
@@ -430,7 +422,7 @@ describe('API Resilience and Caching Property Tests', () => {
             (global as any).XMLHttpRequest = jest.fn(() => mockXHR);
 
             try {
-              const result = await uploadService.uploadFile(
+              const result = await apiClient.uploadFile(
                 mockFile,
                 progressCallback
               );
