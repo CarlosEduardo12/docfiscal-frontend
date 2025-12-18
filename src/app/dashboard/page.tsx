@@ -1,7 +1,6 @@
 'use client';
 
-import { useRequireAuth } from '@/hooks/useAuth';
-import { signOut } from 'next-auth/react';
+import { useRequireAuth } from '@/hooks/useAuthNew';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -16,7 +15,7 @@ import { Upload, Settings } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const { user, isLoading: authLoading } = useRequireAuth();
+  const { user, isLoading: authLoading, logout } = useRequireAuth();
 
   // Fetch user orders
   const {
@@ -42,7 +41,7 @@ export default function DashboardPage() {
   }
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/' });
+    logout();
   };
 
   const handleDownload = async (orderId: string) => {

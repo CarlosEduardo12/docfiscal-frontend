@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,20 +28,15 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
+      const result = await apiClient.login({
         email,
         password,
-        redirect: false,
       });
 
-      if (result?.error) {
-        setError('Invalid email or password');
+      if (!result.success) {
+        setError(result.message || 'Invalid email or password');
       } else {
-        // Check if sign in was successful
-        const session = await getSession();
-        if (session) {
-          router.push('/dashboard');
-        }
+        router.push('/dashboard');
       }
     } catch (error) {
       setError('An error occurred. Please try again.');

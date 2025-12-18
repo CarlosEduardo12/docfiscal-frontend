@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,39 +37,38 @@ export default function RegisterPage() {
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError('Password must be at least 6 characters long and contain at least one letter');
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if password contains at least one letter
+    if (!/[a-zA-Z]/.test(password)) {
+      setError('Password must contain at least one letter');
       setIsLoading(false);
       return;
     }
 
     try {
-      // Register the user
-      const registerResponse = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
+      // Register the user using apiClient
+      const registerResponse = await apiClient.register({
+        name,
+        email,
+        password,
       });
 
-      if (!registerResponse.ok) {
-        const errorData = await registerResponse.json();
-        setError(errorData.error || 'Registration failed');
+      if (!registerResponse.success) {
+        setError(registerResponse.message || 'Registration failed');
         return;
       }
 
       // Auto-login after successful registration
-      const result = await signIn('credentials', {
+      const loginResponse = await apiClient.login({
         email,
         password,
-        redirect: false,
       });
 
-      if (result?.error) {
+      if (!loginResponse.success) {
         setError(
           'Registration successful, but login failed. Please try logging in manually.'
         );
@@ -149,7 +148,7 @@ export default function RegisterPage() {
                 autoComplete="new-password"
               />
               <p id="password-help" className="text-xs text-gray-500">
-                Password must be at least 6 characters long
+                Password must be at least 6 characters long and contain at least one letter
               </p>
             </div>
             <div className="space-y-2">
