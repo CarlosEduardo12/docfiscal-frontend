@@ -17,7 +17,7 @@ import Link from 'next/link';
 export default function DashboardPage() {
   const { user, isLoading: authLoading, logout } = useRequireAuth();
 
-  // Fetch user orders
+  // Fetch user orders only when user is loaded
   const {
     data: ordersData,
     isLoading: ordersLoading,
@@ -90,7 +90,7 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/">
+              <Link href="/upload">
                 <Button className="w-full">Start New Upload</Button>
               </Link>
             </CardContent>

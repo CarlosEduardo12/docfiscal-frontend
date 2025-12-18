@@ -1,12 +1,12 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuthNew';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { UploadPage } from '@/components/upload/UploadPage';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { user, isLoading } = useAuth();
 
   return (
     <main className="min-h-screen bg-gray-50" role="main">
@@ -29,10 +29,10 @@ export default function Home() {
               </h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              {status === 'authenticated' ? (
+              {user ? (
                 <>
                   <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-32">
-                    Welcome, {session.user.name}
+                    Welcome, {user.name}
                   </span>
                   <Link href="/dashboard">
                     <Button

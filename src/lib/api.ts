@@ -1,12 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Debug: Log the API URL
-console.log('🔧 API_BASE_URL:', API_BASE_URL);
-console.log('🔧 Environment variables:', {
-  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  NODE_ENV: process.env.NODE_ENV
-});
-
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;

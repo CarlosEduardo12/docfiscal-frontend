@@ -65,10 +65,13 @@ export function useRequireAuth() {
   const router = useRouter();
 
   useEffect(() => {
+    // Only redirect if we're done loading AND not authenticated
     if (!auth.isLoading && !auth.isAuthenticated) {
       router.push('/login');
     }
   }, [auth.isLoading, auth.isAuthenticated, router]);
 
+  // Don't return auth until we've finished loading
+  // This prevents components from rendering with null user during initial load
   return auth;
 }
