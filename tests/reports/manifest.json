@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-12-25T20:36:52.004Z",
+  "buildNumber": "local",
+  "commit": "unknown",
+  "reports": [
+    {
+      "type": "json",
+      "path": "json/distribution-test-2025-12-25T20-36-51-943Z.json",
+      "size": 2366
+    },
+    {
+      "type": "html",
+      "path": "html/distribution-test-2025-12-25T20-36-51-943Z.html",
+      "size": 9316
+    }
+  ],
+  "summary": {
+    "totalTests": 1,
+    "passedTests": 1,
+    "failedTests": 0,
+    "successRate": 100
+  }
+}

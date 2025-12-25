@@ -1,0 +1,67 @@
+{
+  "createOrderSuccess": {
+    "status": 201,
+    "body": {
+      "success": true,
+      "order": {
+        "id": "order-123",
+        "filename": "test-document.pdf",
+        "status": "pending_payment",
+        "size": 1024000,
+        "createdAt": "2024-01-01T00:00:00Z",
+        "updatedAt": "2024-01-01T00:00:00Z"
+      }
+    }
+  },
+  "getOrderSuccess": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "order": {
+        "id": "order-123",
+        "filename": "test-document.pdf",
+        "status": "completed",
+        "size": 1024000,
+        "createdAt": "2024-01-01T00:00:00Z",
+        "updatedAt": "2024-01-01T00:05:00Z",
+        "downloadUrl": "/api/orders/order-123/download"
+      }
+    }
+  },
+  "orderNotFound": {
+    "status": 404,
+    "body": {
+      "success": false,
+      "error": "Order not found",
+      "message": "Order with ID order-123 does not exist"
+    }
+  },
+  "orderListSuccess": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "orders": [
+        {
+          "id": "order-123",
+          "filename": "document1.pdf",
+          "status": "completed",
+          "size": 1024000,
+          "createdAt": "2024-01-01T00:00:00Z"
+        },
+        {
+          "id": "order-124",
+          "filename": "document2.pdf",
+          "status": "pending_payment",
+          "size": 2048000,
+          "createdAt": "2024-01-01T01:00:00Z"
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 2,
+        "totalPages": 1
+      }
+    }
+  }
+}

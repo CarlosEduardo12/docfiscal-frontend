@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "summary": "E2E tests completed successfully",
+  "details": {
+    "totalTests": 1,
+    "passedTests": 1,
+    "failedTests": 0,
+    "duration": "30s"
+  },
+  "links": {
+    "htmlReport": "tests/reports/html/latest.html",
+    "jsonReport": "tests/reports/json/latest.json"
+  },
+  "timestamp": "2025-12-25T20:36:52.312Z"
+}

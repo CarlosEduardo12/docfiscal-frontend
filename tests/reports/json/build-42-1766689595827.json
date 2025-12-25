@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "startTime": "2025-12-25T19:06:05.810Z",
+    "endTime": "2025-12-25T19:06:35.810Z",
+    "duration": 30000,
+    "browser": "chromium",
+    "environment": "test",
+    "testCommand": "npx playwright test",
+    "gitCommit": "test-commit-123",
+    "buildNumber": "42"
+  },
+  "summary": {
+    "totalTests": 3,
+    "passedTests": 2,
+    "failedTests": 1,
+    "skippedTests": 0,
+    "flakyTests": 0,
+    "duration": 16000,
+    "successRate": 66.66666666666666
+  },
+  "errorAnalysis": {
+    "summary": {
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "totalErrors": 0,
+      "criticalErrors": 0,
+      "executionTime": 0,
+      "timestamp": "2025-12-25T19:06:35.811Z"
+    },
+    "errors": {
+      "byEndpoint": {},
+      "byType": {},
+      "byFlow": {},
+      "bySeverity": {}
+    },
+    "evidence": [],
+    "recommendations": [
+      "✅ No backend errors detected. All API endpoints are responding correctly."
+    ],
+    "uiElements": [],
+    "flowCoverage": {
+      "totalFlows": 0,
+      "testedFlows": 0,
+      "passedFlows": 0,
+      "failedFlows": 0,
+      "coverage": 0,
+      "flowDetails": []
+    },
+    "generatedAt": "2025-12-25T19:06:35.811Z"
+  },
+  "bugReports": [
+    {
+      "id": "BUG-1766689595811-yzald",
+      "title": "Test Failure: Payment Flow Test",
+      "severity": "critical",
+      "category": "integration",
+      "description": "Test \"Payment Flow Test\" is failing consistently.",
+      "stepsToReproduce": [
+        "1. Run test: Payment Flow Test",
+        "2. Observe test failure",
+        "3. Check error details and logs"
+      ],
+      "expectedBehavior": "Test should pass successfully",
+      "actualBehavior": "Test fails with error: Payment gateway timeout",
+      "evidence": [
+        {
+          "type": "console_log",
+          "data": "Payment gateway timeout",
+          "timestamp": "2025-12-25T19:06:35.811Z",
+          "description": "Test error message"
+        }
+      ],
+      "affectedFlows": [
+        "Payment Flow Test"
+      ],
+      "networkErrors": [],
+      "timestamp": "2025-12-25T19:06:35.811Z"
+    }
+  ],
+  "flowCoverage": {
+    "totalFlows": 8,
+    "coveredFlows": 3,
+    "coverage": 37.5,
+    "uncoveredFlows": [
+      "order-management-flow",
+      "download-flow",
+      "dashboard-navigation",
+      "responsive-design",
+      "error-handling"
+    ]
+  },
+  "performance": {
+    "averageTestDuration": 5333.333333333333,
+    "slowestTests": [
+      {
+        "name": "File Upload Test",
+        "duration": 8000
+      },
+      {
+        "name": "Authentication Flow Test",
+        "duration": 5000
+      },
+      {
+        "name": "Payment Flow Test",
+        "duration": 3000
+      }
+    ],
+    "fastestTests": [
+      {
+        "name": "Payment Flow Test",
+        "duration": 3000
+      },
+      {
+        "name": "Authentication Flow Test",
+        "duration": 5000
+      },
+      {
+        "name": "File Upload Test",
+        "duration": 8000
+      }
+    ]
+  },
+  "environment": {
+    "nodeVersion": "v20.11.0",
+    "playwrightVersion": "1.57.0",
+    "browserVersions": {
+      "chromium": "Latest",
+      "firefox": "Latest",
+      "webkit": "Latest"
+    },
+    "os": "darwin"
+  },
+  "recommendations": [
+    "🚨 URGENT: 1 critical bugs detected. These should be fixed immediately before any deployment.",
+    "📈 Coverage: Flow coverage is 37.5%. Consider adding tests for: order-management-flow, download-flow, dashboard-navigation, responsive-design, error-handling"
+  ],
+  "generatedAt": "2025-12-25T19:06:35.813Z"
+}

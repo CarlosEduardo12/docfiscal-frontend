@@ -1,0 +1,84 @@
+{
+  "validUser": {
+    "email": "test@docfiscal.com",
+    "password": "testpassword123",
+    "name": "Test User"
+  },
+  "testUsers": {
+    "validUser": {
+      "email": "test@docfiscal.com",
+      "password": "testpassword123",
+      "name": "Test User"
+    },
+    "invalidUser": {
+      "email": "invalid@example.com",
+      "password": "wrongpassword"
+    },
+    "newUser": {
+      "email": "newuser@docfiscal.com",
+      "password": "newpassword123",
+      "name": "New Test User"
+    }
+  },
+  "testFiles": {
+    "validPdf": {
+      "name": "small-document.pdf",
+      "path": "tests/fixtures/test-files/small-document.pdf",
+      "size": "< 1MB",
+      "type": "application/pdf"
+    },
+    "mediumPdf": {
+      "name": "medium-document.pdf",
+      "path": "tests/fixtures/test-files/medium-document.pdf",
+      "size": "1-5MB",
+      "type": "application/pdf"
+    },
+    "largePdf": {
+      "name": "large-document.pdf",
+      "path": "tests/fixtures/test-files/large-document.pdf",
+      "size": "> 5MB",
+      "type": "application/pdf"
+    },
+    "invalidFile": {
+      "name": "invalid-file.txt",
+      "path": "tests/fixtures/test-files/invalid-file.txt",
+      "type": "text/plain"
+    }
+  },
+  "apiEndpoints": {
+    "auth": {
+      "login": "/api/auth/login",
+      "register": "/api/auth/register",
+      "logout": "/api/auth/logout"
+    },
+    "orders": {
+      "create": "/api/orders",
+      "get": "/api/orders/{orderId}",
+      "payment": "/api/orders/{orderId}/payment",
+      "download": "/api/orders/{orderId}/download"
+    },
+    "payments": {
+      "status": "/api/payments/{paymentId}/status",
+      "callback": "/api/payments/{paymentId}/callback"
+    }
+  },
+  "expectedElements": {
+    "landingPage": [
+      "h1:has-text('DocFiscal')",
+      "button:has-text('Fazer Login')",
+      "button:has-text('Criar Conta')",
+      ".feature-cards"
+    ],
+    "dashboard": [
+      ".sidebar",
+      ".statistics-cards",
+      ".order-history-table",
+      "button:has-text('Upload New File')"
+    ],
+    "orderStatus": [
+      ".order-status-card",
+      ".order-details",
+      ".status-indicator"
+    ]
+  }
+}

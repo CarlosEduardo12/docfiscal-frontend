@@ -1,0 +1,1244 @@
+{
+  "config": {
+    "configFile": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/playwright.config.ts",
+    "rootDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "tests/reports/html"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/reports/json/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "tests/reports/junit/results.xml"
+        }
+      ],
+      [
+        "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/playwright-reporter.ts",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 4,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "flows/simple-upload-test.spec.ts",
+      "file": "flows/simple-upload-test.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Simple Upload Test",
+          "file": "flows/simple-upload-test.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Complete flow: Register → Upload → Payment",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 32959,
+                      "error": {
+                        "message": "Error: locator.isVisible: Error: strict mode violation: locator('span:has-text(\":\")') resolved to 4 elements:\n    1) <span>💰 Valor:</span> aka getByText('💰 Valor:')\n    2) <span>🔗 Método:</span> aka getByText('🔗 Método:')\n    3) <span>⏰ Tempo restante:</span> aka getByText('⏰ Tempo restante:')\n    4) <span class=\"font-bold text-red-600\">9:44</span> aka getByText(':44')\n\nCall log:\n\u001b[2m    - checking visibility of locator('span:has-text(\":\")')\u001b[22m\n",
+                        "stack": "Error: locator.isVisible: Error: strict mode violation: locator('span:has-text(\":\")') resolved to 4 elements:\n    1) <span>💰 Valor:</span> aka getByText('💰 Valor:')\n    2) <span>🔗 Método:</span> aka getByText('🔗 Método:')\n    3) <span>⏰ Tempo restante:</span> aka getByText('⏰ Tempo restante:')\n    4) <span class=\"font-bold text-red-600\">9:44</span> aka getByText(':44')\n\nCall log:\n\u001b[2m    - checking visibility of locator('span:has-text(\":\")')\u001b[22m\n\n    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:267:29",
+                        "location": {
+                          "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                          "column": 29,
+                          "line": 267
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 265 |\u001b[39m     \u001b[90m// Check if countdown timer is working\u001b[39m\n \u001b[90m 266 |\u001b[39m     \u001b[36mconst\u001b[39m timeRemaining \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'span:has-text(\":\")'\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Time format MM:SS\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 267 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m timeRemaining\u001b[33m.\u001b[39misVisible()) {\n \u001b[90m     |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 268 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Countdown timer is working'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 269 |\u001b[39m     }\n \u001b[90m 270 |\u001b[39m     \u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                            "column": 29,
+                            "line": 267
+                          },
+                          "message": "Error: locator.isVisible: Error: strict mode violation: locator('span:has-text(\":\")') resolved to 4 elements:\n    1) <span>💰 Valor:</span> aka getByText('💰 Valor:')\n    2) <span>🔗 Método:</span> aka getByText('🔗 Método:')\n    3) <span>⏰ Tempo restante:</span> aka getByText('⏰ Tempo restante:')\n    4) <span class=\"font-bold text-red-600\">9:44</span> aka getByText(':44')\n\nCall log:\n\u001b[2m    - checking visibility of locator('span:has-text(\":\")')\u001b[22m\n\n\n\u001b[0m \u001b[90m 265 |\u001b[39m     \u001b[90m// Check if countdown timer is working\u001b[39m\n \u001b[90m 266 |\u001b[39m     \u001b[36mconst\u001b[39m timeRemaining \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'span:has-text(\":\")'\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// Time format MM:SS\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 267 |\u001b[39m     \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m timeRemaining\u001b[33m.\u001b[39misVisible()) {\n \u001b[90m     |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 268 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Countdown timer is working'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 269 |\u001b[39m     }\n \u001b[90m 270 |\u001b[39m     \u001b[0m\n\u001b[2m    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:267:29\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Testing complete upload and payment flow...\n"
+                        },
+                        {
+                          "text": "👤 Step 1: Creating new user account...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Registration successful\n"
+                        },
+                        {
+                          "text": "🏠 Step 2: Navigating to main page...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "✅ Successfully authenticated and on main page\n"
+                        },
+                        {
+                          "text": "📁 Step 3: Uploading Ponto2.pdf...\n"
+                        },
+                        {
+                          "text": "✅ File selected\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload button to appear after file selection...\n"
+                        },
+                        {
+                          "text": "✅ Upload button is now visible and enabled\n"
+                        },
+                        {
+                          "text": "✅ File information is displayed\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "📤 Upload button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload to complete...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/36e4f857-b165-4cb7-a181-8c3e025c1f94/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Payment button appeared - upload was successful\n"
+                        },
+                        {
+                          "text": "📊 Upload API calls: 4\n"
+                        },
+                        {
+                          "text": "✅ Upload successful: {\n  success: \u001b[33mtrue\u001b[39m,\n  data: { orders: [], total: \u001b[33m0\u001b[39m, page: \u001b[33m1\u001b[39m, limit: \u001b[33m5\u001b[39m, total_pages: \u001b[33m0\u001b[39m },\n  message: \u001b[32m'Orders retrieved successfully'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "📋 Order ID: undefined\n"
+                        },
+                        {
+                          "text": "💳 Step 4: Testing payment creation...\n"
+                        },
+                        {
+                          "text": "✅ Payment summary is displayed\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/95e7828b-1094-4603-889e-d67bfc0a9276/payment\n"
+                        },
+                        {
+                          "text": "💳 Payment button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for payment creation...\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/95e7828b-1094-4603-889e-d67bfc0a9276/payment\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/95e7828b-1094-4603-889e-d67bfc0a9276/payment\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/95e7828b-1094-4603-889e-d67bfc0a9276/payment\n"
+                        },
+                        {
+                          "text": "✅ Moved to payment waiting step\n"
+                        },
+                        {
+                          "text": "📊 Payment API calls: 2\n"
+                        },
+                        {
+                          "text": "✅ Payment created: {\n  success: \u001b[33mtrue\u001b[39m,\n  data: {\n    payment_id: \u001b[32m'6511dbfb-5c23-40dc-a384-42ec18533b07'\u001b[39m,\n    payment_url: \u001b[32m'https://abacatepay.com/pay/bill_2YdKmhS00MTFeQsg3LumJgCR'\u001b[39m,\n    status: \u001b[32m'pending'\u001b[39m,\n    order_id: \u001b[32m'95e7828b-1094-4603-889e-d67bfc0a9276'\u001b[39m,\n    amount: \u001b[33m50\u001b[39m,\n    currency: \u001b[32m'BRL'\u001b[39m,\n    created_at: \u001b[32m'2025-12-25T22:19:27.420084Z'\u001b[39m,\n    updated_at: \u001b[1mnull\u001b[22m\n  },\n  message: \u001b[32m'Payment initiated successfully'\u001b[39m,\n  error: \u001b[1mnull\u001b[22m\n}\n"
+                        },
+                        {
+                          "text": "💳 Payment ID: 6511dbfb-5c23-40dc-a384-42ec18533b07\n"
+                        },
+                        {
+                          "text": "🔗 Payment URL: https://abacatepay.com/pay/bill_2YdKmhS00MTFeQsg3LumJgCR\n"
+                        },
+                        {
+                          "text": "✅ AbacatePay URL generated successfully\n"
+                        },
+                        {
+                          "text": "💡 Test the payment by accessing: https://abacatepay.com/pay/bill_2YdKmhS00MTFeQsg3LumJgCR\n"
+                        },
+                        {
+                          "text": "🔍 Step 5: Testing payment status polling...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status\n"
+                        },
+                        {
+                          "text": "📊 Status polling calls: 2\n"
+                        },
+                        {
+                          "text": "✅ Payment status polling is working\n"
+                        },
+                        {
+                          "text": "  1. http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status at 2025-12-25T22:19:34.030Z\n"
+                        },
+                        {
+                          "text": "  2. http://localhost:8000/api/payments/6511dbfb-5c23-40dc-a384-42ec18533b07/status at 2025-12-25T22:19:34.324Z\n"
+                        },
+                        {
+                          "text": "✅ Payment status is being displayed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-25T22:19:04.901Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/test-failed-2.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/test-failed-3.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/video-1.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/video-2.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                        "column": 29,
+                        "line": 267
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "6b079878205c81781790-0c0d0d8f8d9d896ba41d",
+              "file": "flows/simple-upload-test.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "Complete flow: Register → Upload → Payment",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 24356,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Testing complete upload and payment flow...\n"
+                        },
+                        {
+                          "text": "👤 Step 1: Creating new user account...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/6767c5a5-40c8-4c15-a4d2-9cea9029ce2a/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/6767c5a5-40c8-4c15-a4d2-9cea9029ce2a/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/6767c5a5-40c8-4c15-a4d2-9cea9029ce2a/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/6767c5a5-40c8-4c15-a4d2-9cea9029ce2a/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Registration successful\n"
+                        },
+                        {
+                          "text": "🏠 Step 2: Navigating to main page...\n"
+                        },
+                        {
+                          "text": "❌ Still not authenticated\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-25T22:19:04.900Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6b079878205c81781790-527cda4e084c33e6e478",
+              "file": "flows/simple-upload-test.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "Complete flow: Register → Upload → Payment",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 15869,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Testing complete upload and payment flow...\n"
+                        },
+                        {
+                          "text": "👤 Step 1: Creating new user account...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/901d653e-fc10-4959-962f-ab228a645b93/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/901d653e-fc10-4959-962f-ab228a645b93/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/901d653e-fc10-4959-962f-ab228a645b93/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/901d653e-fc10-4959-962f-ab228a645b93/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Registration successful\n"
+                        },
+                        {
+                          "text": "🏠 Step 2: Navigating to main page...\n"
+                        },
+                        {
+                          "text": "❌ Still not authenticated\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-25T22:19:04.905Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6b079878205c81781790-d78ef1bf52d195db6f5c",
+              "file": "flows/simple-upload-test.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "Complete flow: Register → Upload → Payment",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 32750,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    7 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    7 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:200:32",
+                        "location": {
+                          "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                          "column": 32,
+                          "line": 200
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 198 |\u001b[39m     \u001b[90m// Should move to waiting step with \"Aguardando Pagamento\" title\u001b[39m\n \u001b[90m 199 |\u001b[39m     \u001b[36mconst\u001b[39m waitingTitle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'h2:has-text(\"Aguardando Pagamento\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     \u001b[36mawait\u001b[39m expect(waitingTitle)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 201 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Moved to payment waiting step'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 202 |\u001b[39m     \n \u001b[90m 203 |\u001b[39m     \u001b[90m// Check for payment API calls\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                            "column": 32,
+                            "line": 200
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    7 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\n\n\u001b[0m \u001b[90m 198 |\u001b[39m     \u001b[90m// Should move to waiting step with \"Aguardando Pagamento\" title\u001b[39m\n \u001b[90m 199 |\u001b[39m     \u001b[36mconst\u001b[39m waitingTitle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'h2:has-text(\"Aguardando Pagamento\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     \u001b[36mawait\u001b[39m expect(waitingTitle)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 201 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Moved to payment waiting step'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 202 |\u001b[39m     \n \u001b[90m 203 |\u001b[39m     \u001b[90m// Check for payment API calls\u001b[39m\u001b[0m\n\u001b[2m    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:200:32\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Testing complete upload and payment flow...\n"
+                        },
+                        {
+                          "text": "👤 Step 1: Creating new user account...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Registration successful\n"
+                        },
+                        {
+                          "text": "🏠 Step 2: Navigating to main page...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "✅ Successfully authenticated and on main page\n"
+                        },
+                        {
+                          "text": "📁 Step 3: Uploading Ponto2.pdf...\n"
+                        },
+                        {
+                          "text": "✅ File selected\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload button to appear after file selection...\n"
+                        },
+                        {
+                          "text": "✅ Upload button is now visible and enabled\n"
+                        },
+                        {
+                          "text": "✅ File information is displayed\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "📤 Upload button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload to complete...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "✅ Payment button appeared - upload was successful\n"
+                        },
+                        {
+                          "text": "📊 Upload API calls: 3\n"
+                        },
+                        {
+                          "text": "✅ Upload successful: {\n  success: \u001b[33mtrue\u001b[39m,\n  data: { orders: [], total: \u001b[33m0\u001b[39m, page: \u001b[33m1\u001b[39m, limit: \u001b[33m50\u001b[39m, total_pages: \u001b[33m0\u001b[39m },\n  message: \u001b[32m'Orders retrieved successfully'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "📋 Order ID: undefined\n"
+                        },
+                        {
+                          "text": "💳 Step 4: Testing payment creation...\n"
+                        },
+                        {
+                          "text": "✅ Payment summary is displayed\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/437f1af0-475d-48de-aabe-a488518fa212/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/9c7ec2b2-c7f2-499e-9735-a8dc3148baf9/payment\n"
+                        },
+                        {
+                          "text": "💳 Payment button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for payment creation...\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/9c7ec2b2-c7f2-499e-9735-a8dc3148baf9/payment\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/9c7ec2b2-c7f2-499e-9735-a8dc3148baf9/payment\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/9c7ec2b2-c7f2-499e-9735-a8dc3148baf9/payment\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/03338b51-48f3-4a6d-b6d3-d00e5b5cfee8/status\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/03338b51-48f3-4a6d-b6d3-d00e5b5cfee8/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/03338b51-48f3-4a6d-b6d3-d00e5b5cfee8/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/03338b51-48f3-4a6d-b6d3-d00e5b5cfee8/status\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/03338b51-48f3-4a6d-b6d3-d00e5b5cfee8/status\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-25T22:19:04.903Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/test-failed-2.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/test-failed-3.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/video-1.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/video-2.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Chrome/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                        "column": 32,
+                        "line": 200
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "6b079878205c81781790-62c1d973c8346f98c287",
+              "file": "flows/simple-upload-test.spec.ts",
+              "line": 5,
+              "column": 7
+            },
+            {
+              "title": "Complete flow: Register → Upload → Payment",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 24213,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    9 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    9 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\n    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:200:32",
+                        "location": {
+                          "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                          "column": 32,
+                          "line": 200
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 198 |\u001b[39m     \u001b[90m// Should move to waiting step with \"Aguardando Pagamento\" title\u001b[39m\n \u001b[90m 199 |\u001b[39m     \u001b[36mconst\u001b[39m waitingTitle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'h2:has-text(\"Aguardando Pagamento\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     \u001b[36mawait\u001b[39m expect(waitingTitle)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 201 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Moved to payment waiting step'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 202 |\u001b[39m     \n \u001b[90m 203 |\u001b[39m     \u001b[90m// Check for payment API calls\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                            "column": 32,
+                            "line": 200
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('h2:has-text(\"Aguardando Pagamento\")')\nExpected: visible\nReceived: hidden\nTimeout:  10000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('h2:has-text(\"Aguardando Pagamento\")')\u001b[22m\n\u001b[2m    9 × locator resolved to <h2 class=\"text-2xl font-bold mb-2\">Aguardando Pagamento</h2>\u001b[22m\n\u001b[2m      - unexpected value \"hidden\"\u001b[22m\n\n\n\u001b[0m \u001b[90m 198 |\u001b[39m     \u001b[90m// Should move to waiting step with \"Aguardando Pagamento\" title\u001b[39m\n \u001b[90m 199 |\u001b[39m     \u001b[36mconst\u001b[39m waitingTitle \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'h2:has-text(\"Aguardando Pagamento\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 200 |\u001b[39m     \u001b[36mawait\u001b[39m expect(waitingTitle)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 201 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'✅ Moved to payment waiting step'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 202 |\u001b[39m     \n \u001b[90m 203 |\u001b[39m     \u001b[90m// Check for payment API calls\u001b[39m\u001b[0m\n\u001b[2m    at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts:200:32\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Testing complete upload and payment flow...\n"
+                        },
+                        {
+                          "text": "👤 Step 1: Creating new user account...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/auth/register\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/login\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=50&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Registration successful\n"
+                        },
+                        {
+                          "text": "🏠 Step 2: Navigating to main page...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/auth/me\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:3000/api/auth/session\n"
+                        },
+                        {
+                          "text": "✅ Successfully authenticated and on main page\n"
+                        },
+                        {
+                          "text": "📁 Step 3: Uploading Ponto2.pdf...\n"
+                        },
+                        {
+                          "text": "✅ File selected\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload button to appear after file selection...\n"
+                        },
+                        {
+                          "text": "✅ Upload button is now visible and enabled\n"
+                        },
+                        {
+                          "text": "✅ File information is displayed\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "📤 Upload button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for upload to complete...\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "📥 201 http://localhost:8000/api/upload\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/users/b314a12c-b2fd-4475-a9ec-92dee6e34a02/orders?page=1&limit=5&sort_by=created_at&sort_order=desc\n"
+                        },
+                        {
+                          "text": "✅ Payment button appeared - upload was successful\n"
+                        },
+                        {
+                          "text": "📊 Upload API calls: 4\n"
+                        },
+                        {
+                          "text": "✅ Upload successful: {\n  success: \u001b[33mtrue\u001b[39m,\n  data: { orders: [], total: \u001b[33m0\u001b[39m, page: \u001b[33m1\u001b[39m, limit: \u001b[33m50\u001b[39m, total_pages: \u001b[33m0\u001b[39m },\n  message: \u001b[32m'Orders retrieved successfully'\u001b[39m\n}\n"
+                        },
+                        {
+                          "text": "📋 Order ID: undefined\n"
+                        },
+                        {
+                          "text": "💳 Step 4: Testing payment creation...\n"
+                        },
+                        {
+                          "text": "✅ Payment summary is displayed\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/6b407e60-0870-4575-8689-0799251167cf/payment\n"
+                        },
+                        {
+                          "text": "💳 Payment button clicked\n"
+                        },
+                        {
+                          "text": "⏳ Waiting for payment creation...\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/6b407e60-0870-4575-8689-0799251167cf/payment\n"
+                        },
+                        {
+                          "text": "📤 POST http://localhost:8000/api/orders/6b407e60-0870-4575-8689-0799251167cf/payment\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/orders/6b407e60-0870-4575-8689-0799251167cf/payment\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/7c637070-59cf-4cbb-94cc-799b357cef09/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/7c637070-59cf-4cbb-94cc-799b357cef09/status\n"
+                        },
+                        {
+                          "text": "📤 GET http://localhost:8000/api/payments/7c637070-59cf-4cbb-94cc-799b357cef09/status\n"
+                        },
+                        {
+                          "text": "📥 200 http://localhost:8000/api/payments/7c637070-59cf-4cbb-94cc-799b357cef09/status\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-12-25T22:19:23.845Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/test-failed-1.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/test-failed-2.png"
+                        },
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/test-failed-3.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/video-1.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/video-2.webm"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/reports/test-results/flows-simple-upload-test-S-83b1f-Register-→-Upload-→-Payment-Mobile-Safari/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/simple-upload-test.spec.ts",
+                        "column": 32,
+                        "line": 200
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "6b079878205c81781790-c753527c0ec0b89fb984",
+              "file": "flows/simple-upload-test.spec.ts",
+              "line": 5,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-12-25T22:18:59.138Z",
+    "duration": 54984.413,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

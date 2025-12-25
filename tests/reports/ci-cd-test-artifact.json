@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-25T20:41:34.390Z",
+  "environment": "test",
+  "ci": false,
+  "buildInfo": {
+    "commit": "unknown",
+    "branch": "unknown",
+    "buildNumber": "unknown",
+    "buildUrl": "unknown"
+  },
+  "testRun": "ci-cd-integration-test"
+}

@@ -1,0 +1,52 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e13]: DocFiscal
+      - navigation [ref=e14]:
+        - link "Convert" [ref=e15] [cursor=pointer]:
+          - /url: /
+          - img [ref=e16]
+          - generic [ref=e19]: Convert
+      - generic [ref=e21]:
+        - link "Sign In" [ref=e22] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e23]
+        - link "Sign Up" [ref=e24] [cursor=pointer]:
+          - /url: /register
+          - button "Sign Up" [ref=e25]
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - heading "Dashboard" [level=1] [ref=e29]
+        - paragraph [ref=e30]: Welcome back, !
+      - generic [ref=e31]:
+        - link "Upload New File" [ref=e32] [cursor=pointer]:
+          - /url: /upload
+          - button "Upload New File" [ref=e33]:
+            - img
+            - text: Upload New File
+        - button "Atualizar Lista" [ref=e34] [cursor=pointer]:
+          - img
+          - text: Atualizar Lista
+        - link "🔧 Test API" [ref=e35] [cursor=pointer]:
+          - /url: /test-api-connection
+          - button "🔧 Test API" [ref=e36]
+        - link "🔧 Debug Payment" [ref=e37] [cursor=pointer]:
+          - /url: /debug-payment
+          - button "🔧 Debug Payment" [ref=e38]
+      - generic [ref=e40]:
+        - generic [ref=e42]: Order History
+        - generic [ref=e44]:
+          - img [ref=e45]
+          - heading "No orders yet" [level=3] [ref=e48]
+          - paragraph [ref=e49]: Upload your first PDF document to get started.
+  - generic [ref=e50]:
+    - img [ref=e52]
+    - button "Open Tanstack query devtools" [ref=e100] [cursor=pointer]:
+      - img [ref=e101]
+  - alert [ref=e149]
+```

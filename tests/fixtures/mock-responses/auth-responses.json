@@ -1,0 +1,50 @@
+{
+  "loginSuccess": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "user": {
+        "id": "test-user-id",
+        "email": "test@example.com",
+        "name": "Test User"
+      },
+      "token": "mock-jwt-token",
+      "refreshToken": "mock-refresh-token"
+    }
+  },
+  "loginFailure": {
+    "status": 401,
+    "body": {
+      "success": false,
+      "error": "Invalid credentials",
+      "message": "Email or password is incorrect"
+    }
+  },
+  "registerSuccess": {
+    "status": 201,
+    "body": {
+      "success": true,
+      "message": "User created successfully",
+      "user": {
+        "id": "new-user-id",
+        "email": "newuser@example.com",
+        "name": "New Test User"
+      }
+    }
+  },
+  "registerFailure": {
+    "status": 400,
+    "body": {
+      "success": false,
+      "error": "Validation error",
+      "message": "Email already exists"
+    }
+  },
+  "logoutSuccess": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "message": "Logged out successfully"
+    }
+  }
+}

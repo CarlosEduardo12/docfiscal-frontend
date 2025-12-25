@@ -1,0 +1,67 @@
+{
+  "createPaymentSuccess": {
+    "status": 201,
+    "body": {
+      "success": true,
+      "payment": {
+        "id": "payment-123",
+        "orderId": "order-123",
+        "amount": 1000,
+        "currency": "BRL",
+        "status": "pending",
+        "paymentUrl": "https://abacatepay.com/payment/payment-123",
+        "expiresAt": "2024-01-01T01:00:00Z"
+      }
+    }
+  },
+  "paymentStatusPending": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "payment": {
+        "id": "payment-123",
+        "orderId": "order-123",
+        "status": "pending",
+        "amount": 1000,
+        "currency": "BRL"
+      }
+    }
+  },
+  "paymentStatusCompleted": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "payment": {
+        "id": "payment-123",
+        "orderId": "order-123",
+        "status": "completed",
+        "amount": 1000,
+        "currency": "BRL",
+        "completedAt": "2024-01-01T00:30:00Z"
+      }
+    }
+  },
+  "paymentStatusFailed": {
+    "status": 200,
+    "body": {
+      "success": true,
+      "payment": {
+        "id": "payment-123",
+        "orderId": "order-123",
+        "status": "failed",
+        "amount": 1000,
+        "currency": "BRL",
+        "failedAt": "2024-01-01T00:30:00Z",
+        "failureReason": "Insufficient funds"
+      }
+    }
+  },
+  "paymentNotFound": {
+    "status": 404,
+    "body": {
+      "success": false,
+      "error": "Payment not found",
+      "message": "Payment with ID payment-123 does not exist"
+    }
+  }
+}
