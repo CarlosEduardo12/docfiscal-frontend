@@ -1,10 +1,19 @@
 'use client';
 
 import { useRequireAuth } from '@/hooks/useAuthNew';
-import { UploadPage } from '@/components/upload/UploadPage';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function UploadPageRoute() {
   const { user, isLoading } = useRequireAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to home page since upload is now integrated there
+    if (!isLoading) {
+      router.push('/');
+    }
+  }, [isLoading, router]);
 
   if (isLoading) {
     return (
@@ -14,9 +23,5 @@ export default function UploadPageRoute() {
     );
   }
 
-  if (!user) {
-    return null; // useRequireAuth will redirect to login
-  }
-
-  return <UploadPage />;
+  return null;
 }

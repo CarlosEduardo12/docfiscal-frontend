@@ -76,6 +76,7 @@ const formatFileSize = (bytes: number): string => {
 export function OrderHistoryTable({
   orders,
   onDownload,
+  onPayment,
   isLoading,
   pagination,
   onPageChange,
@@ -206,20 +207,48 @@ export function OrderHistoryTable({
                       {formatFileSize(order.originalFileSize)}
                     </td>
                     <td className="py-4 px-4 text-right">
-                      {order.status === 'completed' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onDownload(order.id)}
-                          className="flex items-center gap-2"
-                          aria-label={`Download CSV file for ${order.filename}`}
-                        >
-                          <Download className="h-4 w-4" aria-hidden="true" />
-                          Download
-                        </Button>
-                      )}
+                      <div className="flex justify-end gap-2">
+                        {order.status === 'pending_payment' && (
+                          <Button
+                            size="sm"
+                            onClick={() => onPayment?.(order.id)}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                            aria-label={`Make payment for ${order.filename}`}
+                          >
+                            <CreditCard
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                            Pay Now
+                          </Button>
+                        )}
+                        {order.status === 'completed' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onDownload(order.id)}
+                            className="flex items-center gap-2"
+                            aria-label={`Download CSV file for ${order.filename}`}
+                          >
+                            <Download className="h-4 w-4" aria-hidden="true" />
+                            Download
+                          </Button>
+                        )}
+                        {(order.status === 'processing' ||
+                          order.status === 'paid') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled
+                            className="flex items-center gap-2"
+                          >
+                            <Clock className="h-4 w-4" aria-hidden="true" />
+                            Processing
+                          </Button>
+                        )}
+                      </div>
                       {order.status === 'failed' && order.errorMessage && (
-                        <div className="text-xs text-red-600 max-w-32 truncate">
+                        <div className="text-xs text-red-600 max-w-32 truncate mt-1">
                           {order.errorMessage}
                         </div>
                       )}
@@ -274,24 +303,50 @@ export function OrderHistoryTable({
                 <span>{formatFileSize(order.originalFileSize)}</span>
               </div>
 
-              {order.status === 'completed' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onDownload(order.id)}
-                  className="w-full flex items-center justify-center gap-2"
-                  aria-label={`Download CSV file for ${order.filename}`}
-                >
-                  <Download className="h-4 w-4" aria-hidden="true" />
-                  Download CSV
-                </Button>
-              )}
+              <div className="space-y-2">
+                {order.status === 'pending_payment' && (
+                  <Button
+                    size="sm"
+                    onClick={() => onPayment?.(order.id)}
+                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    aria-label={`Make payment for ${order.filename}`}
+                  >
+                    <CreditCard className="h-4 w-4" aria-hidden="true" />
+                    Pay Now
+                  </Button>
+                )}
 
-              {order.status === 'failed' && order.errorMessage && (
-                <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                  {order.errorMessage}
-                </div>
-              )}
+                {order.status === 'completed' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onDownload(order.id)}
+                    className="w-full flex items-center justify-center gap-2"
+                    aria-label={`Download CSV file for ${order.filename}`}
+                  >
+                    <Download className="h-4 w-4" aria-hidden="true" />
+                    Download CSV
+                  </Button>
+                )}
+
+                {(order.status === 'processing' || order.status === 'paid') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <Clock className="h-4 w-4" aria-hidden="true" />
+                    Processing...
+                  </Button>
+                )}
+
+                {order.status === 'failed' && order.errorMessage && (
+                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                    {order.errorMessage}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

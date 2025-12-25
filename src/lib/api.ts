@@ -58,7 +58,7 @@ class ApiClient {
     try {
       console.log('🔄 Making request to:', url);
       console.log('📦 Request config:', config);
-      
+
       const response = await fetch(url, config);
       console.log('📡 Response status:', response.status);
 
@@ -95,7 +95,9 @@ class ApiClient {
     } catch (error) {
       console.error('💥 API Error:', error);
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Network error: Unable to connect to server. Please check if the backend is running.');
+        throw new Error(
+          'Network error: Unable to connect to server. Please check if the backend is running.'
+        );
       }
       throw error;
     }

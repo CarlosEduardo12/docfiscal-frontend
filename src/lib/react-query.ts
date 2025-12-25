@@ -261,7 +261,11 @@ export const useOrderStatus = (orderId: string, enabled: boolean = true) => {
   });
 };
 
-export const useUserOrders = (userId: string, params?: PaginationParams) => {
+export const useUserOrders = (
+  userId: string,
+  params?: PaginationParams,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: queryKeys.orders.userOrders(userId, params),
     queryFn: async () => {
@@ -271,7 +275,7 @@ export const useUserOrders = (userId: string, params?: PaginationParams) => {
       }
       return response.data;
     },
-    enabled: !!userId,
+    enabled: !!userId && options?.enabled !== false,
     staleTime: 2 * 60 * 1000, // 2 minutes for order lists
   });
 };

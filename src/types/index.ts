@@ -181,6 +181,7 @@ export interface OrderStatusCardProps {
 export interface OrderHistoryTableProps {
   orders: Order[];
   onDownload: (orderId: string) => void;
+  onPayment?: (orderId: string) => void;
   isLoading: boolean;
   pagination?: PaginationParams;
   onPageChange?: (page: number) => void;
