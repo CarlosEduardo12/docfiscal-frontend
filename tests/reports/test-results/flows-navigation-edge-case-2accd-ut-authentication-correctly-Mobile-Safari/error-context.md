@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e13]: DocFiscal
+      - navigation [ref=e14]:
+        - link "Convert" [ref=e15]:
+          - /url: /
+          - img [ref=e16]
+          - generic [ref=e19]: Convert
+      - generic [ref=e21]:
+        - link "Sign In" [ref=e22]:
+          - /url: /login
+          - button "Sign In" [ref=e23] [cursor=pointer]
+        - link "Sign Up" [ref=e24]:
+          - /url: /register
+          - button "Sign Up" [ref=e25] [cursor=pointer]
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - heading "Dashboard" [level=1] [ref=e29]
+        - paragraph [ref=e30]: Welcome back, !
+      - generic [ref=e31]:
+        - link "Upload New File" [ref=e32]:
+          - /url: /upload
+          - button "Upload New File" [ref=e33] [cursor=pointer]:
+            - img
+            - text: Upload New File
+        - button "Atualizar Lista" [ref=e34] [cursor=pointer]:
+          - img
+          - text: Atualizar Lista
+        - link "🔧 Test API" [ref=e35]:
+          - /url: /test-api-connection
+          - button "🔧 Test API" [ref=e36] [cursor=pointer]
+        - link "🔧 Debug Payment" [ref=e37]:
+          - /url: /debug-payment
+          - button "🔧 Debug Payment" [ref=e38] [cursor=pointer]
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic: Order History
+        - generic [ref=e42]:
+          - generic:
+            - img [ref=e43]
+            - heading "No orders yet" [level=3]
+            - paragraph: Upload your first PDF document to get started.
+  - alert [ref=e46]
+```

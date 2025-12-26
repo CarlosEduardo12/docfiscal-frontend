@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e13]: DocFiscal
+      - navigation [ref=e14]:
+        - link "Convert" [ref=e15] [cursor=pointer]:
+          - /url: /
+          - img [ref=e16]
+          - generic [ref=e19]: Convert
+        - link "All files" [ref=e20] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e21]
+          - generic [ref=e24]: All files
+        - link "History" [ref=e25] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e26]
+          - generic [ref=e29]: History
+        - link "Settings" [ref=e30] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e31]
+          - generic [ref=e34]: Settings
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - img [ref=e39]
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: Test User
+            - paragraph [ref=e44]: test@docfiscal.com
+        - button "Log out" [ref=e45] [cursor=pointer]:
+          - img
+          - text: Log out
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - heading "Dashboard" [level=1] [ref=e49]
+        - paragraph [ref=e50]: Welcome back, Test User!
+      - generic [ref=e51]:
+        - generic [ref=e53]:
+          - generic:
+            - generic [ref=e54]: Total Orders
+            - img
+          - generic: "0"
+          - paragraph: All time
+        - generic [ref=e58]:
+          - generic:
+            - generic [ref=e59]: Pending Payment
+            - img
+          - generic: "0"
+          - paragraph: Awaiting payment
+        - generic [ref=e63]:
+          - generic:
+            - generic [ref=e64]: Processing
+            - img
+          - generic: "0"
+          - paragraph: In progress
+        - generic [ref=e68]:
+          - generic:
+            - generic [ref=e69]: Completed
+            - img
+          - generic: "0"
+          - paragraph: Ready for download
+      - generic [ref=e72]:
+        - link "Upload New File" [ref=e73] [cursor=pointer]:
+          - /url: /upload
+          - button "Upload New File" [ref=e74]:
+            - img
+            - text: Upload New File
+        - button "Atualizar Lista" [ref=e75] [cursor=pointer]:
+          - img
+          - text: Atualizar Lista
+        - link "🔧 Test API" [ref=e76] [cursor=pointer]:
+          - /url: /test-api-connection
+          - button "🔧 Test API" [ref=e77]
+        - link "🔧 Debug Payment" [ref=e78] [cursor=pointer]:
+          - /url: /debug-payment
+          - button "🔧 Debug Payment" [ref=e79]
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - generic: Order History
+        - generic [ref=e83]:
+          - generic:
+            - img [ref=e84]
+            - heading "No orders yet" [level=3]
+            - paragraph: Upload your first PDF document to get started.
+  - generic [ref=e87]:
+    - img [ref=e89]
+    - button "Open Tanstack query devtools" [ref=e137] [cursor=pointer]:
+      - img [ref=e138]
+  - alert [ref=e186]
+```

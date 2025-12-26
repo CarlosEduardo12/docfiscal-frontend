@@ -1,0 +1,74 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e16]: DocFiscal
+      - navigation [ref=e17]:
+        - link "Convert" [ref=e18] [cursor=pointer]:
+          - /url: /
+          - img [ref=e19]
+          - generic [ref=e23]: Convert
+        - link "All files" [ref=e24] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e25]
+          - generic [ref=e31]: All files
+        - link "History" [ref=e32] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e33]
+          - generic [ref=e37]: History
+        - link "Settings" [ref=e38] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e39]
+          - generic [ref=e42]: Settings
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - img [ref=e47]
+          - generic [ref=e50]:
+            - paragraph [ref=e51]: Test User
+            - paragraph [ref=e52]: test@docfiscal.com
+        - button "Log out" [ref=e53] [cursor=pointer]:
+          - img
+          - text: Log out
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - heading "Converter PDF para CSV" [level=1] [ref=e57]
+        - paragraph [ref=e58]: Transforme seus documentos PDF em formato CSV de forma rápida e fácil
+      - generic [ref=e62]:
+        - img [ref=e63]
+        - heading "Upload do PDF" [level=2] [ref=e67]
+        - paragraph [ref=e68]: "Arquivo selecionado: small-document.pdf"
+        - generic [ref=e69]:
+          - button "Selecionar Arquivo PDF" [ref=e70] [cursor=pointer]:
+            - img
+            - text: Selecionar Arquivo PDF
+          - generic [ref=e71]:
+            - paragraph [ref=e72]: small-document.pdf
+            - paragraph [ref=e73]: 0.00 MB
+          - button "Enviar PDF para Conversão" [ref=e74] [cursor=pointer]:
+            - img
+            - text: Enviar PDF para Conversão
+      - generic [ref=e75]:
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - img [ref=e80]
+            - generic [ref=e86]:
+              - heading "Processamento Rápido" [level=4] [ref=e87]
+              - paragraph [ref=e88]: Converta arquivos em segundos
+          - paragraph [ref=e89]: Nosso mecanismo de processamento avançado converte seus documentos PDF para formato CSV rapidamente e com precisão, mantendo a integridade dos dados durante todo o processo.
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - img [ref=e94]
+            - generic [ref=e98]:
+              - heading "Seguro e Privado" [level=4] [ref=e99]
+              - paragraph [ref=e100]: Seus arquivos são protegidos
+          - paragraph [ref=e101]: Todos os arquivos são processados com segurança e automaticamente excluídos após a conversão. Nunca armazenamos seus dados pessoais por mais tempo que o necessário.
+  - generic [ref=e102]:
+    - img [ref=e104]
+    - button "Open Tanstack query devtools" [ref=e153] [cursor=pointer]:
+      - img [ref=e154]
+  - alert [ref=e203]
+```

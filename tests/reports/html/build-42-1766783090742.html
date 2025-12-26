@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFiscal E2E Test Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s; }
+        .summary-card:hover { transform: translateY(-2px); }
+        .summary-card h3 { font-size: 2.5em; margin-bottom: 10px; }
+        .summary-card p { color: #666; font-size: 1.1em; }
+        .card-success { border-left: 5px solid #28a745; }
+        .card-warning { border-left: 5px solid #ffc107; }
+        .card-danger { border-left: 5px solid #dc3545; }
+        .card-info { border-left: 5px solid #17a2b8; }
+        .section { background: white; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+        .section-header { background: #f8f9fa; padding: 20px; border-bottom: 1px solid #dee2e6; }
+        .section-header h2 { color: #495057; display: flex; align-items: center; gap: 10px; }
+        .section-content { padding: 25px; }
+        .recommendations { background: #e7f3ff; border: 1px solid #b8daff; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .recommendations ul { list-style: none; }
+        .recommendations li { margin: 10px 0; padding: 10px; background: white; border-radius: 6px; border-left: 4px solid #007bff; }
+        .bug-report { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .bug-critical { border-left: 5px solid #e53e3e; }
+        .bug-high { border-left: 5px solid #dd6b20; }
+        .bug-medium { border-left: 5px solid #d69e2e; }
+        .bug-low { border-left: 5px solid #38a169; }
+        .bug-header { display: flex; justify-content: between; align-items: center; margin-bottom: 15px; }
+        .bug-severity { padding: 4px 12px; border-radius: 20px; color: white; font-size: 0.85em; font-weight: bold; }
+        .severity-critical { background: #e53e3e; }
+        .severity-high { background: #dd6b20; }
+        .severity-medium { background: #d69e2e; }
+        .severity-low { background: #38a169; }
+        .error-list { max-height: 400px; overflow-y: auto; }
+        .error-item { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin: 10px 0; }
+        .error-status { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-size: 0.8em; font-weight: bold; }
+        .status-4xx { background: #ffc107; color: #000; }
+        .status-5xx { background: #dc3545; }
+        .flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .flow-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; }
+        .flow-status { padding: 4px 12px; border-radius: 20px; color: white; font-size: 0.85em; font-weight: bold; }
+        .status-passed { background: #28a745; }
+        .status-failed { background: #dc3545; }
+        .status-skipped { background: #6c757d; }
+        .performance-chart { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .chart-section h4 { margin-bottom: 15px; color: #495057; }
+        .test-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 6px; margin: 5px 0; }
+        .duration { font-weight: bold; color: #007bff; }
+        .footer { text-align: center; padding: 30px; color: #666; }
+        .tabs { display: flex; border-bottom: 1px solid #dee2e6; margin-bottom: 20px; }
+        .tab { padding: 12px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .tab:hover { background: #f8f9fa; }
+        .tab.active { border-bottom-color: #007bff; color: #007bff; font-weight: bold; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .performance-chart { grid-template-columns: 1fr; }
+            .flow-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 DocFiscal E2E Test Report</h1>
+            <p>Generated on 12/26/2025, 6:04:50 PM</p>
+            <p>Environment: test | Browser: chromium | Duration: 30s</p>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card card-danger">
+                <h3>66.7%</h3>
+                <p>Success Rate</p>
+            </div>
+            <div class="summary-card card-danger">
+                <h3>2/3</h3>
+                <p>Tests Passed</p>
+            </div>
+            <div class="summary-card card-success">
+                <h3>0</h3>
+                <p>Critical Errors</p>
+            </div>
+            <div class="summary-card card-warning">
+                <h3>37.5%</h3>
+                <p>Flow Coverage</p>
+            </div>
+        </div>
+
+        
+        <div class="section">
+            <div class="section-header">
+                <h2>📋 Key Recommendations</h2>
+            </div>
+            <div class="section-content">
+                <div class="recommendations">
+                    <ul>
+                        <li>🚨 URGENT: 1 critical bugs detected. These should be fixed immediately before any deployment.</li><li>📈 Coverage: Flow coverage is 37.5%. Consider adding tests for: order-management-flow, download-flow, dashboard-navigation, responsive-design, error-handling</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+
+        
+        <div class="section">
+            <div class="section-header">
+                <h2>🐛 Bug Reports (1)</h2>
+            </div>
+            <div class="section-content">
+                
+                    <div class="bug-report bug-critical">
+                        <div class="bug-header">
+                            <h4>Test Failure: Payment Flow Test</h4>
+                            <span class="bug-severity severity-critical">CRITICAL</span>
+                        </div>
+                        <p><strong>Description:</strong> Test "Payment Flow Test" is failing consistently.</p>
+                        <p><strong>Expected:</strong> Test should pass successfully</p>
+                        <p><strong>Actual:</strong> Test fails with error: Payment gateway timeout</p>
+                        <p><strong>Affected Flows:</strong> Payment Flow Test</p>
+                        
+                    </div>
+                
+            </div>
+        </div>
+        
+
+        <div class="section">
+            <div class="section-header">
+                <h2>📊 Test Results Analysis</h2>
+            </div>
+            <div class="section-content">
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('flow-coverage')">Flow Coverage</div>
+                    <div class="tab" onclick="showTab('performance')">Performance</div>
+                    <div class="tab" onclick="showTab('errors')">Error Analysis</div>
+                </div>
+
+                <div id="flow-coverage" class="tab-content active">
+                    <div class="flow-grid">
+                        
+                    </div>
+                </div>
+
+                <div id="performance" class="tab-content">
+                    <div class="performance-chart">
+                        <div class="chart-section">
+                            <h4>⚡ Slowest Tests</h4>
+                            
+                                <div class="test-item">
+                                    <span>File Upload Test</span>
+                                    <span class="duration">8.0s</span>
+                                </div>
+                            
+                                <div class="test-item">
+                                    <span>Authentication Flow Test</span>
+                                    <span class="duration">5.0s</span>
+                                </div>
+                            
+                                <div class="test-item">
+                                    <span>Payment Flow Test</span>
+                                    <span class="duration">3.0s</span>
+                                </div>
+                            
+                        </div>
+                        <div class="chart-section">
+                            <h4>🚀 Fastest Tests</h4>
+                            
+                                <div class="test-item">
+                                    <span>Payment Flow Test</span>
+                                    <span class="duration">3.0s</span>
+                                </div>
+                            
+                                <div class="test-item">
+                                    <span>Authentication Flow Test</span>
+                                    <span class="duration">5.0s</span>
+                                </div>
+                            
+                                <div class="test-item">
+                                    <span>File Upload Test</span>
+                                    <span class="duration">8.0s</span>
+                                </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div id="errors" class="tab-content">
+                    <p>✅ No backend errors detected!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Report generated by DocFiscal E2E Testing System</p>
+            <p>Node.js v20.11.0 | Playwright 1.57.0 | darwin</p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

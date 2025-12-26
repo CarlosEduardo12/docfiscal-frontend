@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Create account
+        - generic [ref=e6]: Enter your information to create a new account
+      - generic [ref=e7]:
+        - form "Create account" [ref=e8]:
+          - generic [ref=e9]:
+            - text: Full Name
+            - textbox "Full Name" [ref=e10]:
+              - /placeholder: Enter your full name
+            - alert [ref=e11]: fullName is required
+          - generic [ref=e12]:
+            - text: Email
+            - textbox "Email" [ref=e13]:
+              - /placeholder: Enter your email
+              - text: invalid-email
+            - alert [ref=e14]: Please enter a valid email address
+          - generic [ref=e15]:
+            - text: Password
+            - textbox "Password" [ref=e16]:
+              - /placeholder: Enter your password
+              - text: "123"
+            - alert [ref=e17]: password must be at least 6 characters long
+          - generic [ref=e18]:
+            - text: Confirm Password
+            - textbox "Confirm Password" [active] [ref=e19]:
+              - /placeholder: Confirm your password
+              - text: "456"
+          - button "Create account" [ref=e20] [cursor=pointer]
+        - generic [ref=e21]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e22] [cursor=pointer]:
+            - /url: /login
+  - generic [ref=e23]:
+    - img [ref=e25]
+    - button "Open Tanstack query devtools" [ref=e74] [cursor=pointer]:
+      - img [ref=e75]
+  - alert [ref=e124]
+```

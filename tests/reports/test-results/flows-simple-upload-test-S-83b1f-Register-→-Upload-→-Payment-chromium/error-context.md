@@ -2,77 +2,37 @@
 
 ```yaml
 - generic [active] [ref=e1]:
-  - generic [ref=e6]:
-    - generic [ref=e7]:
-      - generic [ref=e8]:
-        - img [ref=e10]
-        - generic [ref=e13]: DocFiscal
-      - navigation [ref=e14]:
-        - link "Convert" [ref=e15] [cursor=pointer]:
-          - /url: /
-          - img [ref=e16]
-          - generic [ref=e19]: Convert
-        - link "All files" [ref=e20] [cursor=pointer]:
-          - /url: /dashboard
-          - img [ref=e21]
-          - generic [ref=e24]: All files
-        - link "History" [ref=e25] [cursor=pointer]:
-          - /url: /dashboard
-          - img [ref=e26]
-          - generic [ref=e29]: History
-        - link "Settings" [ref=e30] [cursor=pointer]:
-          - /url: /dashboard
-          - img [ref=e31]
-          - generic [ref=e34]: Settings
-      - generic [ref=e36]:
-        - generic [ref=e37]:
-          - img [ref=e39]
-          - generic [ref=e42]:
-            - paragraph [ref=e43]: Test User 1766701148736
-            - paragraph [ref=e44]: test1766701148736@docfiscal.com
-        - button "Log out" [ref=e45] [cursor=pointer]:
-          - img
-          - text: Log out
-    - generic [ref=e47]:
-      - generic [ref=e48]:
-        - heading "Converter PDF para CSV" [level=1] [ref=e49]
-        - paragraph [ref=e50]: Transforme seus documentos PDF em formato CSV de forma rápida e fácil
-      - generic [ref=e54]:
-        - img [ref=e55]
-        - heading "Aguardando Pagamento" [level=2] [ref=e58]
-        - paragraph [ref=e59]: Complete o pagamento na aba do AbacatePay
-        - paragraph [ref=e60]: Aguardando pagamento...
-        - generic [ref=e62]:
-          - generic [ref=e63]:
-            - generic [ref=e64]: "💰 Valor:"
-            - generic [ref=e65]: R$ 50,00
-          - generic [ref=e66]:
-            - generic [ref=e67]: "🔗 Método:"
-            - generic [ref=e68]: PIX
-          - generic [ref=e69]:
-            - generic [ref=e70]: "⏰ Tempo restante:"
-            - generic [ref=e71]: 9:42
-        - button "🔄 Reabrir Pagamento" [ref=e72] [cursor=pointer]:
-          - img
-          - text: 🔄 Reabrir Pagamento
-      - generic [ref=e73]:
-        - generic [ref=e75]:
-          - generic [ref=e76]:
-            - img [ref=e78]
-            - generic [ref=e81]:
-              - heading "Processamento Rápido" [level=4] [ref=e82]
-              - paragraph [ref=e83]: Converta arquivos em segundos
-          - paragraph [ref=e84]: Nosso mecanismo de processamento avançado converte seus documentos PDF para formato CSV rapidamente e com precisão, mantendo a integridade dos dados durante todo o processo.
-        - generic [ref=e86]:
-          - generic [ref=e87]:
-            - img [ref=e89]
-            - generic [ref=e92]:
-              - heading "Seguro e Privado" [level=4] [ref=e93]
-              - paragraph [ref=e94]: Seus arquivos são protegidos
-          - paragraph [ref=e95]: Todos os arquivos são processados com segurança e automaticamente excluídos após a conversão. Nunca armazenamos seus dados pessoais por mais tempo que o necessário.
-  - generic [ref=e96]:
-    - img [ref=e98]
-    - button "Open Tanstack query devtools" [ref=e146] [cursor=pointer]:
-      - img [ref=e147]
-  - alert [ref=e195]
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Create account
+        - generic [ref=e6]: Enter your information to create a new account
+      - generic [ref=e7]:
+        - form "Create account" [ref=e8]:
+          - generic [ref=e9]:
+            - text: Full Name
+            - textbox "Full Name" [ref=e10]:
+              - /placeholder: Enter your full name
+          - generic [ref=e11]:
+            - text: Email
+            - textbox "Email" [ref=e12]:
+              - /placeholder: Enter your email
+          - generic [ref=e13]:
+            - text: Password
+            - textbox "Password" [ref=e14]:
+              - /placeholder: Enter your password
+          - generic [ref=e15]:
+            - text: Confirm Password
+            - textbox "Confirm Password" [ref=e16]:
+              - /placeholder: Confirm your password
+          - button "Create account" [ref=e17] [cursor=pointer]
+        - generic [ref=e18]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e19] [cursor=pointer]:
+            - /url: /login
+  - generic [ref=e20]:
+    - img [ref=e22]
+    - button "Open Tanstack query devtools" [ref=e70] [cursor=pointer]:
+      - img [ref=e71]
+  - alert [ref=e119]
 ```

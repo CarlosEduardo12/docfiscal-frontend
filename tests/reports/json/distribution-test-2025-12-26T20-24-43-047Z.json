@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "startTime": "2025-12-26T20:23:43.047Z",
+    "endTime": "2025-12-26T20:24:43.047Z",
+    "duration": 60000,
+    "browser": "chromium",
+    "environment": "ci",
+    "testCommand": "npx playwright test --reporter=custom"
+  },
+  "summary": {
+    "totalTests": 1,
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "flakyTests": 0,
+    "duration": 5000,
+    "successRate": 100
+  },
+  "errorAnalysis": {
+    "summary": {
+      "totalTests": 0,
+      "passedTests": 0,
+      "failedTests": 0,
+      "totalErrors": 0,
+      "criticalErrors": 0,
+      "executionTime": 0,
+      "timestamp": "2025-12-26T20:24:43.047Z"
+    },
+    "errors": {
+      "byEndpoint": {},
+      "byType": {},
+      "byFlow": {},
+      "bySeverity": {}
+    },
+    "evidence": [],
+    "recommendations": [
+      "✅ No backend errors detected. All API endpoints are responding correctly."
+    ],
+    "uiElements": [],
+    "flowCoverage": {
+      "totalFlows": 0,
+      "testedFlows": 0,
+      "passedFlows": 0,
+      "failedFlows": 0,
+      "coverage": 0,
+      "flowDetails": []
+    },
+    "generatedAt": "2025-12-26T20:24:43.047Z"
+  },
+  "bugReports": [],
+  "flowCoverage": {
+    "totalFlows": 8,
+    "coveredFlows": 0,
+    "coverage": 0,
+    "uncoveredFlows": [
+      "authentication-flow",
+      "file-upload-flow",
+      "payment-flow",
+      "order-management-flow",
+      "download-flow",
+      "dashboard-navigation",
+      "responsive-design",
+      "error-handling"
+    ]
+  },
+  "performance": {
+    "averageTestDuration": 5000,
+    "slowestTests": [
+      {
+        "name": "Distribution Test",
+        "duration": 5000
+      }
+    ],
+    "fastestTests": [
+      {
+        "name": "Distribution Test",
+        "duration": 5000
+      }
+    ]
+  },
+  "environment": {
+    "nodeVersion": "v20.11.0",
+    "playwrightVersion": "1.57.0",
+    "browserVersions": {
+      "chromium": "Latest",
+      "firefox": "Latest",
+      "webkit": "Latest"
+    },
+    "os": "darwin"
+  },
+  "recommendations": [
+    "📈 Coverage: Flow coverage is 0.0%. Consider adding tests for: authentication-flow, file-upload-flow, payment-flow, order-management-flow, download-flow, dashboard-navigation, responsive-design, error-handling",
+    "✅ Excellent! No critical issues detected. All core flows are working correctly."
+  ],
+  "generatedAt": "2025-12-26T20:24:43.047Z"
+}

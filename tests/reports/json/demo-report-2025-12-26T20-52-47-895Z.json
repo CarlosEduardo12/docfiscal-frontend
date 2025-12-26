@@ -1,0 +1,472 @@
+{
+  "metadata": {
+    "startTime": "2025-12-26T20:51:38.105Z",
+    "endTime": "2025-12-26T20:52:38.105Z",
+    "duration": 60000,
+    "browser": "chromium",
+    "environment": "test",
+    "testCommand": "npx playwright test --reporter=./tests/helpers/playwright-reporter.ts",
+    "gitCommit": "abc123def456",
+    "buildNumber": "42"
+  },
+  "summary": {
+    "totalTests": 6,
+    "passedTests": 4,
+    "failedTests": 1,
+    "skippedTests": 1,
+    "flakyTests": 0,
+    "duration": 30000,
+    "successRate": 66.66666666666666
+  },
+  "errorAnalysis": {
+    "summary": {
+      "totalTests": 2,
+      "passedTests": 1,
+      "failedTests": 1,
+      "totalErrors": 1,
+      "criticalErrors": 0,
+      "executionTime": 23000,
+      "timestamp": "2025-12-26T20:52:47.821Z"
+    },
+    "errors": {
+      "byEndpoint": {
+        "/api/auth/login": [
+          {
+            "id": "1766782362649-sbdeyuyc5",
+            "timestamp": "2025-12-26T20:52:42.654Z",
+            "flow": "report-generation-demo",
+            "step": "login-test",
+            "request": {
+              "url": "http://localhost:8000/api/auth/login",
+              "method": "POST",
+              "headers": {
+                "content-type": "application/json",
+                "accept": "*/*",
+                "sec-fetch-site": "same-site",
+                "accept-encoding": "gzip, deflate",
+                "accept-language": "en-US",
+                "sec-fetch-mode": "cors",
+                "host": "localhost:8000",
+                "origin": "http://localhost:3000",
+                "content-length": "58",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+                "referer": "http://localhost:3000/",
+                "connection": "keep-alive",
+                "sec-fetch-dest": "empty"
+              },
+              "body": {
+                "email": "invalid@example.com",
+                "password": "wrongpassword"
+              }
+            },
+            "response": {
+              "status": 401,
+              "statusText": "Unauthorized",
+              "headers": {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "pragma": "no-cache",
+                "x-xss-protection": "1; mode=block",
+                "expires": "0",
+                "referrer-policy": "strict-origin-when-cross-origin",
+                "date": "Fri, 26 Dec 2025 20:52:42 GMT",
+                "access-control-allow-credentials": "true",
+                "content-length": "120",
+                "cache-control": "no-cache, no-store, must-revalidate",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-response-time": "59.15",
+                "x-ratelimit-window": "900",
+                "server": "uvicorn",
+                "permissions-policy": "geolocation=(), microphone=(), camera=()",
+                "x-request-id": "1766782362584113",
+                "x-ratelimit-limit": "5",
+                "x-process-time": "0.061"
+              },
+              "body": {
+                "success": false,
+                "error": "INVALID_CREDENTIALS",
+                "message": "Invalid email or password",
+                "details": {
+                  "remaining_attempts": 2
+                }
+              }
+            },
+            "category": "client",
+            "severity": "high"
+          }
+        ]
+      },
+      "byType": {
+        "4xx": [
+          {
+            "id": "1766782362649-sbdeyuyc5",
+            "timestamp": "2025-12-26T20:52:42.654Z",
+            "flow": "report-generation-demo",
+            "step": "login-test",
+            "request": {
+              "url": "http://localhost:8000/api/auth/login",
+              "method": "POST",
+              "headers": {
+                "content-type": "application/json",
+                "accept": "*/*",
+                "sec-fetch-site": "same-site",
+                "accept-encoding": "gzip, deflate",
+                "accept-language": "en-US",
+                "sec-fetch-mode": "cors",
+                "host": "localhost:8000",
+                "origin": "http://localhost:3000",
+                "content-length": "58",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+                "referer": "http://localhost:3000/",
+                "connection": "keep-alive",
+                "sec-fetch-dest": "empty"
+              },
+              "body": {
+                "email": "invalid@example.com",
+                "password": "wrongpassword"
+              }
+            },
+            "response": {
+              "status": 401,
+              "statusText": "Unauthorized",
+              "headers": {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "pragma": "no-cache",
+                "x-xss-protection": "1; mode=block",
+                "expires": "0",
+                "referrer-policy": "strict-origin-when-cross-origin",
+                "date": "Fri, 26 Dec 2025 20:52:42 GMT",
+                "access-control-allow-credentials": "true",
+                "content-length": "120",
+                "cache-control": "no-cache, no-store, must-revalidate",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-response-time": "59.15",
+                "x-ratelimit-window": "900",
+                "server": "uvicorn",
+                "permissions-policy": "geolocation=(), microphone=(), camera=()",
+                "x-request-id": "1766782362584113",
+                "x-ratelimit-limit": "5",
+                "x-process-time": "0.061"
+              },
+              "body": {
+                "success": false,
+                "error": "INVALID_CREDENTIALS",
+                "message": "Invalid email or password",
+                "details": {
+                  "remaining_attempts": 2
+                }
+              }
+            },
+            "category": "client",
+            "severity": "high"
+          }
+        ]
+      },
+      "byFlow": {
+        "report-generation-demo": [
+          {
+            "id": "1766782362649-sbdeyuyc5",
+            "timestamp": "2025-12-26T20:52:42.654Z",
+            "flow": "report-generation-demo",
+            "step": "login-test",
+            "request": {
+              "url": "http://localhost:8000/api/auth/login",
+              "method": "POST",
+              "headers": {
+                "content-type": "application/json",
+                "accept": "*/*",
+                "sec-fetch-site": "same-site",
+                "accept-encoding": "gzip, deflate",
+                "accept-language": "en-US",
+                "sec-fetch-mode": "cors",
+                "host": "localhost:8000",
+                "origin": "http://localhost:3000",
+                "content-length": "58",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+                "referer": "http://localhost:3000/",
+                "connection": "keep-alive",
+                "sec-fetch-dest": "empty"
+              },
+              "body": {
+                "email": "invalid@example.com",
+                "password": "wrongpassword"
+              }
+            },
+            "response": {
+              "status": 401,
+              "statusText": "Unauthorized",
+              "headers": {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "pragma": "no-cache",
+                "x-xss-protection": "1; mode=block",
+                "expires": "0",
+                "referrer-policy": "strict-origin-when-cross-origin",
+                "date": "Fri, 26 Dec 2025 20:52:42 GMT",
+                "access-control-allow-credentials": "true",
+                "content-length": "120",
+                "cache-control": "no-cache, no-store, must-revalidate",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-response-time": "59.15",
+                "x-ratelimit-window": "900",
+                "server": "uvicorn",
+                "permissions-policy": "geolocation=(), microphone=(), camera=()",
+                "x-request-id": "1766782362584113",
+                "x-ratelimit-limit": "5",
+                "x-process-time": "0.061"
+              },
+              "body": {
+                "success": false,
+                "error": "INVALID_CREDENTIALS",
+                "message": "Invalid email or password",
+                "details": {
+                  "remaining_attempts": 2
+                }
+              }
+            },
+            "category": "client",
+            "severity": "high"
+          }
+        ]
+      },
+      "bySeverity": {
+        "high": [
+          {
+            "id": "1766782362649-sbdeyuyc5",
+            "timestamp": "2025-12-26T20:52:42.654Z",
+            "flow": "report-generation-demo",
+            "step": "login-test",
+            "request": {
+              "url": "http://localhost:8000/api/auth/login",
+              "method": "POST",
+              "headers": {
+                "content-type": "application/json",
+                "accept": "*/*",
+                "sec-fetch-site": "same-site",
+                "accept-encoding": "gzip, deflate",
+                "accept-language": "en-US",
+                "sec-fetch-mode": "cors",
+                "host": "localhost:8000",
+                "origin": "http://localhost:3000",
+                "content-length": "58",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
+                "referer": "http://localhost:3000/",
+                "connection": "keep-alive",
+                "sec-fetch-dest": "empty"
+              },
+              "body": {
+                "email": "invalid@example.com",
+                "password": "wrongpassword"
+              }
+            },
+            "response": {
+              "status": 401,
+              "statusText": "Unauthorized",
+              "headers": {
+                "content-type": "application/json",
+                "access-control-allow-origin": "*",
+                "pragma": "no-cache",
+                "x-xss-protection": "1; mode=block",
+                "expires": "0",
+                "referrer-policy": "strict-origin-when-cross-origin",
+                "date": "Fri, 26 Dec 2025 20:52:42 GMT",
+                "access-control-allow-credentials": "true",
+                "content-length": "120",
+                "cache-control": "no-cache, no-store, must-revalidate",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-response-time": "59.15",
+                "x-ratelimit-window": "900",
+                "server": "uvicorn",
+                "permissions-policy": "geolocation=(), microphone=(), camera=()",
+                "x-request-id": "1766782362584113",
+                "x-ratelimit-limit": "5",
+                "x-process-time": "0.061"
+              },
+              "body": {
+                "success": false,
+                "error": "INVALID_CREDENTIALS",
+                "message": "Invalid email or password",
+                "details": {
+                  "remaining_attempts": 2
+                }
+              }
+            },
+            "category": "client",
+            "severity": "high"
+          }
+        ]
+      }
+    },
+    "evidence": [
+      {
+        "type": "screenshot",
+        "data": "mock-screenshot-path.png",
+        "timestamp": "2025-12-26T20:52:47.820Z",
+        "description": "Upload failure screenshot"
+      }
+    ],
+    "recommendations": [
+      "🔐 AUTH: 1 authentication errors detected. Verify token handling and session management.",
+      "🔄 FLOW: report-generation-demo flow has 1 errors. Review this user journey.",
+      "📊 Total of 1 errors detected across 1 endpoints."
+    ],
+    "uiElements": [
+      {
+        "element": "Login Button",
+        "page": "/login",
+        "selector": "button[type=\"submit\"]",
+        "status": "working",
+        "timestamp": "2025-12-26T20:52:47.822Z"
+      },
+      {
+        "element": "Upload Area",
+        "page": "/upload",
+        "selector": ".upload-area",
+        "status": "working",
+        "timestamp": "2025-12-26T20:52:47.822Z"
+      },
+      {
+        "element": "Dashboard Sidebar",
+        "page": "/dashboard",
+        "selector": ".sidebar",
+        "status": "broken",
+        "error": "Sidebar not visible for unauthenticated users",
+        "timestamp": "2025-12-26T20:52:47.822Z"
+      }
+    ],
+    "flowCoverage": {
+      "totalFlows": 2,
+      "testedFlows": 2,
+      "passedFlows": 1,
+      "failedFlows": 1,
+      "coverage": 100,
+      "flowDetails": [
+        {
+          "name": "authentication-flow",
+          "status": "passed",
+          "duration": 8000,
+          "steps": 4,
+          "errors": 0,
+          "lastRun": "2025-12-26T20:52:47.819Z"
+        },
+        {
+          "name": "file-upload-flow",
+          "status": "failed",
+          "duration": 15000,
+          "steps": 4,
+          "errors": 1,
+          "lastRun": "2025-12-26T20:52:47.820Z"
+        }
+      ]
+    },
+    "generatedAt": "2025-12-26T20:52:47.822Z"
+  },
+  "bugReports": [
+    {
+      "id": "BUG-1766782367823-yy7n7",
+      "title": "Test Failure: Authentication Flow - Invalid Credentials",
+      "severity": "critical",
+      "category": "integration",
+      "description": "Test \"Authentication Flow - Invalid Credentials\" is failing consistently.",
+      "stepsToReproduce": [
+        "1. Run test: Authentication Flow - Invalid Credentials",
+        "2. Observe test failure",
+        "3. Check error details and logs"
+      ],
+      "expectedBehavior": "Test should pass successfully",
+      "actualBehavior": "Test fails with error: Login failed with invalid credentials",
+      "evidence": [
+        {
+          "type": "console_log",
+          "data": "Login failed with invalid credentials",
+          "timestamp": "2025-12-26T20:52:47.823Z",
+          "description": "Test error message"
+        }
+      ],
+      "affectedFlows": [
+        "Authentication Flow - Invalid Credentials"
+      ],
+      "networkErrors": [],
+      "timestamp": "2025-12-26T20:52:47.823Z"
+    }
+  ],
+  "flowCoverage": {
+    "totalFlows": 8,
+    "coveredFlows": 5,
+    "coverage": 62.5,
+    "uncoveredFlows": [
+      "dashboard-navigation",
+      "responsive-design",
+      "error-handling"
+    ]
+  },
+  "performance": {
+    "averageTestDuration": 5000,
+    "slowestTests": [
+      {
+        "name": "Payment Flow - Payment Processing",
+        "duration": 12000
+      },
+      {
+        "name": "File Upload Flow - Valid PDF",
+        "duration": 8000
+      },
+      {
+        "name": "Authentication Flow - Login Success",
+        "duration": 5000
+      },
+      {
+        "name": "Authentication Flow - Invalid Credentials",
+        "duration": 3000
+      },
+      {
+        "name": "Dashboard Navigation - Order History",
+        "duration": 2000
+      }
+    ],
+    "fastestTests": [
+      {
+        "name": "Download Flow - File Download",
+        "duration": 0
+      },
+      {
+        "name": "Dashboard Navigation - Order History",
+        "duration": 2000
+      },
+      {
+        "name": "Authentication Flow - Invalid Credentials",
+        "duration": 3000
+      },
+      {
+        "name": "Authentication Flow - Login Success",
+        "duration": 5000
+      },
+      {
+        "name": "File Upload Flow - Valid PDF",
+        "duration": 8000
+      }
+    ]
+  },
+  "environment": {
+    "nodeVersion": "v20.11.0",
+    "playwrightVersion": "1.57.0",
+    "browserVersions": {
+      "chromium": "Latest",
+      "firefox": "Latest",
+      "webkit": "Latest"
+    },
+    "os": "darwin"
+  },
+  "recommendations": [
+    "🚨 URGENT: 1 critical bugs detected. These should be fixed immediately before any deployment.",
+    "🔧 Backend Issues: 1 API errors detected. Review backend logs and fix failing endpoints.",
+    "📊 Test Stability: 50.0% test failure rate is too high. Investigate flaky tests and improve test reliability.",
+    "📈 Coverage: Flow coverage is 62.5%. Consider adding tests for: dashboard-navigation, responsive-design, error-handling"
+  ],
+  "generatedAt": "2025-12-26T20:52:47.828Z"
+}

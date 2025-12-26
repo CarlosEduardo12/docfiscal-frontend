@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "DocFiscal" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Converta seus PDFs em CSV de forma rápida, segura e profissional
+      - generic [ref=e7]:
+        - button "Fazer Login" [ref=e8] [cursor=pointer]
+        - button "Criar Conta" [ref=e9] [cursor=pointer]
+    - generic [ref=e10]:
+      - generic [ref=e12]:
+        - img [ref=e14]
+        - heading "Processamento Rápido" [level=3] [ref=e16]
+        - paragraph [ref=e17]: Converta seus arquivos em segundos com nossa tecnologia avançada
+      - generic [ref=e19]:
+        - img [ref=e21]
+        - heading "100% Seguro" [level=3] [ref=e23]
+        - paragraph [ref=e24]: Seus dados são protegidos e automaticamente excluídos após a conversão
+      - generic [ref=e26]:
+        - img [ref=e28]
+        - heading "Alta Qualidade" [level=3] [ref=e34]
+        - paragraph [ref=e35]: Conversão precisa mantendo a integridade dos seus dados
+    - generic [ref=e36]:
+      - heading "Como Funciona" [level=2] [ref=e37]
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: "1"
+          - heading "Upload do PDF" [level=4] [ref=e41]
+          - paragraph [ref=e42]: Faça upload do seu arquivo PDF
+        - generic [ref=e43]:
+          - generic [ref=e44]: "2"
+          - heading "Pagamento" [level=4] [ref=e45]
+          - paragraph [ref=e46]: Complete o pagamento via PIX
+        - generic [ref=e47]:
+          - generic [ref=e48]: "3"
+          - heading "Download" [level=4] [ref=e49]
+          - paragraph [ref=e50]: Baixe seu arquivo CSV convertido
+  - generic [ref=e51]:
+    - img [ref=e53]
+    - button "Open Tanstack query devtools" [ref=e102] [cursor=pointer]:
+      - img [ref=e103]
+  - alert [ref=e152]
+```

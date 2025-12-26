@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "label": "E2E Tests",
+  "message": "2/3 passed",
+  "color": "red",
+  "namedLogo": "playwright"
+}

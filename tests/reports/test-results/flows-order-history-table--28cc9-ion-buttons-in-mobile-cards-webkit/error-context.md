@@ -1,0 +1,186 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e13]: DocFiscal
+      - navigation [ref=e14]:
+        - link "Convert" [ref=e15]:
+          - /url: /
+          - img [ref=e16]
+          - generic [ref=e19]: Convert
+        - link "All files" [ref=e20]:
+          - /url: /dashboard
+          - img [ref=e21]
+          - generic [ref=e24]: All files
+        - link "History" [ref=e25]:
+          - /url: /dashboard
+          - img [ref=e26]
+          - generic [ref=e29]: History
+        - link "Settings" [ref=e30]:
+          - /url: /dashboard
+          - img [ref=e31]
+          - generic [ref=e34]: Settings
+      - generic [ref=e35]:
+        - heading "Recent Files" [level=4] [ref=e36]
+        - generic [ref=e37]:
+          - link "document.pdf 0.0 MB • completed" [ref=e38]:
+            - /url: /pedido/order-1
+            - generic [ref=e41] [cursor=pointer]:
+              - img [ref=e43]
+              - generic [ref=e46]:
+                - paragraph [ref=e47]: document.pdf
+                - generic [ref=e48]:
+                  - generic [ref=e49]: 0.0 MB
+                  - generic [ref=e50]: •
+                  - generic [ref=e51]: completed
+          - link "document.pdf 0.0 MB • pending_payment" [ref=e52]:
+            - /url: /pedido/order-2
+            - generic [ref=e55] [cursor=pointer]:
+              - img [ref=e57]
+              - generic [ref=e60]:
+                - paragraph [ref=e61]: document.pdf
+                - generic [ref=e62]:
+                  - generic [ref=e63]: 0.0 MB
+                  - generic [ref=e64]: •
+                  - generic [ref=e65]: pending_payment
+          - link "document.pdf 0.0 MB • processing" [ref=e66]:
+            - /url: /pedido/order-3
+            - generic [ref=e69] [cursor=pointer]:
+              - img [ref=e71]
+              - generic [ref=e74]:
+                - paragraph [ref=e75]: document.pdf
+                - generic [ref=e76]:
+                  - generic [ref=e77]: 0.0 MB
+                  - generic [ref=e78]: •
+                  - generic [ref=e79]: processing
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - img [ref=e84]
+          - generic [ref=e87]:
+            - paragraph [ref=e88]: Test User
+            - paragraph [ref=e89]: test@docfiscal.com
+        - button "Log out" [ref=e90] [cursor=pointer]:
+          - img
+          - text: Log out
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - heading "Dashboard" [level=1] [ref=e94]
+        - paragraph [ref=e95]: Welcome back, Test User!
+      - generic [ref=e96]:
+        - generic [ref=e98]:
+          - generic:
+            - generic [ref=e99]: Total Orders
+            - img
+          - generic: "4"
+          - paragraph: All time
+        - generic [ref=e103]:
+          - generic:
+            - generic [ref=e104]: Pending Payment
+            - img
+          - generic: "1"
+          - paragraph: Awaiting payment
+        - generic [ref=e108]:
+          - generic:
+            - generic [ref=e109]: Processing
+            - img
+          - generic: "1"
+          - paragraph: In progress
+        - generic [ref=e113]:
+          - generic:
+            - generic [ref=e114]: Completed
+            - img
+          - generic: "1"
+          - paragraph: Ready for download
+      - generic [ref=e117]:
+        - link "Upload New File" [ref=e118]:
+          - /url: /upload
+          - button "Upload New File" [ref=e119] [cursor=pointer]:
+            - img
+            - text: Upload New File
+        - button "Atualizar Lista" [ref=e120] [cursor=pointer]:
+          - img
+          - text: Atualizar Lista
+        - link "🔧 Test API" [ref=e121]:
+          - /url: /test-api-connection
+          - button "🔧 Test API" [ref=e122] [cursor=pointer]
+        - link "🔧 Debug Payment" [ref=e123]:
+          - /url: /debug-payment
+          - button "🔧 Debug Payment" [ref=e124] [cursor=pointer]
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - generic: Order History
+        - generic [ref=e128]:
+          - list "Order history":
+            - listitem [ref=e129]:
+              - generic:
+                - generic [ref=e130]:
+                  - img [ref=e131]
+                  - generic [ref=e134]:
+                    - generic [ref=e135]: test-document.pdf
+                    - generic [ref=e136]: "Order #order-1"
+                - generic [ref=e137]:
+                  - img [ref=e138]
+                  - text: Completed
+              - generic:
+                - generic [ref=e141]: Dec 26, 2025 17:49
+                - generic [ref=e142]: 1.95 MB
+              - button "Download CSV file for test-document.pdf" [ref=e143] [cursor=pointer]:
+                - img
+                - text: Download CSV
+            - listitem [ref=e144]:
+              - generic:
+                - generic [ref=e145]:
+                  - img [ref=e146]
+                  - generic [ref=e149]:
+                    - generic [ref=e150]: processing-doc.pdf
+                    - generic [ref=e151]: "Order #order-3"
+                - generic [ref=e152]:
+                  - img [ref=e153]
+                  - text: Processing
+              - generic:
+                - generic [ref=e156]: Dec 26, 2025 16:49
+                - generic [ref=e157]: 2.93 MB
+              - generic:
+                - button "Processing..." [disabled]:
+                  - img
+                  - text: Processing...
+            - listitem [ref=e158]:
+              - generic:
+                - generic [ref=e159]:
+                  - img [ref=e160]
+                  - generic [ref=e163]:
+                    - generic [ref=e164]: failed-doc.pdf
+                    - generic [ref=e165]: "Order #order-4"
+                - generic [ref=e166]:
+                  - img [ref=e167]
+                  - text: Failed
+              - generic:
+                - generic [ref=e171]: Dec 26, 2025 15:49
+                - generic [ref=e172]: 1.46 MB
+              - generic [ref=e173]: Processing failed due to invalid file format
+            - listitem [ref=e174]:
+              - generic:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: another-doc.pdf
+                    - generic [ref=e181]: "Order #order-2"
+                - generic [ref=e182]:
+                  - img [ref=e183]
+                  - text: Pending Payment
+              - generic:
+                - generic [ref=e185]: Dec 25, 2025 17:49
+                - generic [ref=e186]: 1000 KB
+              - button "Make payment for another-doc.pdf" [ref=e187] [cursor=pointer]:
+                - img
+                - text: Pay Now
+  - generic [ref=e188]:
+    - img [ref=e190]
+    - button "Open Tanstack query devtools" [ref=e258] [cursor=pointer]:
+      - img [ref=e259]
+  - alert [ref=e327]
+```

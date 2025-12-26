@@ -1,0 +1,204 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - img [ref=e10]
+        - generic [ref=e13]: DocFiscal
+      - navigation [ref=e14]:
+        - link "Convert" [ref=e15]:
+          - /url: /
+          - img [ref=e16]
+          - generic [ref=e19]: Convert
+        - link "All files" [ref=e20]:
+          - /url: /dashboard
+          - img [ref=e21]
+          - generic [ref=e24]: All files
+        - link "History" [ref=e25]:
+          - /url: /dashboard
+          - img [ref=e26]
+          - generic [ref=e29]: History
+        - link "Settings" [ref=e30]:
+          - /url: /dashboard
+          - img [ref=e31]
+          - generic [ref=e34]: Settings
+      - generic [ref=e35]:
+        - heading "Recent Files" [level=4] [ref=e36]
+        - generic [ref=e37]:
+          - link "document.pdf 0.0 MB • completed" [ref=e38]:
+            - /url: /pedido/order-1
+            - generic [ref=e41] [cursor=pointer]:
+              - img [ref=e43]
+              - generic [ref=e46]:
+                - paragraph [ref=e47]: document.pdf
+                - generic [ref=e48]:
+                  - generic [ref=e49]: 0.0 MB
+                  - generic [ref=e50]: •
+                  - generic [ref=e51]: completed
+          - link "document.pdf 0.0 MB • pending_payment" [ref=e52]:
+            - /url: /pedido/order-2
+            - generic [ref=e55] [cursor=pointer]:
+              - img [ref=e57]
+              - generic [ref=e60]:
+                - paragraph [ref=e61]: document.pdf
+                - generic [ref=e62]:
+                  - generic [ref=e63]: 0.0 MB
+                  - generic [ref=e64]: •
+                  - generic [ref=e65]: pending_payment
+          - link "document.pdf 0.0 MB • processing" [ref=e66]:
+            - /url: /pedido/order-3
+            - generic [ref=e69] [cursor=pointer]:
+              - img [ref=e71]
+              - generic [ref=e74]:
+                - paragraph [ref=e75]: document.pdf
+                - generic [ref=e76]:
+                  - generic [ref=e77]: 0.0 MB
+                  - generic [ref=e78]: •
+                  - generic [ref=e79]: processing
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - img [ref=e84]
+          - generic [ref=e87]:
+            - paragraph [ref=e88]: Test User
+            - paragraph [ref=e89]: test@docfiscal.com
+        - button "Log out" [ref=e90] [cursor=pointer]:
+          - img
+          - text: Log out
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - heading "Dashboard" [level=1] [ref=e94]
+        - paragraph [ref=e95]: Welcome back, Test User!
+      - generic [ref=e96]:
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - generic [ref=e100]: Total Orders
+            - img [ref=e101]
+          - generic [ref=e104]: "4"
+          - paragraph [ref=e105]: All time
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]: Pending Payment
+            - img [ref=e110]
+          - generic [ref=e113]: "1"
+          - paragraph [ref=e114]: Awaiting payment
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - generic [ref=e118]: Processing
+            - img [ref=e119]
+          - generic [ref=e122]: "1"
+          - paragraph [ref=e123]: In progress
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - generic [ref=e127]: Completed
+            - img [ref=e128]
+          - generic [ref=e131]: "1"
+          - paragraph [ref=e132]: Ready for download
+      - generic [ref=e133]:
+        - link "Upload New File" [ref=e134]:
+          - /url: /upload
+          - button "Upload New File" [ref=e135] [cursor=pointer]:
+            - img
+            - text: Upload New File
+        - button "Atualizar Lista" [ref=e136] [cursor=pointer]:
+          - img
+          - text: Atualizar Lista
+        - link "🔧 Test API" [ref=e137]:
+          - /url: /test-api-connection
+          - button "🔧 Test API" [ref=e138] [cursor=pointer]
+        - link "🔧 Debug Payment" [ref=e139]:
+          - /url: /debug-payment
+          - button "🔧 Debug Payment" [ref=e140] [cursor=pointer]
+      - generic [ref=e142]:
+        - generic [ref=e144]: Order History
+        - table "Order history" [ref=e148]:
+          - rowgroup [ref=e149]:
+            - row "File Date Status Size Actions" [ref=e150]:
+              - columnheader "File" [ref=e151]
+              - columnheader "Date" [ref=e152]
+              - columnheader "Status" [ref=e153]
+              - columnheader "Size" [ref=e154]
+              - columnheader "Actions" [ref=e155]
+          - rowgroup [ref=e156]:
+            - 'row "test-document.pdf Order #order-1 Dec 26, 2025 17:49 Completed 1.95 MB Download CSV file for test-document.pdf" [ref=e157]':
+              - 'cell "test-document.pdf Order #order-1" [ref=e158]':
+                - generic [ref=e159]:
+                  - img [ref=e160]
+                  - generic [ref=e163]:
+                    - generic [ref=e164]: test-document.pdf
+                    - generic [ref=e165]: "Order #order-1"
+              - cell "Dec 26, 2025 17:49" [ref=e166]:
+                - text: Dec 26, 2025
+                - generic [ref=e167]: 17:49
+              - cell "Completed" [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e170]
+                  - text: Completed
+              - cell "1.95 MB" [ref=e173]
+              - cell "Download CSV file for test-document.pdf" [ref=e174]:
+                - button "Download CSV file for test-document.pdf" [ref=e176] [cursor=pointer]:
+                  - img
+                  - text: Download
+            - 'row "processing-doc.pdf Order #order-3 Dec 26, 2025 16:49 Processing 2.93 MB Processing" [ref=e177]':
+              - 'cell "processing-doc.pdf Order #order-3" [ref=e178]':
+                - generic [ref=e179]:
+                  - img [ref=e180]
+                  - generic [ref=e183]:
+                    - generic [ref=e184]: processing-doc.pdf
+                    - generic [ref=e185]: "Order #order-3"
+              - cell "Dec 26, 2025 16:49" [ref=e186]:
+                - text: Dec 26, 2025
+                - generic [ref=e187]: 16:49
+              - cell "Processing" [ref=e188]:
+                - generic [ref=e189]:
+                  - img [ref=e190]
+                  - text: Processing
+              - cell "2.93 MB" [ref=e193]
+              - cell "Processing" [ref=e194]:
+                - generic [ref=e195]:
+                  - button "Processing" [disabled]:
+                    - img
+                    - text: Processing
+            - 'row "failed-doc.pdf Order #order-4 Dec 26, 2025 15:49 Failed 1.46 MB Processing failed due to invalid file format" [ref=e196]':
+              - 'cell "failed-doc.pdf Order #order-4" [ref=e197]':
+                - generic [ref=e198]:
+                  - img [ref=e199]
+                  - generic [ref=e202]:
+                    - generic [ref=e203]: failed-doc.pdf
+                    - generic [ref=e204]: "Order #order-4"
+              - cell "Dec 26, 2025 15:49" [ref=e205]:
+                - text: Dec 26, 2025
+                - generic [ref=e206]: 15:49
+              - cell "Failed" [ref=e207]:
+                - generic [ref=e208]:
+                  - img [ref=e209]
+                  - text: Failed
+              - cell "1.46 MB" [ref=e213]
+              - cell "Processing failed due to invalid file format" [ref=e214]:
+                - generic [ref=e215]: Processing failed due to invalid file format
+            - 'row "another-doc.pdf Order #order-2 Dec 25, 2025 17:49 Pending Payment 1000 KB Make payment for another-doc.pdf" [ref=e216]':
+              - 'cell "another-doc.pdf Order #order-2" [ref=e217]':
+                - generic [ref=e218]:
+                  - img [ref=e219]
+                  - generic [ref=e222]:
+                    - generic [ref=e223]: another-doc.pdf
+                    - generic [ref=e224]: "Order #order-2"
+              - cell "Dec 25, 2025 17:49" [ref=e225]:
+                - text: Dec 25, 2025
+                - generic [ref=e226]: 17:49
+              - cell "Pending Payment" [ref=e227]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - text: Pending Payment
+              - cell "1000 KB" [ref=e231]
+              - cell "Make payment for another-doc.pdf" [ref=e232]:
+                - button "Make payment for another-doc.pdf" [ref=e234] [cursor=pointer]:
+                  - img
+                  - text: Pay Now
+  - generic [ref=e235]:
+    - img [ref=e237]
+    - button "Open Tanstack query devtools" [ref=e305] [cursor=pointer]:
+      - img [ref=e306]
+  - alert [ref=e374]
+```
