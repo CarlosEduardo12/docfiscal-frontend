@@ -70,7 +70,9 @@ describe('usePaymentFlow Property-Based Tests', () => {
       fc.asyncProperty(
         // Generate arbitrary payment IDs and status sequences
         fc.record({
-          paymentId: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+          paymentId: fc
+            .string({ minLength: 2, maxLength: 50 })
+            .filter((s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
           statusSequence: fc.array(
             fc.record({
               status: fc.constantFrom(
@@ -80,12 +82,28 @@ describe('usePaymentFlow Property-Based Tests', () => {
                 'cancelled',
                 'expired'
               ),
-              order_id: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+              order_id: fc
+                .string({ minLength: 2, maxLength: 50 })
+                .filter(
+                  (s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)
+                ), // Valid alphanumeric IDs only
               amount: fc.integer({ min: 100, max: 100000 }),
               currency: fc.constantFrom('BRL', 'USD'),
               payment_method: fc.constantFrom('pix', 'credit_card'),
-              created_at: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }).map((d) => d.toISOString()),
-              completed_at: fc.option(fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') })).map(d => d ? d.toISOString() : null),
+              created_at: fc
+                .date({
+                  min: new Date('2020-01-01'),
+                  max: new Date('2030-01-01'),
+                })
+                .map((d) => d.toISOString()),
+              completed_at: fc
+                .option(
+                  fc.date({
+                    min: new Date('2020-01-01'),
+                    max: new Date('2030-01-01'),
+                  })
+                )
+                .map((d) => (d ? d.toISOString() : null)),
               failure_reason: fc.option(
                 fc.string({ minLength: 1, maxLength: 100 })
               ),
@@ -142,7 +160,11 @@ describe('usePaymentFlow Property-Based Tests', () => {
           let hasTerminalStatus = false;
 
           // Process each status in the sequence or until max attempts
-          for (let i = 0; i < Math.min(maxAttempts, statusSequence.length * 2); i++) {
+          for (
+            let i = 0;
+            i < Math.min(maxAttempts, statusSequence.length * 2);
+            i++
+          ) {
             await act(async () => {
               // First call is immediate, subsequent calls use the interval
               jest.advanceTimersByTime(i === 0 ? 100 : pollingInterval);
@@ -165,7 +187,7 @@ describe('usePaymentFlow Property-Based Tests', () => {
               )
             ) {
               hasTerminalStatus = true;
-              
+
               // Give the hook time to process the terminal status
               await act(async () => {
                 await Promise.resolve();
@@ -265,7 +287,9 @@ describe('usePaymentFlow Property-Based Tests', () => {
     await fc.assert(
       fc.asyncProperty(
         fc.record({
-          paymentId: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+          paymentId: fc
+            .string({ minLength: 2, maxLength: 50 })
+            .filter((s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
           errorSequence: fc.array(
             fc.oneof(
               fc.constant('network_error'),
@@ -273,11 +297,20 @@ describe('usePaymentFlow Property-Based Tests', () => {
               fc.constant('timeout'),
               fc.record({
                 status: fc.constantFrom('pending', 'paid', 'failed'),
-                order_id: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+                order_id: fc
+                  .string({ minLength: 2, maxLength: 50 })
+                  .filter(
+                    (s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)
+                  ), // Valid alphanumeric IDs only
                 amount: fc.integer({ min: 100, max: 100000 }),
                 currency: fc.constantFrom('BRL', 'USD'),
                 payment_method: fc.constantFrom('pix', 'credit_card'),
-                created_at: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }).map((d) => d.toISOString()),
+                created_at: fc
+                  .date({
+                    min: new Date('2020-01-01'),
+                    max: new Date('2030-01-01'),
+                  })
+                  .map((d) => d.toISOString()),
               })
             ),
             { minLength: 1, maxLength: 5 }
@@ -359,18 +392,24 @@ describe('usePaymentFlow Property-Based Tests', () => {
               await act(async () => {
                 await Promise.resolve();
               });
-              
+
               hasTerminalStatus = true;
               if (currentResponse.status === 'paid') {
                 expect(result.current.state.status).toBe('completed');
-                expect(onSuccess).toHaveBeenCalledWith(paymentId, currentResponse.order_id);
+                expect(onSuccess).toHaveBeenCalledWith(
+                  paymentId,
+                  currentResponse.order_id
+                );
               } else {
                 expect(result.current.state.status).toBe('failed');
                 expect(onError).toHaveBeenCalled();
               }
               expect(result.current.isPolling).toBe(false);
               break;
-            } else if (typeof currentResponse === 'object' && currentResponse.status === 'pending') {
+            } else if (
+              typeof currentResponse === 'object' &&
+              currentResponse.status === 'pending'
+            ) {
               // Pending status - should continue polling
               expect(result.current.state.status).toBe('polling');
               expect(result.current.isPolling).toBe(true);
@@ -403,8 +442,12 @@ describe('usePaymentFlow Property-Based Tests', () => {
     await fc.assert(
       fc.asyncProperty(
         fc.record({
-          paymentId: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
-          orderId: fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+          paymentId: fc
+            .string({ minLength: 2, maxLength: 50 })
+            .filter((s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
+          orderId: fc
+            .string({ minLength: 2, maxLength: 50 })
+            .filter((s) => s.trim().length >= 2 && /^[a-zA-Z0-9_-]+$/.test(s)), // Valid alphanumeric IDs only
           amount: fc.integer({ min: 100, max: 100000 }),
           currency: fc.constantFrom('BRL', 'USD'),
           payment_method: fc.constantFrom('pix', 'credit_card'),

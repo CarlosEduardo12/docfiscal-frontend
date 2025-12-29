@@ -633,7 +633,7 @@ describe('API Client Endpoint Properties', () => {
                     return `attachment; filename="test-${orderId}.pdf"`;
                   }
                   return null;
-                }
+                },
               },
               blob: async () =>
                 new Blob(['test content'], { type: 'application/pdf' }),
@@ -676,8 +676,16 @@ describe('API Client Endpoint Properties', () => {
                   'completed',
                   'failed'
                 ),
-                created_at: fc.constantFrom('2023-01-01T00:00:00.000Z', '2023-06-15T12:30:00.000Z', '2024-01-01T00:00:00.000Z'),
-                updated_at: fc.constantFrom('2023-01-01T00:00:00.000Z', '2023-06-15T12:30:00.000Z', '2024-01-01T00:00:00.000Z'),
+                created_at: fc.constantFrom(
+                  '2023-01-01T00:00:00.000Z',
+                  '2023-06-15T12:30:00.000Z',
+                  '2024-01-01T00:00:00.000Z'
+                ),
+                updated_at: fc.constantFrom(
+                  '2023-01-01T00:00:00.000Z',
+                  '2023-06-15T12:30:00.000Z',
+                  '2024-01-01T00:00:00.000Z'
+                ),
               }),
               { maxLength: 10 }
             ),
@@ -802,7 +810,7 @@ describe('API Client Endpoint Properties', () => {
                 }),
               })
             );
-            
+
             // Verify /status suffix is NOT used
             const actualUrl = mockFetch.mock.calls[0][0];
             expect(actualUrl).not.toContain('/status');
@@ -1007,8 +1015,16 @@ describe('API Client Endpoint Properties', () => {
             id: fc.string({ minLength: 1, maxLength: 50 }),
             name: fc.string({ minLength: 2, maxLength: 100 }),
             email: fc.emailAddress(),
-            created_at: fc.constantFrom('2023-01-01T00:00:00.000Z', '2023-06-15T12:30:00.000Z', '2024-01-01T00:00:00.000Z'),
-            updated_at: fc.constantFrom('2023-01-01T00:00:00.000Z', '2023-06-15T12:30:00.000Z', '2024-01-01T00:00:00.000Z'),
+            created_at: fc.constantFrom(
+              '2023-01-01T00:00:00.000Z',
+              '2023-06-15T12:30:00.000Z',
+              '2024-01-01T00:00:00.000Z'
+            ),
+            updated_at: fc.constantFrom(
+              '2023-01-01T00:00:00.000Z',
+              '2023-06-15T12:30:00.000Z',
+              '2024-01-01T00:00:00.000Z'
+            ),
           }),
           async (userData) => {
             // Set up access token
@@ -1231,7 +1247,10 @@ describe('API Client Endpoint Properties', () => {
             details: fc.record({
               field_errors: fc.dictionary(
                 fc.string({ minLength: 1, maxLength: 20 }),
-                fc.array(fc.string({ minLength: 1, maxLength: 100 }), { minLength: 1, maxLength: 3 }),
+                fc.array(fc.string({ minLength: 1, maxLength: 100 }), {
+                  minLength: 1,
+                  maxLength: 3,
+                }),
                 { minKeys: 1, maxKeys: 5 } // Ensure at least one field error
               ),
             }),
@@ -1253,14 +1272,17 @@ describe('API Client Endpoint Properties', () => {
             } catch (error) {
               // Verify validation error processing
               expect(error.message).toBe(validationError.message);
-              
+
               // Verify field errors are accessible
               if (validationError.details?.field_errors) {
-                const fieldNames = Object.keys(validationError.details.field_errors);
+                const fieldNames = Object.keys(
+                  validationError.details.field_errors
+                );
                 expect(fieldNames.length).toBeGreaterThan(0);
-                
-                fieldNames.forEach(fieldName => {
-                  const fieldErrors = validationError.details.field_errors[fieldName];
+
+                fieldNames.forEach((fieldName) => {
+                  const fieldErrors =
+                    validationError.details.field_errors[fieldName];
                   expect(Array.isArray(fieldErrors)).toBe(true);
                   expect(fieldErrors.length).toBeGreaterThan(0);
                 });
@@ -1401,17 +1423,21 @@ describe('API Client Endpoint Properties', () => {
 
             // Verify health information is properly structured for display
             expect(response.data.status).toBeDefined();
-            expect(['healthy', 'degraded', 'unhealthy']).toContain(response.data.status);
-            
+            expect(['healthy', 'degraded', 'unhealthy']).toContain(
+              response.data.status
+            );
+
             // Verify all required services are present
             expect(response.data.services).toBeDefined();
             expect(response.data.services.database).toBeDefined();
             expect(response.data.services.storage).toBeDefined();
             expect(response.data.services.payment_provider).toBeDefined();
-            
+
             // Verify service statuses are valid
-            Object.values(response.data.services).forEach(serviceStatus => {
-              expect(['healthy', 'degraded', 'unhealthy']).toContain(serviceStatus);
+            Object.values(response.data.services).forEach((serviceStatus) => {
+              expect(['healthy', 'degraded', 'unhealthy']).toContain(
+                serviceStatus
+              );
             });
           }
         ),

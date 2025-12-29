@@ -44,19 +44,25 @@ describe('Dashboard Orders Property Tests', () => {
         .map((name) => `${name}.pdf`),
       file_size: fc.integer({ min: 1, max: 10000000 }),
       status: orderStatusArb,
-      created_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      updated_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      processing_completed_at: fc.option(
-        fc.date({
+      created_at: fc
+        .date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        }).map(d => d.toISOString())
+        })
+        .map((d) => d.toISOString()),
+      updated_at: fc
+        .date({
+          min: new Date('2020-01-01T00:00:00.000Z'),
+          max: new Date('2024-12-31T23:59:59.999Z'),
+        })
+        .map((d) => d.toISOString()),
+      processing_completed_at: fc.option(
+        fc
+          .date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2024-12-31T23:59:59.999Z'),
+          })
+          .map((d) => d.toISOString())
       ),
       checkout_url: fc.option(fc.webUrl()),
       download_url: fc.option(fc.webUrl()),
@@ -164,7 +170,9 @@ describe('Dashboard Orders Property Tests', () => {
             // Verify the component displays orders in the correct order
             // We can't easily test the DOM order, but we can verify the sorting logic
             for (let i = 0; i < sortedOrders.length - 1; i++) {
-              const currentDate = new Date(sortedOrders[i].created_at).getTime();
+              const currentDate = new Date(
+                sortedOrders[i].created_at
+              ).getTime();
               const nextDate = new Date(
                 sortedOrders[i + 1].created_at
               ).getTime();

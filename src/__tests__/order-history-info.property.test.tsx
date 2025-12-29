@@ -44,19 +44,25 @@ describe('Order History Information Property Tests', () => {
         .map((name) => `${name}.pdf`),
       file_size: fc.integer({ min: 1, max: 10000000 }),
       status: orderStatusArb,
-      created_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      updated_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      processing_completed_at: fc.option(
-        fc.date({
+      created_at: fc
+        .date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        }).map(d => d.toISOString())
+        })
+        .map((d) => d.toISOString()),
+      updated_at: fc
+        .date({
+          min: new Date('2020-01-01T00:00:00.000Z'),
+          max: new Date('2024-12-31T23:59:59.999Z'),
+        })
+        .map((d) => d.toISOString()),
+      processing_completed_at: fc.option(
+        fc
+          .date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2024-12-31T23:59:59.999Z'),
+          })
+          .map((d) => d.toISOString())
       ),
       checkout_url: fc.option(fc.webUrl()),
       download_url: fc.option(fc.webUrl()),

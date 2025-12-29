@@ -36,27 +36,35 @@ describe('Download Functionality Property Tests', () => {
         .map((name) => `${name}.pdf`),
       file_size: fc.integer({ min: 1, max: 10000000 }),
       status: fc.constant('completed' as OrderStatus),
-      created_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      updated_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      processing_completed_at: fc.option(
-        fc.date({
+      created_at: fc
+        .date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        }).map(d => d.toISOString())
+        })
+        .map((d) => d.toISOString()),
+      updated_at: fc
+        .date({
+          min: new Date('2020-01-01T00:00:00.000Z'),
+          max: new Date('2024-12-31T23:59:59.999Z'),
+        })
+        .map((d) => d.toISOString()),
+      processing_completed_at: fc.option(
+        fc
+          .date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2024-12-31T23:59:59.999Z'),
+          })
+          .map((d) => d.toISOString())
       ),
       download_url: fc.option(fc.webUrl()),
       error_message: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
       expires_at: fc.option(
-        fc.date({
-          min: new Date('2024-01-01T00:00:00.000Z'),
-          max: new Date('2025-12-31T23:59:59.999Z'),
-        }).map(d => d.toISOString())
+        fc
+          .date({
+            min: new Date('2024-01-01T00:00:00.000Z'),
+            max: new Date('2025-12-31T23:59:59.999Z'),
+          })
+          .map((d) => d.toISOString())
       ),
     })
   ) as fc.Arbitrary<Order>;
@@ -77,19 +85,25 @@ describe('Download Functionality Property Tests', () => {
         'processing',
         'failed'
       ) as fc.Arbitrary<OrderStatus>,
-      created_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      updated_at: fc.date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2024-12-31T23:59:59.999Z'),
-      }).map(d => d.toISOString()),
-      processing_completed_at: fc.option(
-        fc.date({
+      created_at: fc
+        .date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        }).map(d => d.toISOString())
+        })
+        .map((d) => d.toISOString()),
+      updated_at: fc
+        .date({
+          min: new Date('2020-01-01T00:00:00.000Z'),
+          max: new Date('2024-12-31T23:59:59.999Z'),
+        })
+        .map((d) => d.toISOString()),
+      processing_completed_at: fc.option(
+        fc
+          .date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2024-12-31T23:59:59.999Z'),
+          })
+          .map((d) => d.toISOString())
       ),
       checkout_url: fc.option(fc.webUrl()),
       download_url: fc.option(fc.webUrl()),
@@ -299,9 +313,15 @@ describe('Download Functionality Property Tests', () => {
                 created_at: '2024-01-01T00:00:00.000Z',
                 updated_at: '2024-01-01T00:00:00.000Z',
                 processing_completed_at: undefined,
-                checkout_url: index % 2 === 0 ? `https://payment.provider.com/checkout/${index}` : undefined,
+                checkout_url:
+                  index % 2 === 0
+                    ? `https://payment.provider.com/checkout/${index}`
+                    : undefined,
                 download_url: undefined,
-                error_message: index % 3 === 0 ? `Error processing file ${index}` : undefined,
+                error_message:
+                  index % 3 === 0
+                    ? `Error processing file ${index}`
+                    : undefined,
               })
             );
 

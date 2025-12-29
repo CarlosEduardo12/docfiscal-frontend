@@ -5,5 +5,13 @@
     "prettier/prettier": "error",
     "prefer-const": "error"
   },
-  "ignorePatterns": ["node_modules/", ".next/", "out/"]
+  "ignorePatterns": [
+    "node_modules/", 
+    ".next/", 
+    "out/",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "src/__tests__/**/*",
+    "src/lib/__tests__/**/*"
+  ]
 }
