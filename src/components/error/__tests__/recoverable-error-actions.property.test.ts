@@ -38,21 +38,21 @@ beforeEach(() => {
   // Mock console methods
   console.error = jest.fn();
   console.warn = jest.fn();
-  
+
   // Mock window.location using delete and redefine
   delete (window as any).location;
   (window as any).location = {
     href: '',
     assign: jest.fn(),
     replace: jest.fn(),
-    reload: jest.fn()
+    reload: jest.fn(),
   };
 });
 
 afterEach(() => {
   console.error = originalConsoleError;
   console.warn = originalConsoleWarn;
-  
+
   // Restore original location
   (window as any).location = originalLocation;
 });
@@ -63,19 +63,19 @@ const recoverableErrorGenerator = fc.oneof(
     type: fc.constant('network'),
     error: fc.constant(() => new NetworkError('Connection failed')),
     expectedRecoverable: fc.constant(true),
-    expectedActions: fc.constant(['retry', 'refresh'])
+    expectedActions: fc.constant(['retry', 'refresh']),
   }),
   fc.record({
     type: fc.constant('authentication'),
     error: fc.constant(() => new AuthenticationError('Session expired')),
     expectedRecoverable: fc.constant(true), // AuthenticationError has retryable: true
-    expectedActions: fc.constant(['login', 'refresh'])
+    expectedActions: fc.constant(['login', 'refresh']),
   }),
   fc.record({
     type: fc.constant('upload'),
     error: fc.constant(() => new UploadError('Upload failed', {}, true)),
     expectedRecoverable: fc.constant(true),
-    expectedActions: fc.constant(['retry', 'clear'])
+    expectedActions: fc.constant(['retry', 'clear']),
   })
 );
 
@@ -84,19 +84,21 @@ const nonRecoverableErrorGenerator = fc.oneof(
     type: fc.constant('payment'),
     error: fc.constant(() => new PaymentError('Payment declined')),
     expectedRecoverable: fc.constant(false),
-    expectedActions: fc.constant(['support'])
+    expectedActions: fc.constant(['support']),
   }),
   fc.record({
     type: fc.constant('server'),
-    error: fc.constant(() => new AppError('Internal server error', ErrorType.SERVER)),
+    error: fc.constant(
+      () => new AppError('Internal server error', ErrorType.SERVER)
+    ),
     expectedRecoverable: fc.constant(false),
-    expectedActions: fc.constant(['wait', 'support'])
+    expectedActions: fc.constant(['wait', 'support']),
   }),
   fc.record({
     type: fc.constant('validation'),
     error: fc.constant(() => new ValidationError('Invalid input')),
     expectedRecoverable: fc.constant(false), // ValidationError has retryable: false
-    expectedActions: fc.constant(['correct'])
+    expectedActions: fc.constant(['correct']),
   })
 );
 
@@ -104,70 +106,68 @@ const recoveryActionGenerator = fc.record({
   label: fc.string({ minLength: 1, maxLength: 20 }),
   description: fc.string({ minLength: 5, maxLength: 100 }),
   primary: fc.boolean(),
-  destructive: fc.boolean()
+  destructive: fc.boolean(),
 });
 
 describe('Recoverable Error Actions Property Tests', () => {
   describe('Property 19: Recoverable errors provide action buttons', () => {
     it('should identify recoverable errors and provide appropriate recovery strategies', () => {
       fc.assert(
-        fc.property(
-          recoverableErrorGenerator,
-          (errorConfig) => {
-            const error = errorConfig.error();
-            const recoveryOptions = errorRecoveryManager.getRecoveryOptions(error);
+        fc.property(recoverableErrorGenerator, (errorConfig) => {
+          const error = errorConfig.error();
+          const recoveryOptions =
+            errorRecoveryManager.getRecoveryOptions(error);
 
-            // Property: Recoverable errors should have recovery strategies available
-            if (errorConfig.expectedRecoverable) {
-              expect(recoveryOptions.length).toBeGreaterThan(0);
-              
-              // Each recovery option should have required properties
-              recoveryOptions.forEach((option) => {
-                expect(option).toMatchObject({
-                  canRecover: expect.any(Function),
-                  recover: expect.any(Function),
-                  description: expect.any(String)
-                });
+          // Property: Recoverable errors should have recovery strategies available
+          if (errorConfig.expectedRecoverable) {
+            expect(recoveryOptions.length).toBeGreaterThan(0);
 
-                // Should be able to recover this error type
-                expect(option.canRecover(error)).toBe(true);
-                expect(option.description.length).toBeGreaterThan(0);
+            // Each recovery option should have required properties
+            recoveryOptions.forEach((option) => {
+              expect(option).toMatchObject({
+                canRecover: expect.any(Function),
+                recover: expect.any(Function),
+                description: expect.any(String),
               });
-            }
 
-            // Property: Error retryable flag should match expected recoverability
-            if (error.retryable !== undefined) {
-              expect(error.retryable).toBe(errorConfig.expectedRecoverable);
-            }
+              // Should be able to recover this error type
+              expect(option.canRecover(error)).toBe(true);
+              expect(option.description.length).toBeGreaterThan(0);
+            });
           }
-        ),
+
+          // Property: Error retryable flag should match expected recoverability
+          if (error.retryable !== undefined) {
+            expect(error.retryable).toBe(errorConfig.expectedRecoverable);
+          }
+        }),
         { numRuns: 100 }
       );
     });
 
     it('should not provide recovery strategies for non-recoverable errors', () => {
       fc.assert(
-        fc.property(
-          nonRecoverableErrorGenerator,
-          (errorConfig) => {
-            const error = errorConfig.error();
-            const recoveryOptions = errorRecoveryManager.getRecoveryOptions(error);
+        fc.property(nonRecoverableErrorGenerator, (errorConfig) => {
+          const error = errorConfig.error();
+          const recoveryOptions =
+            errorRecoveryManager.getRecoveryOptions(error);
 
-            // Property: Non-recoverable errors should have limited or no recovery strategies
-            // Some errors might have support/contact options but not automatic recovery
-            recoveryOptions.forEach((option) => {
-              // If there are recovery options, they should not be automatic retries
-              expect(option.description.toLowerCase()).not.toMatch(/retry.*automatically|auto.*retry/);
-              
-              // Should still be valid recovery strategies
-              expect(option.canRecover(error)).toBe(true);
-              expect(option.description.length).toBeGreaterThan(0);
-            });
+          // Property: Non-recoverable errors should have limited or no recovery strategies
+          // Some errors might have support/contact options but not automatic recovery
+          recoveryOptions.forEach((option) => {
+            // If there are recovery options, they should not be automatic retries
+            expect(option.description.toLowerCase()).not.toMatch(
+              /retry.*automatically|auto.*retry/
+            );
 
-            // Property: Non-recoverable errors should not be marked as retryable
-            expect(error.retryable).toBe(false);
-          }
-        ),
+            // Should still be valid recovery strategies
+            expect(option.canRecover(error)).toBe(true);
+            expect(option.description.length).toBeGreaterThan(0);
+          });
+
+          // Property: Non-recoverable errors should not be marked as retryable
+          expect(error.retryable).toBe(false);
+        }),
         { numRuns: 100 }
       );
     });
@@ -183,7 +183,7 @@ describe('Recoverable Error Actions Property Tests', () => {
             const error = errorFactory();
             // Create a fresh recovery manager without built-in strategies
             const recoveryManager = new ErrorRecoveryManager();
-            
+
             // Clear any existing strategies to avoid built-in ones that might redirect
             (recoveryManager as any).strategies = [];
 
@@ -191,7 +191,7 @@ describe('Recoverable Error Actions Property Tests', () => {
             const mockStrategy: RecoveryStrategy = {
               canRecover: (error) => error.retryable === true,
               recover: jest.fn().mockResolvedValue(undefined),
-              description: 'Mock recovery strategy'
+              description: 'Mock recovery strategy',
             };
 
             recoveryManager.addStrategy(mockStrategy);
@@ -229,22 +229,31 @@ describe('Recoverable Error Actions Property Tests', () => {
           fc.oneof(recoverableErrorGenerator, nonRecoverableErrorGenerator),
           (errorConfig) => {
             const error = errorConfig.error();
-            const recoveryOptions = errorRecoveryManager.getRecoveryOptions(error);
+            const recoveryOptions =
+              errorRecoveryManager.getRecoveryOptions(error);
 
             // Property: All recovery strategies should have clear, actionable descriptions
             recoveryOptions.forEach((option) => {
               expect(option.description).toBeTruthy();
               expect(option.description.length).toBeGreaterThan(5);
-              
+
               // Should not contain technical jargon
               expect(option.description).not.toMatch(/ERR_/);
               expect(option.description).not.toMatch(/ECONN/);
               expect(option.description).not.toMatch(/TypeError/);
               expect(option.description).not.toMatch(/undefined/);
-              
+
               // Should be user-friendly
-              const userFriendlyWords = ['retry', 'refresh', 'login', 'try', 'again', 'clear', 'redirect'];
-              const containsUserFriendlyWord = userFriendlyWords.some(word => 
+              const userFriendlyWords = [
+                'retry',
+                'refresh',
+                'login',
+                'try',
+                'again',
+                'clear',
+                'redirect',
+              ];
+              const containsUserFriendlyWord = userFriendlyWords.some((word) =>
                 option.description.toLowerCase().includes(word)
               );
               expect(containsUserFriendlyWord).toBe(true);
@@ -268,26 +277,27 @@ describe('Recoverable Error Actions Property Tests', () => {
             const customStrategy: RecoveryStrategy = {
               canRecover: (error) => error.type === ErrorType.UNKNOWN,
               recover: mockRecoveryAction,
-              description: actionConfig.description
+              description: actionConfig.description,
             };
 
             customRecoveryManager.addStrategy(customStrategy);
 
             const testError = new AppError(errorMessage, ErrorType.UNKNOWN);
-            const recoveryOptions = customRecoveryManager.getRecoveryOptions(testError);
+            const recoveryOptions =
+              customRecoveryManager.getRecoveryOptions(testError);
 
             // Property: Custom strategy should be included in recovery options
             expect(recoveryOptions).toContainEqual(customStrategy);
-            
+
             // Property: Custom strategy should be applicable to the test error
-            const applicableStrategies = recoveryOptions.filter(strategy => 
+            const applicableStrategies = recoveryOptions.filter((strategy) =>
               strategy.canRecover(testError)
             );
             expect(applicableStrategies.length).toBeGreaterThan(0);
-            
+
             // Property: Custom strategy should have the expected description
-            const customStrategyFound = applicableStrategies.find(strategy => 
-              strategy.description === actionConfig.description
+            const customStrategyFound = applicableStrategies.find(
+              (strategy) => strategy.description === actionConfig.description
             );
             expect(customStrategyFound).toBeDefined();
           }
@@ -306,7 +316,7 @@ describe('Recoverable Error Actions Property Tests', () => {
                 fc.constant(ErrorType.AUTHENTICATION),
                 fc.constant(ErrorType.UPLOAD)
               ),
-              priority: fc.integer({ min: 1, max: 10 })
+              priority: fc.integer({ min: 1, max: 10 }),
             }),
             { minLength: 2, maxLength: 5 }
           ),
@@ -318,17 +328,22 @@ describe('Recoverable Error Actions Property Tests', () => {
               const strategy: RecoveryStrategy = {
                 canRecover: (error) => error.type === config.errorType,
                 recover: jest.fn().mockResolvedValue(undefined),
-                description: `Strategy ${index} for ${config.errorType} (priority: ${config.priority})`
+                description: `Strategy ${index} for ${config.errorType} (priority: ${config.priority})`,
               };
               recoveryManager.addStrategy(strategy);
             });
 
             // Test with different error types
-            const errorTypes = [ErrorType.NETWORK, ErrorType.AUTHENTICATION, ErrorType.UPLOAD];
-            
+            const errorTypes = [
+              ErrorType.NETWORK,
+              ErrorType.AUTHENTICATION,
+              ErrorType.UPLOAD,
+            ];
+
             errorTypes.forEach((errorType) => {
               const testError = new AppError('Test error', errorType);
-              const recoveryOptions = recoveryManager.getRecoveryOptions(testError);
+              const recoveryOptions =
+                recoveryManager.getRecoveryOptions(testError);
 
               // Property: Should only return strategies that can recover this error type
               recoveryOptions.forEach((option) => {
@@ -357,8 +372,10 @@ describe('Recoverable Error Actions Property Tests', () => {
             // Add a strategy that always fails quickly
             const failingStrategy: RecoveryStrategy = {
               canRecover: (error) => error.type === ErrorType.UNKNOWN,
-              recover: jest.fn().mockRejectedValue(new Error('Recovery failed')),
-              description: 'Failing recovery strategy'
+              recover: jest
+                .fn()
+                .mockRejectedValue(new Error('Recovery failed')),
+              description: 'Failing recovery strategy',
             };
 
             recoveryManager.addStrategy(failingStrategy);
@@ -370,9 +387,9 @@ describe('Recoverable Error Actions Property Tests', () => {
             try {
               recoveryResult = await Promise.race([
                 recoveryManager.attemptRecovery(testError),
-                new Promise<boolean>((_, reject) => 
+                new Promise<boolean>((_, reject) =>
                   setTimeout(() => reject(new Error('Recovery timeout')), 3000)
-                )
+                ),
               ]);
             } catch (error) {
               // Should not throw
@@ -383,7 +400,8 @@ describe('Recoverable Error Actions Property Tests', () => {
             expect(recoveryResult).toBe(false);
 
             // Property: Failing strategy should still be in recovery options
-            const recoveryOptions = recoveryManager.getRecoveryOptions(testError);
+            const recoveryOptions =
+              recoveryManager.getRecoveryOptions(testError);
             expect(recoveryOptions).toContainEqual(failingStrategy);
           }
         ),
@@ -401,7 +419,7 @@ describe('Recoverable Error Actions Property Tests', () => {
               fc.constant('authentication'),
               fc.constant('navigation')
             ),
-            userAction: fc.string({ minLength: 1, maxLength: 50 })
+            userAction: fc.string({ minLength: 1, maxLength: 50 }),
           }),
           (testData) => {
             // Create error with context
@@ -411,11 +429,12 @@ describe('Recoverable Error Actions Property Tests', () => {
               ErrorSeverity.MEDIUM,
               {
                 context: testData.context,
-                userAction: testData.userAction
+                userAction: testData.userAction,
               }
             );
 
-            const recoveryOptions = errorRecoveryManager.getRecoveryOptions(contextualError);
+            const recoveryOptions =
+              errorRecoveryManager.getRecoveryOptions(contextualError);
 
             // Property: Recovery strategies should be available
             expect(Array.isArray(recoveryOptions)).toBe(true);
@@ -452,12 +471,13 @@ describe('Recoverable Error Actions Property Tests', () => {
               canRecover: (error) => error.type === ErrorType.UNKNOWN,
               recover: jest.fn().mockImplementation(async () => {
                 recoveryAttempts++;
-                if (recoveryAttempts < 2) { // Reduced threshold for faster tests
+                if (recoveryAttempts < 2) {
+                  // Reduced threshold for faster tests
                   throw new Error('Not ready yet');
                 }
                 return Promise.resolve();
               }),
-              description: 'Tracking recovery strategy'
+              description: 'Tracking recovery strategy',
             };
 
             recoveryManager.addStrategy(trackingStrategy);
@@ -465,13 +485,16 @@ describe('Recoverable Error Actions Property Tests', () => {
             // Property: Multiple recovery attempts should maintain state
             for (const errorMessage of errorMessages) {
               const testError = new AppError(errorMessage, ErrorType.UNKNOWN);
-              
+
               try {
                 await Promise.race([
                   recoveryManager.attemptRecovery(testError),
-                  new Promise<boolean>((_, reject) => 
-                    setTimeout(() => reject(new Error('Recovery timeout')), 2000)
-                  )
+                  new Promise<boolean>((_, reject) =>
+                    setTimeout(
+                      () => reject(new Error('Recovery timeout')),
+                      2000
+                    )
+                  ),
                 ]);
               } catch (error) {
                 // Some attempts may fail, that's expected

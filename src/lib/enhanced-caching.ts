@@ -10,22 +10,22 @@ export const CACHE_CONFIG = {
   // Default stale times for different data types (in milliseconds)
   STALE_TIMES: {
     USER_DATA: 10 * 60 * 1000, // 10 minutes
-    ORDER_DATA: 2 * 60 * 1000,  // 2 minutes
+    ORDER_DATA: 2 * 60 * 1000, // 2 minutes
     STATIC_DATA: 60 * 60 * 1000, // 1 hour
-    REAL_TIME_DATA: 30 * 1000,   // 30 seconds
+    REAL_TIME_DATA: 30 * 1000, // 30 seconds
   },
-  
+
   // Garbage collection times
   GC_TIMES: {
-    SHORT: 5 * 60 * 1000,      // 5 minutes
-    MEDIUM: 30 * 60 * 1000,    // 30 minutes
+    SHORT: 5 * 60 * 1000, // 5 minutes
+    MEDIUM: 30 * 60 * 1000, // 30 minutes
     LONG: 24 * 60 * 60 * 1000, // 24 hours
   },
-  
+
   // Cache size limits
   MAX_CACHE_SIZE: 50 * 1024 * 1024, // 50MB
   MAX_ENTRIES: 1000,
-  
+
   // Retry configuration
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY_BASE: 1000, // 1 second
@@ -48,12 +48,15 @@ export function createEnhancedQueryClient(): QueryClient {
               return false;
             }
           }
-          
+
           return failureCount < CACHE_CONFIG.RETRY_ATTEMPTS;
         },
-        retryDelay: (attemptIndex) => 
-          Math.min(CACHE_CONFIG.RETRY_DELAY_BASE * Math.pow(2, attemptIndex), 30000),
-        
+        retryDelay: (attemptIndex) =>
+          Math.min(
+            CACHE_CONFIG.RETRY_DELAY_BASE * Math.pow(2, attemptIndex),
+            30000
+          ),
+
         // Enable background refetching for better UX
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
@@ -81,30 +84,31 @@ export const cacheKeys = {
     profile: (userId: string) => ['user', 'profile', userId] as const,
     preferences: (userId: string) => ['user', 'preferences', userId] as const,
   },
-  
+
   // Order-related queries
   orders: {
     all: ['orders'] as const,
-    list: (filters?: Record<string, any>) => ['orders', 'list', filters] as const,
+    list: (filters?: Record<string, any>) =>
+      ['orders', 'list', filters] as const,
     byId: (orderId: string) => ['orders', 'detail', orderId] as const,
-    byUser: (userId: string, params?: Record<string, any>) => 
+    byUser: (userId: string, params?: Record<string, any>) =>
       ['orders', 'user', userId, params] as const,
     status: (orderId: string) => ['orders', 'status', orderId] as const,
   },
-  
+
   // Payment-related queries
   payments: {
     all: ['payments'] as const,
     byId: (paymentId: string) => ['payments', paymentId] as const,
     byOrder: (orderId: string) => ['payments', 'order', orderId] as const,
   },
-  
+
   // Upload-related queries
   uploads: {
     progress: (uploadId: string) => ['uploads', 'progress', uploadId] as const,
     history: (userId: string) => ['uploads', 'history', userId] as const,
   },
-  
+
   // Static data
   static: {
     config: ['static', 'config'] as const,
@@ -123,10 +127,10 @@ export class CacheInvalidator {
    */
   invalidateUser(userId: string) {
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.user.profile(userId)
+      queryKey: cacheKeys.user.profile(userId),
     });
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.user.preferences(userId)
+      queryKey: cacheKeys.user.preferences(userId),
     });
   }
 
@@ -135,12 +139,12 @@ export class CacheInvalidator {
    */
   invalidateOrders(userId?: string) {
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.orders.all
+      queryKey: cacheKeys.orders.all,
     });
-    
+
     if (userId) {
       this.queryClient.invalidateQueries({
-        queryKey: cacheKeys.orders.byUser(userId)
+        queryKey: cacheKeys.orders.byUser(userId),
       });
     }
   }
@@ -150,10 +154,10 @@ export class CacheInvalidator {
    */
   invalidateOrder(orderId: string) {
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.orders.byId(orderId)
+      queryKey: cacheKeys.orders.byId(orderId),
     });
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.orders.status(orderId)
+      queryKey: cacheKeys.orders.status(orderId),
     });
   }
 
@@ -162,12 +166,12 @@ export class CacheInvalidator {
    */
   invalidatePayments(orderId?: string) {
     this.queryClient.invalidateQueries({
-      queryKey: cacheKeys.payments.all
+      queryKey: cacheKeys.payments.all,
     });
-    
+
     if (orderId) {
       this.queryClient.invalidateQueries({
-        queryKey: cacheKeys.payments.byOrder(orderId)
+        queryKey: cacheKeys.payments.byOrder(orderId),
       });
     }
   }
@@ -217,7 +221,7 @@ export class CacheOptimizer {
         staleTime: CACHE_CONFIG.STALE_TIMES.ORDER_DATA,
       });
     }
-    
+
     // Prefetch payment data when order is loaded
     if (queryKey[0] === 'orders' && queryKey[1] === 'detail') {
       const orderId = queryKey[2] as string;
@@ -237,14 +241,14 @@ export class CacheOptimizer {
   optimizeCacheSize() {
     const cache = this.queryClient.getQueryCache();
     const queries = cache.getAll();
-    
+
     // Sort by last updated time
     const sortedQueries = queries.sort((a, b) => {
       const aTime = a.state.dataUpdatedAt || 0;
       const bTime = b.state.dataUpdatedAt || 0;
       return aTime - bTime;
     });
-    
+
     // Remove oldest entries if we exceed limits
     if (queries.length > CACHE_CONFIG.MAX_ENTRIES) {
       const toRemove = queries.length - CACHE_CONFIG.MAX_ENTRIES;
@@ -259,7 +263,7 @@ export class CacheOptimizer {
    */
   setOptimalStaleTime(queryKey: QueryKey): number {
     const [category, type] = queryKey;
-    
+
     switch (category) {
       case 'user':
         return CACHE_CONFIG.STALE_TIMES.USER_DATA;
@@ -318,8 +322,8 @@ export class CacheMetrics {
   }
 
   static getHitRatio(): number {
-    return this.metrics.totalQueries > 0 
-      ? this.metrics.hits / this.metrics.totalQueries 
+    return this.metrics.totalQueries > 0
+      ? this.metrics.hits / this.metrics.totalQueries
       : 0;
   }
 
@@ -354,12 +358,14 @@ export class CachePersistence {
   static saveToStorage(data: any) {
     try {
       const serialized = JSON.stringify(data);
-      
+
       if (serialized.length > this.MAX_STORAGE_SIZE) {
-        console.warn('Cache data too large for localStorage, skipping persistence');
+        console.warn(
+          'Cache data too large for localStorage, skipping persistence'
+        );
         return;
       }
-      
+
       localStorage.setItem(this.STORAGE_KEY, serialized);
     } catch (error) {
       console.warn('Failed to save cache to localStorage:', error);

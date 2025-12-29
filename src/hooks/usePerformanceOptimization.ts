@@ -5,20 +5,20 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { 
-  AssetLazyLoadManager, 
-  AssetOptimizer, 
+import {
+  AssetLazyLoadManager,
+  AssetOptimizer,
   AssetPerformanceMonitor,
-  type AssetInfo 
+  type AssetInfo,
 } from '@/lib/asset-optimization';
-import { 
-  CacheOptimizer, 
-  CacheInvalidator, 
-  CacheMetrics 
+import {
+  CacheOptimizer,
+  CacheInvalidator,
+  CacheMetrics,
 } from '@/lib/enhanced-caching';
-import { 
-  LazyLoadingMetrics, 
-  shouldLazyLoadComponent 
+import {
+  LazyLoadingMetrics,
+  shouldLazyLoadComponent,
 } from '@/lib/lazy-loading';
 
 /**
@@ -70,7 +70,11 @@ export function usePerformanceOptimization(config: PerformanceConfig = {}) {
     }
 
     // Set up performance monitoring
-    if (monitorPerformance && typeof window !== 'undefined' && 'PerformanceObserver' in window) {
+    if (
+      monitorPerformance &&
+      typeof window !== 'undefined' &&
+      'PerformanceObserver' in window
+    ) {
       performanceObserver.current = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
@@ -83,8 +87,8 @@ export function usePerformanceOptimization(config: PerformanceConfig = {}) {
       });
 
       try {
-        performanceObserver.current.observe({ 
-          entryTypes: ['navigation', 'resource', 'measure'] 
+        performanceObserver.current.observe({
+          entryTypes: ['navigation', 'resource', 'measure'],
         });
       } catch (error) {
         console.warn('Performance observer not supported:', error);
@@ -95,77 +99,98 @@ export function usePerformanceOptimization(config: PerformanceConfig = {}) {
       if (enableLazyLoading) {
         AssetLazyLoadManager.cleanup();
       }
-      
+
       if (performanceObserver.current) {
         performanceObserver.current.disconnect();
       }
     };
-  }, [enableLazyLoading, enableAssetOptimization, enableCacheOptimization, monitorPerformance, queryClient]);
+  }, [
+    enableLazyLoading,
+    enableAssetOptimization,
+    enableCacheOptimization,
+    monitorPerformance,
+    queryClient,
+  ]);
 
   /**
    * Optimize and preload assets
    */
-  const optimizeAssets = useCallback((assets: AssetInfo[]) => {
-    if (!enableAssetOptimization) return assets;
+  const optimizeAssets = useCallback(
+    (assets: AssetInfo[]) => {
+      if (!enableAssetOptimization) return assets;
 
-    const optimization = AssetOptimizer.optimizeAssets(assets);
-    
-    // Preload critical assets
-    AssetLazyLoadManager.preloadCriticalAssets(assets);
-    
-    if (monitorPerformance) {
-      console.log('Asset optimization results:', {
-        totalSavings: `${(optimization.totalSavings * 100).toFixed(1)}%`,
-        initialLoadSize: `${(optimization.initialLoadSize / 1024).toFixed(1)}KB`,
-        totalSize: `${(optimization.totalSize / 1024).toFixed(1)}KB`,
-      });
-    }
+      const optimization = AssetOptimizer.optimizeAssets(assets);
 
-    return optimization.results;
-  }, [enableAssetOptimization, monitorPerformance]);
+      // Preload critical assets
+      AssetLazyLoadManager.preloadCriticalAssets(assets);
+
+      if (monitorPerformance) {
+        console.log('Asset optimization results:', {
+          totalSavings: `${(optimization.totalSavings * 100).toFixed(1)}%`,
+          initialLoadSize: `${(optimization.initialLoadSize / 1024).toFixed(1)}KB`,
+          totalSize: `${(optimization.totalSize / 1024).toFixed(1)}KB`,
+        });
+      }
+
+      return optimization.results;
+    },
+    [enableAssetOptimization, monitorPerformance]
+  );
 
   /**
    * Set up lazy loading for an element
    */
-  const setupLazyLoading = useCallback((element: HTMLElement) => {
-    if (!enableLazyLoading) return;
+  const setupLazyLoading = useCallback(
+    (element: HTMLElement) => {
+      if (!enableLazyLoading) return;
 
-    AssetLazyLoadManager.observe(element);
-  }, [enableLazyLoading]);
+      AssetLazyLoadManager.observe(element);
+    },
+    [enableLazyLoading]
+  );
 
   /**
    * Check if a component should be lazy loaded
    */
-  const shouldLazyLoad = useCallback((componentName: string) => {
-    if (!enableLazyLoading) return false;
-    return shouldLazyLoadComponent(componentName);
-  }, [enableLazyLoading]);
+  const shouldLazyLoad = useCallback(
+    (componentName: string) => {
+      if (!enableLazyLoading) return false;
+      return shouldLazyLoadComponent(componentName);
+    },
+    [enableLazyLoading]
+  );
 
   /**
    * Invalidate cache intelligently
    */
-  const invalidateCache = useCallback((mutationType: string, data: any) => {
-    if (!enableCacheOptimization || !cacheInvalidator.current) return;
+  const invalidateCache = useCallback(
+    (mutationType: string, data: any) => {
+      if (!enableCacheOptimization || !cacheInvalidator.current) return;
 
-    cacheInvalidator.current.invalidateAfterMutation(mutationType, data);
-    
-    if (monitorPerformance) {
-      CacheMetrics.recordInvalidation();
-    }
-  }, [enableCacheOptimization, monitorPerformance]);
+      cacheInvalidator.current.invalidateAfterMutation(mutationType, data);
+
+      if (monitorPerformance) {
+        CacheMetrics.recordInvalidation();
+      }
+    },
+    [enableCacheOptimization, monitorPerformance]
+  );
 
   /**
    * Prefetch related data
    */
-  const prefetchRelatedData = useCallback(async (queryKey: any[], data: any) => {
-    if (!enableCacheOptimization || !cacheOptimizer.current) return;
+  const prefetchRelatedData = useCallback(
+    async (queryKey: any[], data: any) => {
+      if (!enableCacheOptimization || !cacheOptimizer.current) return;
 
-    await cacheOptimizer.current.prefetchRelatedData(queryKey, data);
-    
-    if (monitorPerformance) {
-      CacheMetrics.recordPrefetch();
-    }
-  }, [enableCacheOptimization, monitorPerformance]);
+      await cacheOptimizer.current.prefetchRelatedData(queryKey, data);
+
+      if (monitorPerformance) {
+        CacheMetrics.recordPrefetch();
+      }
+    },
+    [enableCacheOptimization, monitorPerformance]
+  );
 
   /**
    * Optimize cache size
@@ -196,81 +221,90 @@ export function usePerformanceOptimization(config: PerformanceConfig = {}) {
   /**
    * Measure performance of an operation
    */
-  const measurePerformance = useCallback(<T>(
-    name: string,
-    operation: () => T | Promise<T>
-  ): T | Promise<T> => {
-    if (!monitorPerformance) return operation();
+  const measurePerformance = useCallback(
+    <T>(name: string, operation: () => T | Promise<T>): T | Promise<T> => {
+      if (!monitorPerformance) return operation();
 
-    const startTime = performance.now();
-    const result = operation();
+      const startTime = performance.now();
+      const result = operation();
 
-    if (result instanceof Promise) {
-      return result.finally(() => {
+      if (result instanceof Promise) {
+        return result.finally(() => {
+          const endTime = performance.now();
+          console.log(`${name} took ${endTime - startTime} milliseconds`);
+
+          // Create a performance measure
+          performance.mark(`${name}-end`);
+          performance.measure(name, `${name}-start`, `${name}-end`);
+        });
+      } else {
         const endTime = performance.now();
         console.log(`${name} took ${endTime - startTime} milliseconds`);
-        
+
         // Create a performance measure
         performance.mark(`${name}-end`);
         performance.measure(name, `${name}-start`, `${name}-end`);
-      });
-    } else {
-      const endTime = performance.now();
-      console.log(`${name} took ${endTime - startTime} milliseconds`);
-      
-      // Create a performance measure
-      performance.mark(`${name}-end`);
-      performance.measure(name, `${name}-start`, `${name}-end`);
-      
-      return result;
-    }
-  }, [monitorPerformance]);
+
+        return result;
+      }
+    },
+    [monitorPerformance]
+  );
 
   /**
    * Create optimized image props for lazy loading
    */
-  const createOptimizedImageProps = useCallback((
-    src: string,
-    options: {
-      priority?: 'critical' | 'high' | 'medium' | 'low';
-      position?: 'above-fold' | 'below-fold';
-      placeholder?: string;
-    } = {}
-  ) => {
-    const { priority = 'medium', position = 'below-fold', placeholder } = options;
-    
-    if (!enableLazyLoading || priority === 'critical') {
-      return { src, loading: 'eager' as const };
-    }
+  const createOptimizedImageProps = useCallback(
+    (
+      src: string,
+      options: {
+        priority?: 'critical' | 'high' | 'medium' | 'low';
+        position?: 'above-fold' | 'below-fold';
+        placeholder?: string;
+      } = {}
+    ) => {
+      const {
+        priority = 'medium',
+        position = 'below-fold',
+        placeholder,
+      } = options;
 
-    return {
-      src: placeholder || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNGM0Y0RjYiLz48L3N2Zz4=',
-      'data-src': src,
-      loading: 'lazy' as const,
-      onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
-        setupLazyLoading(e.currentTarget);
+      if (!enableLazyLoading || priority === 'critical') {
+        return { src, loading: 'eager' as const };
       }
-    };
-  }, [enableLazyLoading, setupLazyLoading]);
+
+      return {
+        src:
+          placeholder ||
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB2aWV3Qm94PSIwIDAgMSAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNGM0Y0RjYiLz48L3N2Zz4=',
+        'data-src': src,
+        loading: 'lazy' as const,
+        onLoad: (e: React.SyntheticEvent<HTMLImageElement>) => {
+          setupLazyLoading(e.currentTarget);
+        },
+      };
+    },
+    [enableLazyLoading, setupLazyLoading]
+  );
 
   return {
     // Asset optimization
     optimizeAssets,
     setupLazyLoading,
     createOptimizedImageProps,
-    
+
     // Component lazy loading
     shouldLazyLoad,
-    
+
     // Cache optimization
     invalidateCache,
     prefetchRelatedData,
     optimizeCacheSize,
-    
+
     // Performance monitoring
     getPerformanceMetrics,
     measurePerformance,
-    
+
     // Configuration
     config: {
       enableLazyLoading,
@@ -286,16 +320,16 @@ export function usePerformanceOptimization(config: PerformanceConfig = {}) {
  */
 export function useComponentPerformance(componentName: string) {
   const { shouldLazyLoad, measurePerformance } = usePerformanceOptimization();
-  
+
   useEffect(() => {
     const startTime = performance.now();
-    
+
     return () => {
       const endTime = performance.now();
       const loadTime = endTime - startTime;
-      
+
       LazyLoadingMetrics.recordComponentLoad(componentName, loadTime);
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log(`Component ${componentName} rendered in ${loadTime}ms`);
       }
@@ -312,8 +346,9 @@ export function useComponentPerformance(componentName: string) {
  * Hook for asset-specific performance optimization
  */
 export function useAssetPerformance() {
-  const { optimizeAssets, createOptimizedImageProps } = usePerformanceOptimization();
-  
+  const { optimizeAssets, createOptimizedImageProps } =
+    usePerformanceOptimization();
+
   const recordAssetLoad = useCallback((asset: AssetInfo, loadTime: number) => {
     AssetPerformanceMonitor.recordAssetLoad(asset, loadTime, true);
   }, []);

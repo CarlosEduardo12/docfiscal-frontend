@@ -72,7 +72,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   text,
 }) => {
   return (
-    <div className={cn('flex items-center justify-center', className)} data-testid="loading-spinner">
+    <div
+      className={cn('flex items-center justify-center', className)}
+      data-testid="loading-spinner"
+    >
       <svg
         className={cn('animate-spin', spinnerSizes[size])}
         xmlns="http://www.w3.org/2000/svg"

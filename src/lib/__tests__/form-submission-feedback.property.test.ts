@@ -41,7 +41,7 @@ describe('Form Submission Feedback Properties', () => {
             // Test double submission prevention synchronously
             let firstResult: any;
             let secondResult: any;
-            
+
             act(() => {
               firstResult = result.current?.submit(mockSubmitFn);
               // Immediately try to submit again
@@ -71,9 +71,12 @@ describe('Form Submission Feedback Properties', () => {
             }
 
             // Wait for state to update after async operation
-            await waitFor(() => {
-              expect(result.current?.isSubmitting).toBe(false);
-            }, { timeout: 1000 });
+            await waitFor(
+              () => {
+                expect(result.current?.isSubmitting).toBe(false);
+              },
+              { timeout: 1000 }
+            );
 
             // After completion, form should not be submitting
             expect(result.current?.isSubmitting).toBe(false);
@@ -110,11 +113,11 @@ describe('Form Submission Feedback Properties', () => {
             // Ensure hook is properly initialized and not null
             expect(result.current).toBeDefined();
             expect(result.current).not.toBeNull();
-            
+
             // Test that loading state can be used for UI feedback
             const isLoading = result.current?.isSubmitting ?? false;
             const isDisabled = result.current?.isDisabled ?? false;
-            
+
             // These properties should be consistent
             if (isLoading) {
               expect(isDisabled).toBe(true);

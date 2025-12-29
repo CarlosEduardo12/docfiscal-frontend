@@ -1,7 +1,10 @@
 'use client';
 
 import { useRequireAuth } from '@/hooks/useAuthNew';
-import { useOrdersRefresh, usePendingPaymentsMonitor } from '@/hooks/useOrdersRefresh';
+import {
+  useOrdersRefresh,
+  usePendingPaymentsMonitor,
+} from '@/hooks/useOrdersRefresh';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -17,6 +20,7 @@ export default function DashboardPage() {
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
   // Fetch user orders only when user is loaded
+  // Updated to use new query parameters format (Requirements 9.1, 9.2)
   const {
     data: ordersData,
     isLoading: ordersLoading,
@@ -25,8 +29,8 @@ export default function DashboardPage() {
   } = useUserOrders(user?.id || '', {
     page: 1,
     limit: 50,
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    sort: 'created_at', // Using 'sort' instead of 'sort_by' (Requirement 9.2)
+    order: 'desc', // Using 'order' instead of 'sort_order' (Requirement 9.2)
   });
 
   // Auto-refresh hooks para manter a lista atualizada
@@ -60,74 +64,112 @@ export default function DashboardPage() {
 
   const handlePayment = async (orderId: string) => {
     console.log('🔄 Iniciando pagamento para order:', orderId);
-    console.log('🔑 Token atual:', apiClient.currentAccessToken ? 'Presente' : 'Ausente');
+    console.log(
+      '🔑 Token atual:',
+      apiClient.currentAccessToken ? 'Presente' : 'Ausente'
+    );
     console.log('👤 Usuário atual:', user);
-    
+
     setIsPaymentLoading(true);
-    
+
     try {
-      // Primeiro, vamos verificar se a API está funcionando
+      // Updated to use new payment endpoint (Requirement 4.1)
       console.log('🔍 Verificando conectividade com a API...');
-      
+
       const paymentResponse = await apiClient.initiatePayment(orderId);
       console.log('📡 Resposta completa da API de pagamento:', paymentResponse);
-      
+
       if (paymentResponse.success) {
-        if (paymentResponse.data?.payment_url) {
-          console.log('✅ URL de pagamento encontrada:', paymentResponse.data.payment_url);
-          
+        // Updated to handle new payment response format (Requirement 4.3)
+        if (paymentResponse.data?.checkout_url) {
+          console.log(
+            '✅ URL de pagamento encontrada:',
+            paymentResponse.data.checkout_url
+          );
+
           // Tentar abrir em nova aba
-          const opened = window.open(paymentResponse.data.payment_url, '_blank');
-          
+          const opened = window.open(
+            paymentResponse.data.checkout_url,
+            '_blank'
+          );
+
           if (!opened || opened.closed || typeof opened.closed == 'undefined') {
             // Pop-up foi bloqueado
             const userWantsToOpen = confirm(
-              `Pop-up foi bloqueado pelo navegador.\n\nURL de pagamento: ${paymentResponse.data.payment_url}\n\nDeseja copiar a URL para a área de transferência?`
+              `Pop-up foi bloqueado pelo navegador.\n\nURL de pagamento: ${paymentResponse.data.checkout_url}\n\nDeseja copiar a URL para a área de transferência?`
             );
-            
+
             if (userWantsToOpen) {
               try {
-                await navigator.clipboard.writeText(paymentResponse.data.payment_url);
-                alert('URL copiada para a área de transferência! Cole em uma nova aba do navegador.');
+                await navigator.clipboard.writeText(
+                  paymentResponse.data.checkout_url
+                );
+                alert(
+                  'URL copiada para a área de transferência! Cole em uma nova aba do navegador.'
+                );
               } catch (clipboardError) {
                 // Fallback se clipboard não funcionar
-                prompt('Copie esta URL e cole em uma nova aba:', paymentResponse.data.payment_url);
+                prompt(
+                  'Copie esta URL e cole em uma nova aba:',
+                  paymentResponse.data.checkout_url
+                );
               }
             }
           } else {
             console.log('✅ Nova aba aberta com sucesso');
           }
         } else {
-          console.error('❌ Resposta de sucesso mas sem payment_url:', paymentResponse);
-          alert(`Erro: API retornou sucesso mas sem URL de pagamento.\n\nResposta: ${JSON.stringify(paymentResponse, null, 2)}`);
+          console.error(
+            '❌ Resposta de sucesso mas sem checkout_url:',
+            paymentResponse
+          );
+          alert(
+            `Erro: API retornou sucesso mas sem URL de pagamento.\n\nResposta: ${JSON.stringify(paymentResponse, null, 2)}`
+          );
         }
       } else {
         console.error('❌ API retornou erro:', paymentResponse);
-        const errorMsg = paymentResponse.message || paymentResponse.error || 'Erro desconhecido';
-        
+        // Updated error handling for new response format (Requirement 6.3)
+        const errorResponse = paymentResponse as any; // Cast to handle error properties
+        const errorMsg =
+          paymentResponse.message || errorResponse.error || 'Erro desconhecido';
+
         // Verificar se é erro de autenticação
-        if (paymentResponse.error === 'UNAUTHORIZED' || errorMsg.includes('credentials')) {
-          alert(`Erro de autenticação: ${errorMsg}\n\nTente fazer login novamente.`);
+        if (
+          errorResponse.error === 'UNAUTHORIZED' ||
+          errorMsg.includes('credentials')
+        ) {
+          alert(
+            `Erro de autenticação: ${errorMsg}\n\nTente fazer login novamente.`
+          );
           // Opcional: redirecionar para login
           // logout();
         } else {
-          alert(`Erro da API: ${errorMsg}\n\nDetalhes: ${JSON.stringify(paymentResponse, null, 2)}`);
+          alert(
+            `Erro da API: ${errorMsg}\n\nDetalhes: ${JSON.stringify(paymentResponse, null, 2)}`
+          );
         }
       }
     } catch (error: any) {
       console.error('💥 Erro na chamada da API:', error);
-      
+
       let errorMessage = 'Erro desconhecido';
       if (error.message) {
         errorMessage = error.message;
       }
-      
+
       // Verificar se é erro de rede
-      if (error.message?.includes('fetch') || error.message?.includes('Network')) {
-        errorMessage = 'Erro de conexão: Não foi possível conectar ao servidor. Verifique se o backend está rodando.';
+      if (
+        error.message?.includes('fetch') ||
+        error.message?.includes('Network')
+      ) {
+        errorMessage =
+          'Erro de conexão: Não foi possível conectar ao servidor. Verifique se o backend está rodando.';
       }
-      
-      alert(`Erro de conexão: ${errorMessage}\n\nVerifique:\n- Se o backend está rodando na porta 8000\n- Se não há problemas de CORS\n- Se você está autenticado corretamente`);
+
+      alert(
+        `Erro de conexão: ${errorMessage}\n\nVerifique:\n- Se o backend está rodando na porta 8000\n- Se não há problemas de CORS\n- Se você está autenticado corretamente`
+      );
     } finally {
       setIsPaymentLoading(false);
     }
@@ -237,10 +279,12 @@ export default function DashboardPage() {
             disabled={ordersLoading}
             className="gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${ordersLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${ordersLoading ? 'animate-spin' : ''}`}
+            />
             Atualizar Lista
           </Button>
-          
+
           {/* Debug buttons - remove in production */}
           <Link href="/test-api-connection">
             <Button variant="outline" size="sm">

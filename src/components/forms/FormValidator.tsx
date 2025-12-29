@@ -1,6 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
 import { z } from 'zod';
 
 // Types for form validation
@@ -21,7 +28,10 @@ export interface FieldValidator {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  customValidator?: (value: any, formData?: Record<string, any>) => string | null;
+  customValidator?: (
+    value: any,
+    formData?: Record<string, any>
+  ) => string | null;
 }
 
 export interface ValidationSchema<T> {
@@ -32,7 +42,11 @@ export interface ValidationSchema<T> {
 export interface FormValidatorContextType {
   errors: ValidationError[];
   isValid: boolean;
-  validateField: (fieldName: string, value: any, formData?: Record<string, any>) => void;
+  validateField: (
+    fieldName: string,
+    value: any,
+    formData?: Record<string, any>
+  ) => void;
   validateForm: (formData: Record<string, any>) => ValidationResult;
   clearErrors: () => void;
   clearFieldError: (fieldName: string) => void;
@@ -41,7 +55,9 @@ export interface FormValidatorContextType {
   focusFirstError: () => void;
 }
 
-const FormValidatorContext = createContext<FormValidatorContextType | null>(null);
+const FormValidatorContext = createContext<FormValidatorContextType | null>(
+  null
+);
 
 export interface FormValidatorProps<T> {
   schema: ValidationSchema<T>;
@@ -58,116 +74,140 @@ export function FormValidator<T extends Record<string, any>>({
   const [isValid, setIsValid] = useState(true);
   const fieldRefs = useRef<Record<string, HTMLElement>>({});
 
-  const validateSingleField = useCallback((
-    fieldName: string,
-    value: any,
-    fieldValidator: FieldValidator,
-    formData?: Record<string, any>
-  ): string | null => {
-    // Required validation
-    if (fieldValidator.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
-      return `${fieldName} is required`;
-    }
-
-    // Skip other validations if field is empty and not required
-    if (!value || (typeof value === 'string' && value.trim() === '')) {
-      return null;
-    }
-
-    // Type-specific validation
-    if (fieldValidator.type === 'email') {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
-        return 'Please enter a valid email address';
+  const validateSingleField = useCallback(
+    (
+      fieldName: string,
+      value: any,
+      fieldValidator: FieldValidator,
+      formData?: Record<string, any>
+    ): string | null => {
+      // Required validation
+      if (
+        fieldValidator.required &&
+        (!value || (typeof value === 'string' && value.trim() === ''))
+      ) {
+        return `${fieldName} is required`;
       }
-    }
 
-    // Length validation
-    if (fieldValidator.minLength && value.length < fieldValidator.minLength) {
-      return `${fieldName} must be at least ${fieldValidator.minLength} characters long`;
-    }
-
-    if (fieldValidator.maxLength && value.length > fieldValidator.maxLength) {
-      return `${fieldName} must be no more than ${fieldValidator.maxLength} characters long`;
-    }
-
-    // Pattern validation
-    if (fieldValidator.pattern && !fieldValidator.pattern.test(value)) {
-      return `${fieldName} format is invalid`;
-    }
-
-    // Custom validation
-    if (fieldValidator.customValidator) {
-      return fieldValidator.customValidator(value, formData);
-    }
-
-    return null;
-  }, []);
-
-  const validateField = useCallback((fieldName: string, value: any, formData?: Record<string, any>) => {
-    const fieldValidator = schema.fields[fieldName as keyof T];
-    if (!fieldValidator) return;
-
-    const error = validateSingleField(fieldName, value, fieldValidator, formData);
-    
-    setErrors(prevErrors => {
-      const filteredErrors = prevErrors.filter(e => e.field !== fieldName);
-      const newErrors = error ? [...filteredErrors, { field: fieldName, message: error }] : filteredErrors;
-      
-      const newIsValid = newErrors.length === 0;
-      setIsValid(newIsValid);
-      
-      if (onValidationChange) {
-        onValidationChange(newIsValid, newErrors);
+      // Skip other validations if field is empty and not required
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        return null;
       }
-      
-      return newErrors;
-    });
-  }, [schema.fields, validateSingleField, onValidationChange]);
 
-  const validateForm = useCallback((formData: Record<string, any>): ValidationResult => {
-    const fieldErrors: ValidationError[] = [];
-    let firstErrorField: string | undefined;
-
-    // Validate individual fields
-    Object.entries(schema.fields).forEach(([fieldName, fieldValidator]) => {
-      const value = formData[fieldName];
-      const error = validateSingleField(fieldName, value, fieldValidator, formData);
-      
-      if (error) {
-        fieldErrors.push({ field: fieldName, message: error });
-        if (!firstErrorField) {
-          firstErrorField = fieldName;
+      // Type-specific validation
+      if (fieldValidator.type === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          return 'Please enter a valid email address';
         }
       }
-    });
 
-    // Run custom form-level validators
-    if (schema.customValidators) {
-      schema.customValidators.forEach(validator => {
-        const customErrors = validator(formData as T);
-        fieldErrors.push(...customErrors);
-        if (!firstErrorField && customErrors.length > 0) {
-          firstErrorField = customErrors[0].field;
+      // Length validation
+      if (fieldValidator.minLength && value.length < fieldValidator.minLength) {
+        return `${fieldName} must be at least ${fieldValidator.minLength} characters long`;
+      }
+
+      if (fieldValidator.maxLength && value.length > fieldValidator.maxLength) {
+        return `${fieldName} must be no more than ${fieldValidator.maxLength} characters long`;
+      }
+
+      // Pattern validation
+      if (fieldValidator.pattern && !fieldValidator.pattern.test(value)) {
+        return `${fieldName} format is invalid`;
+      }
+
+      // Custom validation
+      if (fieldValidator.customValidator) {
+        return fieldValidator.customValidator(value, formData);
+      }
+
+      return null;
+    },
+    []
+  );
+
+  const validateField = useCallback(
+    (fieldName: string, value: any, formData?: Record<string, any>) => {
+      const fieldValidator = schema.fields[fieldName as keyof T];
+      if (!fieldValidator) return;
+
+      const error = validateSingleField(
+        fieldName,
+        value,
+        fieldValidator,
+        formData
+      );
+
+      setErrors((prevErrors) => {
+        const filteredErrors = prevErrors.filter((e) => e.field !== fieldName);
+        const newErrors = error
+          ? [...filteredErrors, { field: fieldName, message: error }]
+          : filteredErrors;
+
+        const newIsValid = newErrors.length === 0;
+        setIsValid(newIsValid);
+
+        if (onValidationChange) {
+          onValidationChange(newIsValid, newErrors);
+        }
+
+        return newErrors;
+      });
+    },
+    [schema.fields, validateSingleField, onValidationChange]
+  );
+
+  const validateForm = useCallback(
+    (formData: Record<string, any>): ValidationResult => {
+      const fieldErrors: ValidationError[] = [];
+      let firstErrorField: string | undefined;
+
+      // Validate individual fields
+      Object.entries(schema.fields).forEach(([fieldName, fieldValidator]) => {
+        const value = formData[fieldName];
+        const error = validateSingleField(
+          fieldName,
+          value,
+          fieldValidator,
+          formData
+        );
+
+        if (error) {
+          fieldErrors.push({ field: fieldName, message: error });
+          if (!firstErrorField) {
+            firstErrorField = fieldName;
+          }
         }
       });
-    }
 
-    const result: ValidationResult = {
-      isValid: fieldErrors.length === 0,
-      errors: fieldErrors,
-      firstErrorField,
-    };
+      // Run custom form-level validators
+      if (schema.customValidators) {
+        schema.customValidators.forEach((validator) => {
+          const customErrors = validator(formData as T);
+          fieldErrors.push(...customErrors);
+          if (!firstErrorField && customErrors.length > 0) {
+            firstErrorField = customErrors[0].field;
+          }
+        });
+      }
 
-    setErrors(fieldErrors);
-    setIsValid(result.isValid);
-    
-    if (onValidationChange) {
-      onValidationChange(result.isValid, fieldErrors);
-    }
+      const result: ValidationResult = {
+        isValid: fieldErrors.length === 0,
+        errors: fieldErrors,
+        firstErrorField,
+      };
 
-    return result;
-  }, [schema, validateSingleField, onValidationChange]);
+      setErrors(fieldErrors);
+      setIsValid(result.isValid);
+
+      if (onValidationChange) {
+        onValidationChange(result.isValid, fieldErrors);
+      }
+
+      return result;
+    },
+    [schema, validateSingleField, onValidationChange]
+  );
 
   const clearErrors = useCallback(() => {
     setErrors([]);
@@ -177,28 +217,37 @@ export function FormValidator<T extends Record<string, any>>({
     }
   }, [onValidationChange]);
 
-  const clearFieldError = useCallback((fieldName: string) => {
-    setErrors(prevErrors => {
-      const newErrors = prevErrors.filter(e => e.field !== fieldName);
-      const newIsValid = newErrors.length === 0;
-      setIsValid(newIsValid);
-      
-      if (onValidationChange) {
-        onValidationChange(newIsValid, newErrors);
-      }
-      
-      return newErrors;
-    });
-  }, [onValidationChange]);
+  const clearFieldError = useCallback(
+    (fieldName: string) => {
+      setErrors((prevErrors) => {
+        const newErrors = prevErrors.filter((e) => e.field !== fieldName);
+        const newIsValid = newErrors.length === 0;
+        setIsValid(newIsValid);
 
-  const getFieldError = useCallback((fieldName: string): string | undefined => {
-    const error = errors.find(e => e.field === fieldName);
-    return error?.message;
-  }, [errors]);
+        if (onValidationChange) {
+          onValidationChange(newIsValid, newErrors);
+        }
 
-  const hasFieldError = useCallback((fieldName: string): boolean => {
-    return errors.some(e => e.field === fieldName);
-  }, [errors]);
+        return newErrors;
+      });
+    },
+    [onValidationChange]
+  );
+
+  const getFieldError = useCallback(
+    (fieldName: string): string | undefined => {
+      const error = errors.find((e) => e.field === fieldName);
+      return error?.message;
+    },
+    [errors]
+  );
+
+  const hasFieldError = useCallback(
+    (fieldName: string): boolean => {
+      return errors.some((e) => e.field === fieldName);
+    },
+    [errors]
+  );
 
   const focusFirstError = useCallback(() => {
     if (errors.length > 0) {
@@ -211,13 +260,16 @@ export function FormValidator<T extends Record<string, any>>({
   }, [errors]);
 
   // Register field refs for focus management
-  const registerFieldRef = useCallback((fieldName: string, element: HTMLElement | null) => {
-    if (element) {
-      fieldRefs.current[fieldName] = element;
-    } else {
-      delete fieldRefs.current[fieldName];
-    }
-  }, []);
+  const registerFieldRef = useCallback(
+    (fieldName: string, element: HTMLElement | null) => {
+      if (element) {
+        fieldRefs.current[fieldName] = element;
+      } else {
+        delete fieldRefs.current[fieldName];
+      }
+    },
+    []
+  );
 
   const contextValue: FormValidatorContextType = {
     errors,
@@ -246,7 +298,10 @@ interface FormValidatorProviderProps {
   children: React.ReactNode;
 }
 
-const FormValidatorProvider: React.FC<FormValidatorProviderProps> = ({ registerFieldRef, children }) => {
+const FormValidatorProvider: React.FC<FormValidatorProviderProps> = ({
+  registerFieldRef,
+  children,
+}) => {
   return (
     <FormValidatorRefContext.Provider value={registerFieldRef}>
       {children}
@@ -254,7 +309,9 @@ const FormValidatorProvider: React.FC<FormValidatorProviderProps> = ({ registerF
   );
 };
 
-const FormValidatorRefContext = createContext<((fieldName: string, element: HTMLElement | null) => void) | null>(null);
+const FormValidatorRefContext = createContext<
+  ((fieldName: string, element: HTMLElement | null) => void) | null
+>(null);
 
 export function useFormValidator() {
   const context = useContext(FormValidatorContext);
@@ -290,7 +347,8 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   onBlur,
   ...props
 }) => {
-  const { getFieldError, hasFieldError, validateField, clearFieldError } = useFormValidator();
+  const { getFieldError, hasFieldError, validateField, clearFieldError } =
+    useFormValidator();
   const registerFieldRef = useFieldRef();
   const [value, setValue] = useState(props.value || '');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -305,12 +363,12 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
     if (preserveValue) {
       setValue(newValue);
     }
-    
+
     // Clear field error on change to provide immediate feedback
     if (hasFieldError(fieldName)) {
       clearFieldError(fieldName);
     }
-    
+
     if (onChange) {
       onChange(e);
     }
@@ -319,7 +377,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     // Validate field on blur
     validateField(fieldName, e.target.value);
-    
+
     if (onBlur) {
       onBlur(e);
     }
@@ -331,7 +389,10 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   return (
     <div className="space-y-2">
       {label && (
-        <label htmlFor={fieldName} className="text-sm font-medium text-gray-700">
+        <label
+          htmlFor={fieldName}
+          className="text-sm font-medium text-gray-700"
+        >
           {label}
         </label>
       )}
@@ -345,9 +406,10 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
         onBlur={handleBlur}
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-          ${hasError 
-            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-            : 'border-gray-300 focus:border-blue-500'
+          ${
+            hasError
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500'
           }
           ${className}
         `}
@@ -381,22 +443,25 @@ export const mapServerErrors = (
   mapping: ServerErrorMapping
 ): ValidationError[] => {
   const errors: ValidationError[] = [];
-  
+
   if (!serverErrors && serverErrors !== '') {
     return errors;
   }
-  
+
   if (typeof serverErrors === 'string') {
     // Single error message (including empty string)
     errors.push({ field: 'general', message: serverErrors });
   } else if (Array.isArray(serverErrors)) {
     // Array of errors
-    serverErrors.forEach(error => {
+    serverErrors.forEach((error) => {
       if (typeof error === 'string') {
         errors.push({ field: 'general', message: error });
       } else if (error && typeof error === 'object') {
         const errorCode = error.code;
-        if (errorCode && Object.prototype.hasOwnProperty.call(mapping, errorCode)) {
+        if (
+          errorCode &&
+          Object.prototype.hasOwnProperty.call(mapping, errorCode)
+        ) {
           const mapped = mapping[errorCode];
           errors.push({
             field: mapped.field || 'general',
@@ -437,7 +502,7 @@ export const mapServerErrors = (
       });
     }
   }
-  
+
   return errors;
 };
 

@@ -32,20 +32,24 @@ class MockQueryCache {
     const cached = this.cache.get(key);
 
     // Check if we have fresh cached data
-    if (cached && (now - cached.timestamp) < cached.staleTime) {
+    if (cached && now - cached.timestamp < cached.staleTime) {
       // Return cached data without making a request
       return cached.data;
     }
 
     // Make a new request
     this.requestCount++;
-    const data = { id: key, timestamp: now, data: `fresh-data-${this.requestCount}` };
-    
+    const data = {
+      id: key,
+      timestamp: now,
+      data: `fresh-data-${this.requestCount}`,
+    };
+
     // Cache the result
     this.cache.set(key, {
       data,
       timestamp: now,
-      staleTime
+      staleTime,
     });
 
     return data;
@@ -59,7 +63,7 @@ class MockQueryCache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      staleTime
+      staleTime,
     });
   }
 
@@ -71,9 +75,9 @@ class MockQueryCache {
   isStale(key: string): boolean {
     const cached = this.cache.get(key);
     if (!cached) return true;
-    
+
     const now = Date.now();
-    return (now - cached.timestamp) >= cached.staleTime;
+    return now - cached.timestamp >= cached.staleTime;
   }
 }
 
@@ -98,25 +102,25 @@ describe('API Caching Behavior Properties', () => {
 
           // Make multiple requests for the same resource within stale time
           const results: any[] = [];
-          
+
           for (let i = 0; i < requestCount; i++) {
             const result = await mockCache.fetchData(resourceId, staleTime);
             results.push(result);
-            
+
             // Small delay to ensure requests happen in sequence
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
           }
 
           // All results should be identical (from cache)
           const firstResult = results[0];
-          results.forEach(result => {
+          results.forEach((result) => {
             expect(result).toEqual(firstResult);
           });
 
           // Only one API request should have been made
           const finalRequestCount = mockCache.getRequestCount();
           const actualRequests = finalRequestCount - initialRequestCount;
-          
+
           expect(actualRequests).toBe(1);
         }
       ),
@@ -137,14 +141,16 @@ describe('API Caching Behavior Properties', () => {
 
           // First request
           const result1 = await mockCache.fetchData(resourceId, staleTime);
-          const requestsAfterFirst = mockCache.getRequestCount() - initialRequestCount;
+          const requestsAfterFirst =
+            mockCache.getRequestCount() - initialRequestCount;
 
           // Invalidate cache
           mockCache.invalidateCache(resourceId);
 
           // Second request after invalidation
           const result2 = await mockCache.fetchData(resourceId, staleTime);
-          const requestsAfterSecond = mockCache.getRequestCount() - initialRequestCount;
+          const requestsAfterSecond =
+            mockCache.getRequestCount() - initialRequestCount;
 
           // Should have made 2 requests total
           expect(requestsAfterFirst).toBe(1);
@@ -171,14 +177,16 @@ describe('API Caching Behavior Properties', () => {
 
           // First request
           const result1 = await mockCache.fetchData(resourceId, staleTime);
-          const requestsAfterFirst = mockCache.getRequestCount() - initialRequestCount;
+          const requestsAfterFirst =
+            mockCache.getRequestCount() - initialRequestCount;
 
           // Wait for data to become stale
-          await new Promise(resolve => setTimeout(resolve, staleTime + 50));
+          await new Promise((resolve) => setTimeout(resolve, staleTime + 50));
 
           // Second request after stale time
           const result2 = await mockCache.fetchData(resourceId, staleTime);
-          const requestsAfterSecond = mockCache.getRequestCount() - initialRequestCount;
+          const requestsAfterSecond =
+            mockCache.getRequestCount() - initialRequestCount;
 
           // Should have made 2 requests (data became stale)
           expect(requestsAfterFirst).toBe(1);
@@ -196,7 +204,10 @@ describe('API Caching Behavior Properties', () => {
     fc.assert(
       fc.property(
         fc.record({
-          resourceIds: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { minLength: 2, maxLength: 5 }),
+          resourceIds: fc.array(fc.string({ minLength: 1, maxLength: 20 }), {
+            minLength: 2,
+            maxLength: 5,
+          }),
           staleTime: fc.integer({ min: 1000, max: 5000 }),
         }),
         ({ resourceIds, staleTime }) => {
@@ -204,7 +215,11 @@ describe('API Caching Behavior Properties', () => {
 
           // Set different data for each resource
           resourceIds.forEach((resourceId, index) => {
-            const data = { id: resourceId, value: `data-${index}`, status: index % 2 === 0 ? 'active' : 'inactive' };
+            const data = {
+              id: resourceId,
+              value: `data-${index}`,
+              status: index % 2 === 0 ? 'active' : 'inactive',
+            };
             mockCache.setQueryData(resourceId, data, staleTime);
           });
 
@@ -214,17 +229,17 @@ describe('API Caching Behavior Properties', () => {
             expect(cachedData).toEqual({
               id: resourceId,
               value: `data-${index}`,
-              status: index % 2 === 0 ? 'active' : 'inactive'
+              status: index % 2 === 0 ? 'active' : 'inactive',
             });
           });
 
           // Verify cache entries are independent
           const firstResourceId = resourceIds[0];
           const secondResourceId = resourceIds[1];
-          
+
           const firstData = mockCache.getQueryData(firstResourceId);
           const secondData = mockCache.getQueryData(secondResourceId);
-          
+
           expect(firstData).not.toEqual(secondData);
         }
       ),

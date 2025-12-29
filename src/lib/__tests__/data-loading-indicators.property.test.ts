@@ -14,7 +14,9 @@ describe('Data Loading Indicators Properties', () => {
       fc.asyncProperty(
         fc.record({
           shouldSucceed: fc.boolean(),
-          errorMessage: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          errorMessage: fc
+            .string({ minLength: 1, maxLength: 50 })
+            .filter((s) => s.trim().length > 0),
         }),
         async ({ shouldSucceed, errorMessage }) => {
           const { result, unmount } = renderHook(() => useDataLoading());
@@ -43,7 +45,6 @@ describe('Data Loading Indicators Properties', () => {
               expect(typeof result.current.hasLoaded).toBe('boolean');
               expect(result.current.hasLoaded).toBe(true);
             }
-
           } finally {
             unmount();
           }
@@ -81,7 +82,6 @@ describe('Data Loading Indicators Properties', () => {
               expect(result.current.isLoading).toBe(false);
               expect(result.current.hasLoaded).toBe(true);
             }
-
           } finally {
             unmount();
           }
@@ -95,7 +95,9 @@ describe('Data Loading Indicators Properties', () => {
     await fc.assert(
       fc.asyncProperty(
         fc.record({
-          errorMessage: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          errorMessage: fc
+            .string({ minLength: 1, maxLength: 50 })
+            .filter((s) => s.trim().length > 0),
         }),
         async ({ errorMessage }) => {
           const { result, unmount } = renderHook(() => useDataLoading());
@@ -121,7 +123,6 @@ describe('Data Loading Indicators Properties', () => {
               expect(result.current.isLoading).toBe(false);
               expect(result.current.hasLoaded).toBe(true);
             }
-
           } finally {
             unmount();
           }

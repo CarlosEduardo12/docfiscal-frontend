@@ -5,16 +5,16 @@ import { apiClient } from '@/lib/api';
 jest.mock('@/lib/api', () => ({
   apiClient: {
     getPaymentStatus: jest.fn(),
-    getOrder: jest.fn()
-  }
+    getOrder: jest.fn(),
+  },
 }));
 
 // Mock React Query for cache invalidation
 const mockInvalidateQueries = jest.fn();
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({
-    invalidateQueries: mockInvalidateQueries
-  })
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
 describe('Payment Completion Updates Property Tests', () => {
@@ -26,8 +26,8 @@ describe('Payment Completion Updates Property Tests', () => {
   /**
    * Property 13: Payment completion updates status immediately
    * **Validates: Requirements 4.3**
-   * 
-   * For any successful payment, the system should update order status 
+   *
+   * For any successful payment, the system should update order status
    * immediately and display success confirmation with next steps
    */
   test('Property 13: Payment completion updates status immediately', async () => {
@@ -36,14 +36,28 @@ describe('Payment Completion Updates Property Tests', () => {
         fc.record({
           paymentId: fc.string({ minLength: 5, maxLength: 50 }),
           orderId: fc.string({ minLength: 5, maxLength: 50 }),
-          completionTime: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') }).filter(d => !isNaN(d.getTime())),
+          completionTime: fc
+            .date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') })
+            .filter((d) => !isNaN(d.getTime())),
           orderData: fc.record({
             id: fc.string({ minLength: 5, maxLength: 50 }),
             status: fc.constant('completed'),
             original_filename: fc.string({ minLength: 1, maxLength: 100 }),
-            created_at: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') }).filter(d => !isNaN(d.getTime())).map(d => d.toISOString()),
-            updated_at: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') }).filter(d => !isNaN(d.getTime())).map(d => d.toISOString())
-          })
+            created_at: fc
+              .date({
+                min: new Date('2024-01-01'),
+                max: new Date('2025-12-31'),
+              })
+              .filter((d) => !isNaN(d.getTime()))
+              .map((d) => d.toISOString()),
+            updated_at: fc
+              .date({
+                min: new Date('2024-01-01'),
+                max: new Date('2025-12-31'),
+              })
+              .filter((d) => !isNaN(d.getTime()))
+              .map((d) => d.toISOString()),
+          }),
         }),
         async (testData) => {
           // Mock successful payment status
@@ -53,8 +67,8 @@ describe('Payment Completion Updates Property Tests', () => {
               payment_id: testData.paymentId,
               status: 'paid',
               order_id: testData.orderId,
-              paid_at: testData.completionTime.toISOString()
-            }
+              paid_at: testData.completionTime.toISOString(),
+            },
           });
 
           // Mock updated order status
@@ -63,13 +77,15 @@ describe('Payment Completion Updates Property Tests', () => {
             data: {
               ...testData.orderData,
               id: testData.orderId,
-              status: 'completed'
-            }
+              status: 'completed',
+            },
           });
 
           // Simulate payment completion check
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
-          
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
+
           // Property: Payment status should be 'paid' for completed payments
           expect(paymentResponse.success).toBe(true);
           expect(paymentResponse.data.status).toBe('paid');
@@ -82,7 +98,7 @@ describe('Payment Completion Updates Property Tests', () => {
 
           // Simulate order status update check
           const orderResponse = await apiClient.getOrder(testData.orderId);
-          
+
           // Property: Order status should be updated to completed
           expect(orderResponse.success).toBe(true);
           expect(orderResponse.data.status).toBe('completed');
@@ -104,12 +120,12 @@ describe('Payment Completion Updates Property Tests', () => {
         fc.record({
           paymentId: fc.string({ minLength: 5, maxLength: 50 }),
           orderId: fc.string({ minLength: 5, maxLength: 50 }),
-          userId: fc.string({ minLength: 5, maxLength: 50 })
+          userId: fc.string({ minLength: 5, maxLength: 50 }),
         }),
         async (testData) => {
           // Reset mock for this specific test
           mockInvalidateQueries.mockClear();
-          
+
           // Mock successful payment completion
           (apiClient.getPaymentStatus as jest.Mock).mockResolvedValue({
             success: true,
@@ -117,24 +133,37 @@ describe('Payment Completion Updates Property Tests', () => {
               payment_id: testData.paymentId,
               status: 'paid',
               order_id: testData.orderId,
-              user_id: testData.userId
-            }
+              user_id: testData.userId,
+            },
           });
 
           // Simulate payment completion detection
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
-          
-          if (paymentResponse.success && paymentResponse.data.status === 'paid') {
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
+
+          if (
+            paymentResponse.success &&
+            paymentResponse.data.status === 'paid'
+          ) {
             // Simulate cache invalidation that should occur
             mockInvalidateQueries({ queryKey: ['orders'] });
             mockInvalidateQueries({ queryKey: ['orders', testData.orderId] });
-            mockInvalidateQueries({ queryKey: ['payments', testData.paymentId] });
+            mockInvalidateQueries({
+              queryKey: ['payments', testData.paymentId],
+            });
           }
 
           // Property: Cache invalidation should be called for completed payments
-          expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['orders'] });
-          expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['orders', testData.orderId] });
-          expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['payments', testData.paymentId] });
+          expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['orders'],
+          });
+          expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['orders', testData.orderId],
+          });
+          expect(mockInvalidateQueries).toHaveBeenCalledWith({
+            queryKey: ['payments', testData.paymentId],
+          });
 
           // Property: Should be called exactly 3 times for this test
           expect(mockInvalidateQueries).toHaveBeenCalledTimes(3);
@@ -158,7 +187,7 @@ describe('Payment Completion Updates Property Tests', () => {
               fc.constant('order_history')
             ),
             { minLength: 1, maxLength: 4 }
-          )
+          ),
         }),
         async (testData) => {
           // Mock successful payment with next steps
@@ -168,12 +197,14 @@ describe('Payment Completion Updates Property Tests', () => {
               payment_id: testData.paymentId,
               status: 'paid',
               order_id: testData.orderId,
-              next_steps: testData.nextSteps
-            }
+              next_steps: testData.nextSteps,
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
-          
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
+
           // Property: Successful payment should include next steps
           expect(paymentResponse.success).toBe(true);
           expect(paymentResponse.data.status).toBe('paid');
@@ -181,7 +212,12 @@ describe('Payment Completion Updates Property Tests', () => {
           expect(Array.isArray(paymentResponse.data.next_steps)).toBe(true);
 
           // Property: Next steps should contain valid actions
-          const validSteps = ['download', 'processing', 'email_notification', 'order_history'];
+          const validSteps = [
+            'download',
+            'processing',
+            'email_notification',
+            'order_history',
+          ];
           paymentResponse.data.next_steps.forEach((step: string) => {
             expect(validSteps).toContain(step);
           });
@@ -201,38 +237,43 @@ describe('Payment Completion Updates Property Tests', () => {
           paymentId: fc.string({ minLength: 5, maxLength: 50 }),
           orderId: fc.string({ minLength: 5, maxLength: 50 }),
           concurrentRequests: fc.integer({ min: 2, max: 5 }),
-          completionDelay: fc.integer({ min: 0, max: 100 }) // milliseconds
+          completionDelay: fc.integer({ min: 0, max: 100 }), // milliseconds
         }),
         async (testData) => {
           let requestCount = 0;
-          
+
           // Mock payment status that becomes 'paid' after a delay
-          (apiClient.getPaymentStatus as jest.Mock).mockImplementation(async () => {
-            requestCount++;
-            
-            // Simulate completion after delay
-            await new Promise(resolve => setTimeout(resolve, testData.completionDelay));
-            
-            return {
-              success: true,
-              data: {
-                payment_id: testData.paymentId,
-                status: 'paid',
-                order_id: testData.orderId,
-                request_number: requestCount
-              }
-            };
-          });
+          (apiClient.getPaymentStatus as jest.Mock).mockImplementation(
+            async () => {
+              requestCount++;
+
+              // Simulate completion after delay
+              await new Promise((resolve) =>
+                setTimeout(resolve, testData.completionDelay)
+              );
+
+              return {
+                success: true,
+                data: {
+                  payment_id: testData.paymentId,
+                  status: 'paid',
+                  order_id: testData.orderId,
+                  request_number: requestCount,
+                },
+              };
+            }
+          );
 
           // Make concurrent requests
-          const requests = Array.from({ length: testData.concurrentRequests }, () =>
-            apiClient.getPaymentStatus(testData.paymentId)
+          const requests = Array.from(
+            { length: testData.concurrentRequests },
+            () => apiClient.getPaymentStatus(testData.paymentId)
           );
 
           const responses = await Promise.all(requests);
 
           // Property: All concurrent requests should succeed
-          responses.forEach(response => {
+          responses.forEach((response) => {
             expect(response.success).toBe(true);
             expect(response.data.status).toBe('paid');
             expect(response.data.payment_id).toBe(testData.paymentId);
@@ -244,8 +285,10 @@ describe('Payment Completion Updates Property Tests', () => {
 
           // Property: All responses should be consistent
           const firstResponse = responses[0];
-          responses.forEach(response => {
-            expect(response.data.payment_id).toBe(firstResponse.data.payment_id);
+          responses.forEach((response) => {
+            expect(response.data.payment_id).toBe(
+              firstResponse.data.payment_id
+            );
             expect(response.data.status).toBe(firstResponse.data.status);
             expect(response.data.order_id).toBe(firstResponse.data.order_id);
           });
@@ -265,9 +308,17 @@ describe('Payment Completion Updates Property Tests', () => {
             user_id: fc.string({ minLength: 5, maxLength: 50 }),
             original_filename: fc.string({ minLength: 1, maxLength: 100 }),
             file_size: fc.integer({ min: 1000, max: 10000000 }),
-            created_at: fc.date({ min: new Date('2024-01-01'), max: new Date('2025-12-31') }).filter(d => !isNaN(d.getTime())).map(d => d.toISOString())
+            created_at: fc
+              .date({
+                min: new Date('2024-01-01'),
+                max: new Date('2025-12-31'),
+              })
+              .filter((d) => !isNaN(d.getTime()))
+              .map((d) => d.toISOString()),
           }),
-          paymentAmount: fc.float({ min: Math.fround(1.0), max: Math.fround(100.0) }).filter(n => !isNaN(n) && isFinite(n))
+          paymentAmount: fc
+            .float({ min: Math.fround(1.0), max: Math.fround(100.0) })
+            .filter((n) => !isNaN(n) && isFinite(n)),
         }),
         async (testData) => {
           // Mock payment completion
@@ -277,8 +328,8 @@ describe('Payment Completion Updates Property Tests', () => {
               payment_id: testData.paymentId,
               status: 'paid',
               order_id: testData.orderId,
-              amount: testData.paymentAmount
-            }
+              amount: testData.paymentAmount,
+            },
           });
 
           // Mock order with preserved original data
@@ -289,11 +340,13 @@ describe('Payment Completion Updates Property Tests', () => {
               status: 'completed',
               ...testData.originalOrderData,
               // Status updated but original data preserved
-              updated_at: new Date().toISOString()
-            }
+              updated_at: new Date().toISOString(),
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
           const orderResponse = await apiClient.getOrder(testData.orderId);
 
           // Property: Payment completion should preserve payment data
@@ -306,12 +359,20 @@ describe('Payment Completion Updates Property Tests', () => {
           expect(orderResponse.success).toBe(true);
           expect(orderResponse.data.id).toBe(testData.orderId);
           expect(orderResponse.data.status).toBe('completed');
-          
+
           // Property: Original order data should be preserved
-          expect(orderResponse.data.user_id).toBe(testData.originalOrderData.user_id);
-          expect(orderResponse.data.original_filename).toBe(testData.originalOrderData.original_filename);
-          expect(orderResponse.data.file_size).toBe(testData.originalOrderData.file_size);
-          expect(orderResponse.data.created_at).toBe(testData.originalOrderData.created_at);
+          expect(orderResponse.data.user_id).toBe(
+            testData.originalOrderData.user_id
+          );
+          expect(orderResponse.data.original_filename).toBe(
+            testData.originalOrderData.original_filename
+          );
+          expect(orderResponse.data.file_size).toBe(
+            testData.originalOrderData.file_size
+          );
+          expect(orderResponse.data.created_at).toBe(
+            testData.originalOrderData.created_at
+          );
 
           // Property: Updated timestamp should be present and recent
           expect(orderResponse.data.updated_at).toBeDefined();
@@ -335,7 +396,7 @@ describe('Payment Completion Updates Property Tests', () => {
             fc.constant('late_completion'),
             fc.constant('partial_data'),
             fc.constant('network_delay')
-          )
+          ),
         }),
         async (testData) => {
           // Mock different edge case scenarios
@@ -348,8 +409,8 @@ describe('Payment Completion Updates Property Tests', () => {
                   payment_id: testData.paymentId,
                   status: 'paid',
                   order_id: testData.orderId,
-                  completed_at: new Date(Date.now() - 60000).toISOString() // 1 minute ago
-                }
+                  completed_at: new Date(Date.now() - 60000).toISOString(), // 1 minute ago
+                },
               });
               break;
 
@@ -361,8 +422,8 @@ describe('Payment Completion Updates Property Tests', () => {
                   payment_id: testData.paymentId,
                   status: 'paid',
                   order_id: testData.orderId,
-                  completed_at: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
-                }
+                  completed_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+                },
               });
               break;
 
@@ -373,29 +434,33 @@ describe('Payment Completion Updates Property Tests', () => {
                 data: {
                   payment_id: testData.paymentId,
                   status: 'paid',
-                  order_id: testData.orderId
+                  order_id: testData.orderId,
                   // Missing optional fields
-                }
+                },
               });
               break;
 
             case 'network_delay':
               // Simulate network delay
-              (apiClient.getPaymentStatus as jest.Mock).mockImplementation(async () => {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                return {
-                  success: true,
-                  data: {
-                    payment_id: testData.paymentId,
-                    status: 'paid',
-                    order_id: testData.orderId
-                  }
-                };
-              });
+              (apiClient.getPaymentStatus as jest.Mock).mockImplementation(
+                async () => {
+                  await new Promise((resolve) => setTimeout(resolve, 100));
+                  return {
+                    success: true,
+                    data: {
+                      payment_id: testData.paymentId,
+                      status: 'paid',
+                      order_id: testData.orderId,
+                    },
+                  };
+                }
+              );
               break;
           }
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: All edge cases should result in successful completion
           expect(paymentResponse.success).toBe(true);

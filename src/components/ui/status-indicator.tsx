@@ -1,15 +1,15 @@
 'use client';
 
 import React from 'react';
-import { 
-  CheckCircle, 
-  Clock, 
-  CreditCard, 
-  AlertCircle, 
+import {
+  CheckCircle,
+  Clock,
+  CreditCard,
+  AlertCircle,
   Loader2,
   XCircle,
   PlayCircle,
-  PauseCircle
+  PauseCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
@@ -39,7 +39,7 @@ export interface StatusIndicatorProps {
 // Consistent status configuration mapping
 export const getStatusConfig = (status: OrderStatus): StatusConfig => {
   const configs: Record<OrderStatus, StatusConfig> = {
-    'pending_payment': {
+    pending_payment: {
       icon: CreditCard,
       label: 'Aguardando Pagamento',
       description: 'Clique em "Pagar" para continuar com o processamento',
@@ -48,9 +48,9 @@ export const getStatusConfig = (status: OrderStatus): StatusConfig => {
       borderColor: 'border-yellow-200',
       badgeVariant: 'outline',
       iconColor: 'text-yellow-600',
-      animated: false
+      animated: false,
     },
-    'paid': {
+    paid: {
       icon: PlayCircle,
       label: 'Pagamento Confirmado',
       description: 'Pagamento recebido, processamento iniciará em breve',
@@ -59,9 +59,9 @@ export const getStatusConfig = (status: OrderStatus): StatusConfig => {
       borderColor: 'border-blue-200',
       badgeVariant: 'secondary',
       iconColor: 'text-blue-600',
-      animated: false
+      animated: false,
     },
-    'processing': {
+    processing: {
       icon: Loader2,
       label: 'Processando',
       description: 'Seu documento está sendo convertido para CSV',
@@ -70,9 +70,9 @@ export const getStatusConfig = (status: OrderStatus): StatusConfig => {
       borderColor: 'border-blue-200',
       badgeVariant: 'secondary',
       iconColor: 'text-blue-600',
-      animated: true
+      animated: true,
     },
-    'completed': {
+    completed: {
       icon: CheckCircle,
       label: 'Concluído',
       description: 'Arquivo CSV pronto para download',
@@ -81,9 +81,9 @@ export const getStatusConfig = (status: OrderStatus): StatusConfig => {
       borderColor: 'border-green-200',
       badgeVariant: 'default',
       iconColor: 'text-green-600',
-      animated: false
+      animated: false,
     },
-    'failed': {
+    failed: {
       icon: AlertCircle,
       label: 'Erro no Processamento',
       description: 'Ocorreu um erro. Tente fazer upload novamente',
@@ -92,8 +92,8 @@ export const getStatusConfig = (status: OrderStatus): StatusConfig => {
       borderColor: 'border-red-200',
       badgeVariant: 'destructive',
       iconColor: 'text-red-600',
-      animated: false
-    }
+      animated: false,
+    },
   };
 
   return configs[status] || configs['failed'];
@@ -105,7 +105,7 @@ export function StatusIndicator({
   showDescription = true,
   showIcon = true,
   showBadge = true,
-  className
+  className,
 }: StatusIndicatorProps) {
   const config = getStatusConfig(status);
   const StatusIcon = config.icon;
@@ -114,22 +114,22 @@ export function StatusIndicator({
     sm: {
       icon: 'h-4 w-4',
       text: 'text-sm',
-      badge: 'text-xs'
+      badge: 'text-xs',
     },
     md: {
       icon: 'h-5 w-5',
       text: 'text-base',
-      badge: 'text-sm'
+      badge: 'text-sm',
     },
     lg: {
       icon: 'h-6 w-6',
       text: 'text-lg',
-      badge: 'text-base'
-    }
+      badge: 'text-base',
+    },
   };
 
   return (
-    <div 
+    <div
       className={cn('flex items-start space-x-3', className)}
       role="status"
       aria-label={`Status: ${config.label}`}
@@ -146,15 +146,17 @@ export function StatusIndicator({
           />
         </div>
       )}
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
-          <h3 className={cn('font-medium', config.color, sizeClasses[size].text)}>
+          <h3
+            className={cn('font-medium', config.color, sizeClasses[size].text)}
+          >
             {config.label}
           </h3>
-          
+
           {showBadge && (
-            <Badge 
+            <Badge
               variant={config.badgeVariant}
               className={sizeClasses[size].badge}
             >
@@ -162,9 +164,11 @@ export function StatusIndicator({
             </Badge>
           )}
         </div>
-        
+
         {showDescription && (
-          <p className={cn('mt-1 text-muted-foreground', sizeClasses[size].text)}>
+          <p
+            className={cn('mt-1 text-muted-foreground', sizeClasses[size].text)}
+          >
             {config.description}
           </p>
         )}
@@ -174,18 +178,18 @@ export function StatusIndicator({
 }
 
 // Compact status indicator for tables and lists
-export function CompactStatusIndicator({ 
-  status, 
-  className 
-}: { 
-  status: OrderStatus; 
-  className?: string; 
+export function CompactStatusIndicator({
+  status,
+  className,
+}: {
+  status: OrderStatus;
+  className?: string;
 }) {
   const config = getStatusConfig(status);
   const StatusIcon = config.icon;
 
   return (
-    <div 
+    <div
       className={cn('inline-flex items-center space-x-2', className)}
       role="status"
       aria-label={`Status: ${config.label}`}
@@ -211,17 +215,27 @@ export interface StatusProgressProps {
   className?: string;
 }
 
-export function StatusProgress({ currentStatus, className }: StatusProgressProps) {
-  const allStatuses: OrderStatus[] = ['pending_payment', 'paid', 'processing', 'completed'];
+export function StatusProgress({
+  currentStatus,
+  className,
+}: StatusProgressProps) {
+  const allStatuses: OrderStatus[] = [
+    'pending_payment',
+    'paid',
+    'processing',
+    'completed',
+  ];
   const currentIndex = allStatuses.indexOf(currentStatus);
-  
+
   // Handle failed status separately
   if (currentStatus === 'failed') {
     return (
       <div className={cn('flex items-center space-x-2', className)}>
         <div className="flex items-center space-x-1">
           <XCircle className="h-4 w-4 text-red-600" />
-          <span className="text-sm font-medium text-red-700">Processamento Falhou</span>
+          <span className="text-sm font-medium text-red-700">
+            Processamento Falhou
+          </span>
         </div>
       </div>
     );
@@ -238,7 +252,7 @@ export function StatusProgress({ currentStatus, className }: StatusProgressProps
 
         return (
           <React.Fragment key={status}>
-            <div 
+            <div
               className={cn(
                 'flex items-center space-x-1',
                 isCompleted && 'text-green-600',
@@ -253,13 +267,11 @@ export function StatusProgress({ currentStatus, className }: StatusProgressProps
                 )}
                 aria-hidden="true"
               />
-              <span className="text-xs font-medium">
-                {config.label}
-              </span>
+              <span className="text-xs font-medium">{config.label}</span>
             </div>
-            
+
             {index < allStatuses.length - 1 && (
-              <div 
+              <div
                 className={cn(
                   'h-px w-8 bg-gray-300',
                   isCompleted && 'bg-green-300'

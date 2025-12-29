@@ -21,10 +21,12 @@ describe('Progress Time Estimates Properties', () => {
       fc.property(
         fc.record({
           initialProgress: fc.integer({ min: 0, max: 50 }),
-          progressUpdates: fc.array(
-            fc.integer({ min: 1, max: 100 }),
-            { minLength: 2, maxLength: 10 }
-          ).map(arr => arr.sort((a, b) => a - b)), // Ensure ascending order
+          progressUpdates: fc
+            .array(fc.integer({ min: 1, max: 100 }), {
+              minLength: 2,
+              maxLength: 10,
+            })
+            .map((arr) => arr.sort((a, b) => a - b)), // Ensure ascending order
           timeInterval: fc.integer({ min: 100, max: 1000 }),
           stage: fc.string({ minLength: 1, maxLength: 50 }),
         }),
@@ -69,8 +71,13 @@ describe('Progress Time Estimates Properties', () => {
               if (index > 0 && targetProgress < 100) {
                 // Speed calculation requires at least 2 data points
                 // Time estimate should be available for ongoing operations
-                if (result.current.averageSpeed !== null && result.current.averageSpeed > 0) {
-                  expect(result.current.estimatedTimeRemaining).toBeGreaterThan(0);
+                if (
+                  result.current.averageSpeed !== null &&
+                  result.current.averageSpeed > 0
+                ) {
+                  expect(result.current.estimatedTimeRemaining).toBeGreaterThan(
+                    0
+                  );
                 }
               }
 
@@ -97,10 +104,12 @@ describe('Progress Time Estimates Properties', () => {
     fc.assert(
       fc.property(
         fc.record({
-          progressSteps: fc.array(
-            fc.integer({ min: 10, max: 90 }),
-            { minLength: 3, maxLength: 5 }
-          ).map(arr => arr.sort((a, b) => a - b)),
+          progressSteps: fc
+            .array(fc.integer({ min: 10, max: 90 }), {
+              minLength: 3,
+              maxLength: 5,
+            })
+            .map((arr) => arr.sort((a, b) => a - b)),
           timeStep: fc.integer({ min: 500, max: 2000 }),
         }),
         ({ progressSteps, timeStep }) => {
@@ -122,17 +131,18 @@ describe('Progress Time Estimates Properties', () => {
 
             // After enough data points, time estimates should be reasonable
             if (index >= 2 && progress < 95) {
-              const { estimatedTimeRemaining, averageSpeed, elapsedTime } = result.current;
-              
+              const { estimatedTimeRemaining, averageSpeed, elapsedTime } =
+                result.current;
+
               if (estimatedTimeRemaining !== null && averageSpeed !== null) {
                 // Time estimate should be positive for incomplete operations
                 expect(estimatedTimeRemaining).toBeGreaterThan(0);
-                
+
                 // Speed should be positive if progress is being made
                 if (progress > 0) {
                   expect(averageSpeed).toBeGreaterThan(0);
                 }
-                
+
                 // Elapsed time should be reasonable
                 expect(elapsedTime).toBeGreaterThan(0);
                 expect(elapsedTime).toBeLessThan(timeStep * (index + 2)); // Allow some buffer
@@ -219,13 +229,15 @@ describe('Progress Time Estimates Properties', () => {
 
           // Time should not advance while paused
           const elapsedBeforePause = result.current.elapsedTime;
-          
+
           act(() => {
             jest.advanceTimersByTime(pauseDuration);
           });
 
           // Elapsed time should not have changed significantly during pause
-          expect(result.current.elapsedTime).toBeLessThanOrEqual(elapsedBeforePause + 200); // Small buffer for timing
+          expect(result.current.elapsedTime).toBeLessThanOrEqual(
+            elapsedBeforePause + 200
+          ); // Small buffer for timing
 
           // Resume
           act(() => {

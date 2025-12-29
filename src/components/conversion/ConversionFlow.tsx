@@ -87,9 +87,11 @@ export function ConversionFlow() {
     updateState({ loading: true, status: 'Enviando arquivo...' });
 
     try {
+      // Updated to use new upload endpoint format (Requirement 2.1)
       const response = await apiClient.uploadFile(state.file);
 
       if (response.success) {
+        // Updated to handle new upload response format (Requirement 2.4)
         updateState({
           orderId: response.data.order_id,
           status: 'Arquivo enviado! Iniciando pagamento...',
@@ -115,14 +117,19 @@ export function ConversionFlow() {
     try {
       // Garantir que estamos usando a URL correta
       const baseUrl = window.location.origin;
-      const returnUrl = process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL || `${baseUrl}/payment/complete`;
-      const cancelUrl = process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL || `${baseUrl}/payment/success`;
-      
+      const returnUrl =
+        process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL ||
+        `${baseUrl}/payment/complete`;
+      const cancelUrl =
+        process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL ||
+        `${baseUrl}/payment/success`;
+
       console.log('🔗 URLs de retorno configuradas:');
       console.log('  Return URL:', returnUrl);
       console.log('  Cancel URL:', cancelUrl);
       console.log('  Base URL:', baseUrl);
 
+      // Updated to use new payment endpoint (already implemented in API client)
       const response = await apiClient.initiatePayment(orderId, {
         return_url: returnUrl,
         cancel_url: cancelUrl,
@@ -130,18 +137,21 @@ export function ConversionFlow() {
 
       if (response.success) {
         console.log('✅ Pagamento criado com sucesso:', response.data);
-        
+
+        // Updated to handle new payment response format with checkout_url (Requirement 4.3)
         updateState({
           paymentId: response.data.payment_id,
-          paymentUrl: response.data.payment_url,
+          paymentUrl: response.data.checkout_url || response.data.payment_url, // Support both formats
           status: 'Pagamento criado! Redirecionando...',
           currentStep: 'waiting',
           loading: false,
         });
 
         // Redirecionar para AbacatePay
-        console.log('🔗 Abrindo URL de pagamento:', response.data.payment_url);
-        window.open(response.data.payment_url, '_blank');
+        const paymentUrl =
+          response.data.checkout_url || response.data.payment_url;
+        console.log('🔗 Abrindo URL de pagamento:', paymentUrl);
+        window.open(paymentUrl, '_blank');
 
         // Iniciar monitoramento
         startPaymentMonitoring(response.data.payment_id);
@@ -182,7 +192,9 @@ export function ConversionFlow() {
             // Invalidar cache quando pagamento confirmado
             queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
             if (state.orderId) {
-              queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(state.orderId) });
+              queryClient.invalidateQueries({
+                queryKey: queryKeys.orders.byId(state.orderId),
+              });
             }
             clearInterval(interval);
             clearInterval(countdownInterval);
@@ -247,8 +259,10 @@ export function ConversionFlow() {
           clearInterval(statusInterval);
           // Invalidar cache quando processamento completo
           queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-          queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(state.orderId!) });
-          
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.orders.byId(state.orderId!),
+          });
+
           updateState({
             progress: 100,
             currentStep: 'completed',
@@ -279,17 +293,25 @@ export function ConversionFlow() {
     if (!state.orderId) return;
 
     try {
-      const blob = await apiClient.downloadOrder(state.orderId);
+      const { blob, filename } = await apiClient.downloadOrder(state.orderId);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${state.file?.name.replace('.pdf', '')}_converted.csv`;
+      // Use filename from Content-Disposition header if available, otherwise fallback
+      link.download =
+        filename || `${state.file?.name.replace('.pdf', '')}_converted.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro no download:', error);
+
+      // Handle specific error types
+      if (error.code === 'DOWNLOAD_LINK_EXPIRED') {
+        // This will be handled by the retry functionality in subtask 8.2
+        console.warn('Download link expired, retry functionality needed');
+      }
     }
   };
 
@@ -302,10 +324,37 @@ export function ConversionFlow() {
       network: 'Erro de conexão. Verifique sua internet.',
     };
 
+    // Updated error handling for new response format (Requirements 6.1, 6.2)
+    const errorMessage =
+      errorMessages[step as keyof typeof errorMessages] || 'Erro inesperado';
+    let detailedError = 'Erro desconhecido';
+
+    if (error && typeof error === 'object') {
+      // Handle new standardized error format
+      if (error.message) {
+        detailedError = error.message;
+      } else if (error.error) {
+        detailedError = error.error;
+      }
+
+      // Handle field-specific errors (Requirement 6.4)
+      if (error.details && error.details.field_errors) {
+        const fieldErrors = Object.entries(error.details.field_errors)
+          .map(
+            ([field, errors]) =>
+              `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
+          )
+          .join('; ');
+        detailedError = `${detailedError}. Detalhes: ${fieldErrors}`;
+      }
+    } else if (error instanceof Error) {
+      detailedError = error.message;
+    }
+
     updateState({
       currentStep: 'error',
-      status: `❌ ${errorMessages[step as keyof typeof errorMessages] || 'Erro inesperado'}`,
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      status: `❌ ${errorMessage}`,
+      error: detailedError,
       loading: false,
     });
   };

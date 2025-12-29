@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
+import {
+  CheckCircle,
+  AlertCircle,
+  Clock,
   CreditCard,
   Loader2,
   Bell,
-  X
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -49,38 +49,43 @@ export const generateStatusChangeMessage = (
   newStatus: OrderStatus,
   orderId: string
 ): { message: string; type: 'success' | 'warning' | 'error' | 'info' } => {
-  const statusTransitions: Record<string, { message: string; type: 'success' | 'warning' | 'error' | 'info' }> = {
+  const statusTransitions: Record<
+    string,
+    { message: string; type: 'success' | 'warning' | 'error' | 'info' }
+  > = {
     'pending_payment->paid': {
       message: `Pagamento confirmado para o pedido ${orderId.slice(-8)}. Processamento iniciará em breve.`,
-      type: 'success'
+      type: 'success',
     },
     'paid->processing': {
       message: `Processamento iniciado para o pedido ${orderId.slice(-8)}. Seu arquivo está sendo convertido.`,
-      type: 'info'
+      type: 'info',
     },
     'processing->completed': {
       message: `Pedido ${orderId.slice(-8)} concluído com sucesso! Arquivo pronto para download.`,
-      type: 'success'
+      type: 'success',
     },
     'processing->failed': {
       message: `Erro no processamento do pedido ${orderId.slice(-8)}. Tente fazer upload novamente.`,
-      type: 'error'
+      type: 'error',
     },
     'pending_payment->failed': {
       message: `Pagamento não foi processado para o pedido ${orderId.slice(-8)}. Verifique os dados e tente novamente.`,
-      type: 'error'
+      type: 'error',
     },
     'paid->failed': {
       message: `Erro no processamento do pedido ${orderId.slice(-8)} após pagamento confirmado. Entre em contato com o suporte.`,
-      type: 'error'
-    }
+      type: 'error',
+    },
   };
 
   const transitionKey = `${previousStatus}->${newStatus}`;
-  return statusTransitions[transitionKey] || {
-    message: `Status do pedido ${orderId.slice(-8)} alterado de ${previousStatus} para ${newStatus}.`,
-    type: 'info'
-  };
+  return (
+    statusTransitions[transitionKey] || {
+      message: `Status do pedido ${orderId.slice(-8)} alterado de ${previousStatus} para ${newStatus}.`,
+      type: 'info',
+    }
+  );
 };
 
 // Create notification for status change
@@ -89,8 +94,12 @@ export const createStatusChangeNotification = (
   previousStatus: OrderStatus,
   newStatus: OrderStatus
 ): StatusChangeNotification => {
-  const { message, type } = generateStatusChangeMessage(previousStatus, newStatus, orderId);
-  
+  const { message, type } = generateStatusChangeMessage(
+    previousStatus,
+    newStatus,
+    orderId
+  );
+
   return {
     id: `${orderId}-${Date.now()}`,
     orderId,
@@ -100,7 +109,7 @@ export const createStatusChangeNotification = (
     message,
     type,
     read: false,
-    persistent: type === 'error' || newStatus === 'completed'
+    persistent: type === 'error' || newStatus === 'completed',
   };
 };
 
@@ -109,7 +118,7 @@ export function StatusNotification({
   notification,
   onDismiss,
   onMarkAsRead,
-  className
+  className,
 }: StatusNotificationProps) {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -185,20 +194,16 @@ export function StatusNotification({
       aria-live="polite"
       aria-atomic="true"
     >
-      <NotificationIcon 
-        className="h-5 w-5 flex-shrink-0 mt-0.5" 
-        aria-hidden="true" 
+      <NotificationIcon
+        className="h-5 w-5 flex-shrink-0 mt-0.5"
+        aria-hidden="true"
       />
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium">
-              Status Atualizado
-            </p>
-            <p className="text-sm mt-1">
-              {notification.message}
-            </p>
+            <p className="text-sm font-medium">Status Atualizado</p>
+            <p className="text-sm mt-1">{notification.message}</p>
             <div className="flex items-center space-x-2 mt-2">
               <Badge variant="outline" className="text-xs">
                 {notification.previousStatus} → {notification.newStatus}
@@ -208,7 +213,7 @@ export function StatusNotification({
               </span>
             </div>
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -231,13 +236,13 @@ export function StatusNotificationManager({
   onMarkAsRead,
   onClearAll,
   maxVisible = 5,
-  className
+  className,
 }: StatusNotificationManagerProps) {
   const visibleNotifications = notifications
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, maxVisible);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (notifications.length === 0) {
     return null;
@@ -249,16 +254,14 @@ export function StatusNotificationManager({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Bell className="h-4 w-4" aria-hidden="true" />
-          <h3 className="text-sm font-medium">
-            Notificações de Status
-          </h3>
+          <h3 className="text-sm font-medium">Notificações de Status</h3>
           {unreadCount > 0 && (
             <Badge variant="destructive" className="text-xs">
               {unreadCount}
             </Badge>
           )}
         </div>
-        
+
         {notifications.length > 0 && (
           <Button
             variant="ghost"
@@ -297,25 +300,30 @@ export function StatusNotificationManager({
 
 // Hook for managing status change notifications
 export function useStatusNotifications() {
-  const [notifications, setNotifications] = useState<StatusChangeNotification[]>([]);
+  const [notifications, setNotifications] = useState<
+    StatusChangeNotification[]
+  >([]);
 
-  const addNotification = useCallback((
-    orderId: string,
-    previousStatus: OrderStatus,
-    newStatus: OrderStatus
-  ) => {
-    const notification = createStatusChangeNotification(orderId, previousStatus, newStatus);
-    setNotifications(prev => [notification, ...prev]);
-    return notification.id;
-  }, []);
+  const addNotification = useCallback(
+    (orderId: string, previousStatus: OrderStatus, newStatus: OrderStatus) => {
+      const notification = createStatusChangeNotification(
+        orderId,
+        previousStatus,
+        newStatus
+      );
+      setNotifications((prev) => [notification, ...prev]);
+      return notification.id;
+    },
+    []
+  );
 
   const dismissNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
   }, []);
 
@@ -324,7 +332,7 @@ export function useStatusNotifications() {
   }, []);
 
   const getUnreadCount = useCallback(() => {
-    return notifications.filter(n => !n.read).length;
+    return notifications.filter((n) => !n.read).length;
   }, [notifications]);
 
   return {
@@ -333,7 +341,7 @@ export function useStatusNotifications() {
     dismissNotification,
     markAsRead,
     clearAll,
-    getUnreadCount
+    getUnreadCount,
   };
 }
 
@@ -351,10 +359,14 @@ export function ImmediateStatusNotification({
   previousStatus,
   newStatus,
   onDismiss,
-  duration = 4000
+  duration = 4000,
 }: ImmediateNotificationProps) {
   const [isVisible, setIsVisible] = useState(true);
-  const { message, type } = generateStatusChangeMessage(previousStatus, newStatus, orderId);
+  const { message, type } = generateStatusChangeMessage(
+    previousStatus,
+    newStatus,
+    orderId
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {

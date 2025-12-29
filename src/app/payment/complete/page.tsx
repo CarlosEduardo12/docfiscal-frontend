@@ -5,7 +5,13 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Download, ArrowLeft, RefreshCw, Clock } from 'lucide-react';
+import {
+  CheckCircle,
+  Download,
+  ArrowLeft,
+  RefreshCw,
+  Clock,
+} from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from '@/lib/react-query';
 
@@ -17,6 +23,7 @@ function PaymentCompleteContent() {
   const [loading, setLoading] = useState(true);
   const [processingStatus, setProcessingStatus] = useState('checking');
   const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState('');
 
   const paymentId = searchParams.get('payment_id');
   const orderId = searchParams.get('order_id');
@@ -26,11 +33,11 @@ function PaymentCompleteContent() {
 
     try {
       const response = await apiClient.getPaymentStatus(paymentId);
-      
+
       if (response.success) {
         const status = response.data.status;
-        
-        if (status === 'paid') {
+
+        if (status === 'completed') {
           setProcessingStatus('processing');
           startProcessingMonitoring();
         } else if (status === 'pending') {
@@ -51,31 +58,33 @@ function PaymentCompleteContent() {
     if (!orderId) return;
 
     setProcessingStatus('processing');
-    
+
     // Simular progresso visual
     const progressInterval = setInterval(() => {
-      setProgress(prev => Math.min(prev + 10, 90));
+      setProgress((prev) => Math.min(prev + 10, 90));
     }, 500);
 
     // Verificar status do pedido
     const statusInterval = setInterval(async () => {
       try {
         const response = await apiClient.getOrder(orderId);
-        
+
         if (response.success) {
           const orderData = response.data;
           setOrder(orderData);
-          
+
           // Invalidar cache sempre que o status do pedido mudar
           queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-          queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(orderId) });
-          
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.orders.byId(orderId),
+          });
+
           if (orderData.status === 'completed') {
             clearInterval(progressInterval);
             clearInterval(statusInterval);
             setProgress(100);
             setProcessingStatus('completed');
-            
+
             // Auto-download após 2 segundos
             setTimeout(() => handleDownload(orderData), 2000);
           } else if (orderData.status === 'failed') {
@@ -94,24 +103,33 @@ function PaymentCompleteContent() {
       clearInterval(progressInterval);
       clearInterval(statusInterval);
     }, 600000);
-  }, [orderId]);
+  }, [orderId, queryClient]);
 
   const handleDownload = async (orderData?: any) => {
     const targetOrder = orderData || order;
     if (!orderId || !targetOrder) return;
 
     try {
-      const blob = await apiClient.downloadOrder(orderId);
+      const { blob, filename } = await apiClient.downloadOrder(orderId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${targetOrder.original_filename?.replace('.pdf', '') || 'converted'}_converted.csv`;
+      a.download =
+        filename ||
+        `${targetOrder.filename?.replace('.pdf', '') || 'converted'}_converted.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
       console.error('Download failed:', error);
+      // Handle download link expiration (410 error)
+      if (
+        error instanceof Error &&
+        error.message.includes('Download link expired')
+      ) {
+        setMessage('Link de download expirado. Tente novamente.');
+      }
     }
   };
 
@@ -144,7 +162,7 @@ function PaymentCompleteContent() {
               </CardTitle>
             </>
           )}
-          
+
           {processingStatus === 'waiting' && (
             <>
               <div className="mx-auto mb-4 w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -201,7 +219,9 @@ function PaymentCompleteContent() {
           {processingStatus === 'waiting' && (
             <div className="text-center text-gray-600">
               <p>Aguardando confirmação do pagamento...</p>
-              <p className="text-sm mt-2">Complete o pagamento na aba do AbacatePay.</p>
+              <p className="text-sm mt-2">
+                Complete o pagamento na aba do AbacatePay.
+              </p>
             </div>
           )}
 
@@ -211,14 +231,14 @@ function PaymentCompleteContent() {
                 <p className="font-medium">Processando seu arquivo...</p>
                 <p className="text-sm mt-1">Convertendo PDF para CSV</p>
               </div>
-              
+
               <div className="bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-blue-600 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              
+
               <p className="text-center text-sm text-gray-500">
                 {progress}% - Isso pode levar alguns segundos...
               </p>
@@ -231,12 +251,16 @@ function PaymentCompleteContent() {
                 <p>Seu arquivo CSV está pronto para download!</p>
                 {order && (
                   <p className="mt-2 font-medium text-sm">
-                    📄 {order.original_filename}
+                    📄 {order.filename}
                   </p>
                 )}
               </div>
 
-              <Button onClick={() => handleDownload()} className="w-full" size="lg">
+              <Button
+                onClick={() => handleDownload()}
+                className="w-full"
+                size="lg"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 📥 Baixar CSV Convertido
               </Button>
@@ -246,23 +270,25 @@ function PaymentCompleteContent() {
           {processingStatus === 'failed' && (
             <div className="text-center text-gray-600">
               <p>Houve um problema com o processamento.</p>
-              <p className="text-sm mt-2">Tente novamente ou entre em contato com o suporte.</p>
+              <p className="text-sm mt-2">
+                Tente novamente ou entre em contato com o suporte.
+              </p>
             </div>
           )}
 
           <div className="space-y-2">
             <Button
               variant="outline"
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/dashboard')}
               className="w-full"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar ao Início
+              Voltar ao Dashboard
             </Button>
 
             {processingStatus === 'failed' && (
               <Button
-                onClick={() => router.push('/')}
+                onClick={() => router.push('/dashboard')}
                 className="w-full"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -285,11 +311,13 @@ function PaymentCompleteContent() {
 
 export default function PaymentCompletePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
       <PaymentCompleteContent />
     </Suspense>
   );

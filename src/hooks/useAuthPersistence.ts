@@ -28,7 +28,7 @@ export function useAuthPersistence() {
 
   const initializePersistence = async () => {
     try {
-      setState(prev => ({ ...prev, isRefreshing: true }));
+      setState((prev) => ({ ...prev, isRefreshing: true }));
 
       // Initialize the token manager
       const hasValidSession = await authTokenManager.initialize();
@@ -40,10 +40,12 @@ export function useAuthPersistence() {
         lastRefreshAttempt: new Date(),
       });
 
-      console.log(`✅ Auth persistence initialized - Valid session: ${hasValidSession}`);
+      console.log(
+        `✅ Auth persistence initialized - Valid session: ${hasValidSession}`
+      );
     } catch (error) {
       console.error('❌ Auth persistence initialization failed:', error);
-      
+
       setState({
         isInitialized: true,
         hasValidSession: false,
@@ -55,12 +57,12 @@ export function useAuthPersistence() {
 
   const refreshSession = async (): Promise<boolean> => {
     try {
-      setState(prev => ({ ...prev, isRefreshing: true }));
+      setState((prev) => ({ ...prev, isRefreshing: true }));
 
       const refreshResult = await authTokenManager.refreshToken();
       const success = refreshResult.success;
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         hasValidSession: success,
         isRefreshing: false,
@@ -70,8 +72,8 @@ export function useAuthPersistence() {
       return success;
     } catch (error) {
       console.error('❌ Session refresh failed:', error);
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         hasValidSession: false,
         isRefreshing: false,
@@ -84,7 +86,7 @@ export function useAuthPersistence() {
 
   const clearSession = () => {
     authTokenManager.clearTokens();
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       hasValidSession: false,
       lastRefreshAttempt: new Date(),

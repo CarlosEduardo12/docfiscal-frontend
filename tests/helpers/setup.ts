@@ -8,7 +8,7 @@ async function globalSetup(config: FullConfig) {
   console.log('🚀 Starting Playwright E2E Flow Testing Setup');
   
   // Environment validation
-  const baseURL = process.env.BASE_URL || config.use?.baseURL || 'http://localhost:3000';
+  const baseURL = process.env.BASE_URL || (config as any).use?.baseURL || 'http://localhost:3000';
   const backendURL = process.env.BACKEND_URL || 'http://localhost:8000';
   
   console.log(`📍 Frontend URL: ${baseURL}`);

@@ -113,7 +113,7 @@ export class StatusPollingHelper {
         console.error(`❌ Error during polling attempt ${attempts}:`, error);
         
         // If it's a navigation or network error, retry
-        if (error.message.includes('navigation') || error.message.includes('timeout')) {
+        if ((error as Error).message?.includes('navigation') || (error as Error).message?.includes('timeout')) {
           await this.page.waitForTimeout(pollingConfig.interval);
           continue;
         }
@@ -174,7 +174,7 @@ export class StatusPollingHelper {
         console.error(`❌ Error during payment polling attempt ${attempts}:`, error);
         
         // Retry on network errors
-        if (error.message.includes('network') || error.message.includes('timeout')) {
+        if ((error as Error).message?.includes('network') || (error as Error).message?.includes('timeout')) {
           await this.page.waitForTimeout(pollingConfig.interval);
           continue;
         }

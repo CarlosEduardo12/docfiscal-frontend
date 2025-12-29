@@ -3,8 +3,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
-  error?: string;
-  message?: string;
+  message: string;
 }
 
 interface ApiError {
@@ -13,9 +12,10 @@ interface ApiError {
   message: string;
   details?: {
     field_errors?: Record<string, string[]>;
-    error_count?: number;
     retry_after?: number;
+    guidance?: string;
   };
+  request_id?: string;
 }
 
 class ApiClient {
@@ -64,12 +64,16 @@ class ApiClient {
 
       if (!response.ok) {
         // Try to parse error response
-        let errorData;
+        let errorData: ApiError;
         try {
           errorData = await response.json();
           console.log('❌ Error response data:', errorData);
         } catch {
-          errorData = { message: `HTTP ${response.status}` };
+          errorData = {
+            success: false,
+            error: `HTTP_${response.status}`,
+            message: `HTTP ${response.status}`,
+          };
         }
 
         // Handle token refresh on 401
@@ -82,7 +86,16 @@ class ApiClient {
               Authorization: `Bearer ${this.accessToken}`,
             };
             const retryResponse = await fetch(url, config);
-            return await retryResponse.json();
+            if (retryResponse.ok) {
+              const retryData = await retryResponse.json();
+              console.log('✅ Retry success response data:', retryData);
+              return retryData;
+            } else {
+              const retryErrorData = await retryResponse.json();
+              throw new Error(
+                retryErrorData.message || `HTTP ${retryResponse.status}`
+              );
+            }
           }
         }
 
@@ -91,6 +104,15 @@ class ApiClient {
 
       const data = await response.json();
       console.log('✅ Success response data:', data);
+
+      // Ensure response has required fields
+      if (typeof data.success === 'undefined') {
+        data.success = true;
+      }
+      if (!data.message) {
+        data.message = 'Request completed successfully';
+      }
+
       return data;
     } catch (error) {
       console.error('💥 API Error:', error);
@@ -126,10 +148,10 @@ class ApiClient {
       skipAuth: true,
     });
 
-    if (response.success && (response.data as any)?.tokens) {
+    if (response.success && (response.data as any)?.access_token) {
       this.setTokens(
-        (response.data as any).tokens.access_token,
-        (response.data as any).tokens.refresh_token
+        (response.data as any).access_token,
+        (response.data as any).refresh_token
       );
     }
 
@@ -146,10 +168,10 @@ class ApiClient {
         skipAuth: true,
       });
 
-      if (response.success && (response.data as any)?.tokens) {
+      if (response.success && (response.data as any)?.access_token) {
         this.setTokens(
-          (response.data as any).tokens.access_token,
-          (response.data as any).tokens.refresh_token || this.refreshToken
+          (response.data as any).access_token,
+          (response.data as any).refresh_token || this.refreshToken
         );
         return true;
       }
@@ -180,7 +202,7 @@ class ApiClient {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.request('/api/upload', {
+    return this.request('/api/upload/', {
       method: 'POST',
       body: formData,
       headers: {}, // Don't set Content-Type for FormData
@@ -201,14 +223,16 @@ class ApiClient {
   async getOrders(params?: {
     page?: number;
     limit?: number;
-    sort_by?: string;
-    sort_order?: 'asc' | 'desc';
+    sort?: string;
+    order?: 'asc' | 'desc';
+    status?: string;
   }): Promise<ApiResponse> {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
-    if (params?.sort_by) searchParams.set('sort_by', params.sort_by);
-    if (params?.sort_order) searchParams.set('sort_order', params.sort_order);
+    if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.order) searchParams.set('order', params.order);
+    if (params?.status) searchParams.set('status', params.status);
 
     const query = searchParams.toString();
     return this.request(`/api/orders${query ? `?${query}` : ''}`);
@@ -218,7 +242,9 @@ class ApiClient {
     return this.request(`/api/orders/${orderId}`);
   }
 
-  async downloadOrder(orderId: string): Promise<Blob> {
+  async downloadOrder(
+    orderId: string
+  ): Promise<{ blob: Blob; filename?: string }> {
     const response = await fetch(
       `${this.baseURL}/api/orders/${orderId}/download`,
       {
@@ -228,11 +254,46 @@ class ApiClient {
       }
     );
 
-    if (!response.ok) {
-      throw new Error('Download failed');
+    if (response.status === 410) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error('Download link expired');
+      (error as any).code = 'DOWNLOAD_LINK_EXPIRED';
+      (error as any).details = errorData;
+      throw error;
     }
 
-    return response.blob();
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.message || 'Download failed');
+      (error as any).code =
+        response.status === 404 ? 'ORDER_NOT_FOUND' : 'DOWNLOAD_FAILED';
+      (error as any).status = response.status;
+      (error as any).details = errorData;
+      throw error;
+    }
+
+    // Extract filename from Content-Disposition header
+    let filename: string | undefined;
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (contentDisposition) {
+      // Handle various Content-Disposition formats
+      // First try to match quoted filenames
+      let filenameMatch = contentDisposition.match(/filename\s*=\s*"([^"]*)"/);
+      if (!filenameMatch) {
+        filenameMatch = contentDisposition.match(/filename\s*=\s*'([^']*)'/);
+      }
+      if (!filenameMatch) {
+        // Try unquoted filename
+        filenameMatch = contentDisposition.match(/filename\s*=\s*([^;\s]+)/);
+      }
+
+      if (filenameMatch && filenameMatch[1] && filenameMatch[1].length > 0) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    const blob = await response.blob();
+    return { blob, filename };
   }
 
   async retryOrder(orderId: string): Promise<ApiResponse> {
@@ -255,25 +316,32 @@ class ApiClient {
       ...options,
     };
 
-    return this.request(`/api/orders/${orderId}/payment`, {
+    return this.request(`/api/payments/orders/${orderId}/payment`, {
       method: 'POST',
       body: JSON.stringify(defaultOptions),
     });
   }
 
   async getPaymentStatus(paymentId: string): Promise<ApiResponse> {
-    return this.request(`/api/payments/${paymentId}/status`);
+    return this.request(`/api/payments/${paymentId}`);
   }
 
   // User management
-  async updateProfile(
-    userId: string,
-    data: {
-      name?: string;
-      email?: string;
-    }
-  ): Promise<ApiResponse> {
-    return this.request(`/api/users/${userId}`, {
+  async updateProfile(data: {
+    name?: string;
+    email?: string;
+  }): Promise<ApiResponse> {
+    return this.request(`/api/users/me`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(data: {
+    current_password: string;
+    new_password: string;
+  }): Promise<ApiResponse> {
+    return this.request(`/api/users/me/password`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -284,15 +352,17 @@ class ApiClient {
     params?: {
       page?: number;
       limit?: number;
-      sort_by?: string;
-      sort_order?: 'asc' | 'desc';
+      sort?: string;
+      order?: 'asc' | 'desc';
+      status?: string;
     }
   ): Promise<ApiResponse> {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
-    if (params?.sort_by) searchParams.set('sort_by', params.sort_by);
-    if (params?.sort_order) searchParams.set('sort_order', params.sort_order);
+    if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.order) searchParams.set('order', params.order);
+    if (params?.status) searchParams.set('status', params.status);
 
     const query = searchParams.toString();
     return this.request(

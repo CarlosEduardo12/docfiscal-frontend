@@ -1,6 +1,6 @@
 /**
  * Enhanced State Management Provider
- * 
+ *
  * Provides enhanced state management capabilities throughout the application,
  * including automatic UI updates, state persistence, data consistency,
  * failure recovery, and optimistic updates.
@@ -10,25 +10,31 @@
 
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { 
+import {
   createEnhancedStateManagement,
   EnhancedStateManager,
   StateSynchronizer,
-  NavigationStateManager
+  NavigationStateManager,
 } from '@/lib/enhanced-state-management';
 
 interface EnhancedStateContextValue {
   stateManager: EnhancedStateManager;
   stateSynchronizer: StateSynchronizer;
   navigationStateManager: NavigationStateManager;
-  updateOrderStatus: (orderId: string, status: string, options?: any) => Promise<any>;
+  updateOrderStatus: (
+    orderId: string,
+    status: string,
+    options?: any
+  ) => Promise<any>;
   ensureConsistency: (orderId: string) => void;
   handleFailure: (queryKey: any, error: Error, options?: any) => Promise<any>;
   persistAcrossNavigation: (queryKey: any) => void;
   cleanup: () => void;
 }
 
-const EnhancedStateContext = createContext<EnhancedStateContextValue | null>(null);
+const EnhancedStateContext = createContext<EnhancedStateContextValue | null>(
+  null
+);
 
 export interface EnhancedStateProviderProps {
   children: React.ReactNode;
@@ -71,11 +77,16 @@ export function EnhancedStateProvider({
     if (enableAutoRecovery) {
       // Set up global error handling for state recovery
       const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        console.error('Unhandled promise rejection in state management:', event.reason);
-        
+        console.error(
+          'Unhandled promise rejection in state management:',
+          event.reason
+        );
+
         // Could implement automatic recovery mechanisms here
-        if (event.reason?.message?.includes('network') || 
-            event.reason?.message?.includes('fetch')) {
+        if (
+          event.reason?.message?.includes('network') ||
+          event.reason?.message?.includes('fetch')
+        ) {
           // Network error - could trigger retry logic
           console.log('Network error detected, recovery mechanisms available');
         }
@@ -84,7 +95,10 @@ export function EnhancedStateProvider({
       window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
       return () => {
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+        window.removeEventListener(
+          'unhandledrejection',
+          handleUnhandledRejection
+        );
       };
     }
   }, [queryClient, enableStatePersistence, enableAutoRecovery]);
@@ -108,11 +122,13 @@ export function EnhancedStateProvider({
  */
 export function useEnhancedStateContext() {
   const context = useContext(EnhancedStateContext);
-  
+
   if (!context) {
-    throw new Error('useEnhancedStateContext must be used within an EnhancedStateProvider');
+    throw new Error(
+      'useEnhancedStateContext must be used within an EnhancedStateProvider'
+    );
   }
-  
+
   return context;
 }
 
@@ -135,49 +151,63 @@ export function withEnhancedState<P extends object>(
  * Hook for component-level state management integration
  */
 export function useComponentStateManagement(componentId: string) {
-  const { 
-    stateManager, 
-    updateOrderStatus, 
-    ensureConsistency,
-    handleFailure 
-  } = useEnhancedStateContext();
+  const { stateManager, updateOrderStatus, ensureConsistency, handleFailure } =
+    useEnhancedStateContext();
 
   const componentRef = useRef(componentId);
 
   // Track component state changes
   useEffect(() => {
-    console.log(`Component ${componentId} initialized with enhanced state management`);
-    
+    console.log(
+      `Component ${componentId} initialized with enhanced state management`
+    );
+
     return () => {
       console.log(`Component ${componentId} cleanup`);
     };
   }, [componentId]);
 
-  const updateOrderWithTracking = async (orderId: string, status: string, options?: any) => {
-    console.log(`Component ${componentId} updating order ${orderId} to status ${status}`);
-    
+  const updateOrderWithTracking = async (
+    orderId: string,
+    status: string,
+    options?: any
+  ) => {
+    console.log(
+      `Component ${componentId} updating order ${orderId} to status ${status}`
+    );
+
     try {
       const result = await updateOrderStatus(orderId, status, {
         optimistic: true,
         rollbackOnError: true,
         ...options,
       });
-      
+
       if (result.success) {
-        console.log(`Component ${componentId} successfully updated order ${orderId}`);
+        console.log(
+          `Component ${componentId} successfully updated order ${orderId}`
+        );
       } else {
-        console.error(`Component ${componentId} failed to update order ${orderId}:`, result.error);
+        console.error(
+          `Component ${componentId} failed to update order ${orderId}:`,
+          result.error
+        );
       }
-      
+
       return result;
     } catch (error) {
-      console.error(`Component ${componentId} error updating order ${orderId}:`, error);
+      console.error(
+        `Component ${componentId} error updating order ${orderId}:`,
+        error
+      );
       throw error;
     }
   };
 
   const ensureOrderConsistency = (orderId: string) => {
-    console.log(`Component ${componentId} ensuring consistency for order ${orderId}`);
+    console.log(
+      `Component ${componentId} ensuring consistency for order ${orderId}`
+    );
     ensureConsistency(orderId);
   };
 
@@ -199,9 +229,12 @@ export function StateManagementDebugger() {
     const interval = setInterval(() => {
       const optimisticUpdates = stateManager.getOptimisticUpdates();
       const hasPending = stateManager.hasPendingOptimisticUpdates();
-      
+
       if (hasPending) {
-        console.log('Pending optimistic updates:', Array.from(optimisticUpdates.entries()));
+        console.log(
+          'Pending optimistic updates:',
+          Array.from(optimisticUpdates.entries())
+        );
       }
     }, 5000);
 

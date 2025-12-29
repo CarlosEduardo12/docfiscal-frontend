@@ -33,35 +33,34 @@ describe('Dashboard Orders Property Tests', () => {
     'failed'
   ) as fc.Arbitrary<OrderStatus>;
 
-  // Generator for valid orders with unique IDs
+  // Generator for valid orders with unique IDs using new API format
   const orderArb = fc.integer({ min: 0 }).chain((index) =>
     fc.record({
       id: fc.constant(`order-${index}-${Date.now()}`),
-      userId: fc.constant('user-placeholder'), // Will be overridden in tests
+      user_id: fc.constant('user-placeholder'), // Will be overridden in tests
       filename: fc
         .string({ minLength: 1, maxLength: 50 })
         .map((name) => name.trim() || 'document')
         .map((name) => `${name}.pdf`),
-      originalFileSize: fc.integer({ min: 1, max: 10000000 }),
+      file_size: fc.integer({ min: 1, max: 10000000 }),
       status: orderStatusArb,
-      paymentId: fc.option(fc.constant(`payment-${index}`)),
-      paymentUrl: fc.option(fc.webUrl()),
-      downloadUrl: fc.option(fc.webUrl()),
-      errorMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
-      createdAt: fc.date({
+      created_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      updatedAt: fc.date({
+      }).map(d => d.toISOString()),
+      updated_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      completedAt: fc.option(
+      }).map(d => d.toISOString()),
+      processing_completed_at: fc.option(
         fc.date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        })
+        }).map(d => d.toISOString())
       ),
+      checkout_url: fc.option(fc.webUrl()),
+      download_url: fc.option(fc.webUrl()),
+      error_message: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
     })
   ) as fc.Arbitrary<Order>;
 
@@ -79,14 +78,14 @@ describe('Dashboard Orders Property Tests', () => {
             const userSpecificOrders = userOrders.map((order, index) => ({
               ...order,
               id: `user-order-${index}-${Date.now()}`,
-              userId: targetUserId,
+              user_id: targetUserId,
             }));
 
             // Ensure other orders belong to different users with unique IDs
             const otherUserOrders = otherOrders.map((order, index) => ({
               ...order,
               id: `other-order-${index}-${Date.now()}`,
-              userId: `other_user_${index}`,
+              user_id: `other_user_${index}`,
             }));
 
             // Mix all orders together (simulating what might come from API)
@@ -94,7 +93,7 @@ describe('Dashboard Orders Property Tests', () => {
 
             // Filter to only user-specific orders (what the component should receive)
             const filteredOrders = allOrders.filter(
-              (order) => order.userId === targetUserId
+              (order) => order.user_id === targetUserId
             );
 
             const mockOnDownload = jest.fn();
@@ -109,12 +108,12 @@ describe('Dashboard Orders Property Tests', () => {
 
             // Property: All displayed orders should belong to the target user
             filteredOrders.forEach((order) => {
-              expect(order.userId).toBe(targetUserId);
+              expect(order.user_id).toBe(targetUserId);
             });
 
             // Property: No orders from other users should be displayed
             otherUserOrders.forEach((order) => {
-              expect(order.userId).not.toBe(targetUserId);
+              expect(order.user_id).not.toBe(targetUserId);
             });
 
             // Property: The number of filtered orders should match user-specific orders
@@ -139,10 +138,10 @@ describe('Dashboard Orders Property Tests', () => {
             const userOrders = orders.map((order, index) => ({
               ...order,
               id: `sort-order-${index}-${Date.now()}`,
-              userId: userId,
-              // Ensure valid dates by creating new Date objects
-              createdAt: new Date(order.createdAt.getTime()),
-              updatedAt: new Date(order.updatedAt.getTime()),
+              user_id: userId,
+              // Ensure valid dates by using the string format
+              created_at: order.created_at,
+              updated_at: order.updated_at,
             }));
 
             const mockOnDownload = jest.fn();
@@ -158,16 +157,16 @@ describe('Dashboard Orders Property Tests', () => {
             // Property: Orders should be sorted by creation date (most recent first)
             const sortedOrders = [...userOrders].sort(
               (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
             );
 
             // Verify the component displays orders in the correct order
             // We can't easily test the DOM order, but we can verify the sorting logic
             for (let i = 0; i < sortedOrders.length - 1; i++) {
-              const currentDate = new Date(sortedOrders[i].createdAt).getTime();
+              const currentDate = new Date(sortedOrders[i].created_at).getTime();
               const nextDate = new Date(
-                sortedOrders[i + 1].createdAt
+                sortedOrders[i + 1].created_at
               ).getTime();
 
               // Ensure dates are valid numbers

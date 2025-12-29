@@ -58,32 +58,37 @@ describe('Navigation State Persistence Properties', () => {
         fc.record({
           id: fc.string({ minLength: 1, maxLength: 50 }),
           filename: fc.string({ minLength: 1, maxLength: 100 }),
-          status: fc.constantFrom('pending', 'processing', 'completed', 'failed'),
+          status: fc.constantFrom(
+            'pending',
+            'processing',
+            'completed',
+            'failed'
+          ),
         }),
         fc.constantFrom('/dashboard', '/orders', '/upload', '/profile'),
         fc.constantFrom('/dashboard', '/orders', '/upload', '/profile'),
         (orderData, fromPath, toPath) => {
           // Create fresh navigation manager for this test run
           const testNavigationManager = new MockNavigationManager();
-          
+
           // Setup: Cache order data
           const cacheKey = `order-${orderData.id}`;
           testNavigationManager.setData(cacheKey, orderData);
-          
+
           // Verify data is cached
           const beforeNavigation = testNavigationManager.getData(cacheKey);
           expect(beforeNavigation).toEqual(orderData);
-          
+
           // Simulate navigation
           testNavigationManager.navigate(fromPath, toPath);
-          
+
           // **Property: Navigation should preserve cached data without refetching**
           const afterNavigation = testNavigationManager.getData(cacheKey);
           expect(afterNavigation).toEqual(beforeNavigation);
           expect(afterNavigation).toEqual(orderData);
           expect(afterNavigation.id).toBe(orderData.id);
           expect(afterNavigation.status).toBe(orderData.status);
-          
+
           return true;
         }
       ),
@@ -104,38 +109,41 @@ describe('Navigation State Persistence Properties', () => {
           }),
           { minLength: 1, maxLength: 5 }
         ),
-        fc.array(fc.constantFrom('/dashboard', '/orders', '/upload'), { minLength: 2, maxLength: 4 }),
+        fc.array(fc.constantFrom('/dashboard', '/orders', '/upload'), {
+          minLength: 2,
+          maxLength: 4,
+        }),
         (queries, navigationSequence) => {
           // Create fresh navigation manager for this test run
           const testNavigationManager = new MockNavigationManager();
-          
+
           // Setup: Cache multiple queries
           const initialStates = new Map();
-          queries.forEach(query => {
+          queries.forEach((query) => {
             const key = `query-${query.id}`;
             testNavigationManager.setData(key, query.data);
             initialStates.set(key, query.data);
           });
-          
+
           // Perform navigation sequence
           for (let i = 0; i < navigationSequence.length - 1; i++) {
             const fromPath = navigationSequence[i];
             const toPath = navigationSequence[i + 1];
-            
+
             testNavigationManager.navigate(fromPath, toPath);
-            
+
             // **Property: Query state should remain consistent across navigation**
-            queries.forEach(query => {
+            queries.forEach((query) => {
               const key = `query-${query.id}`;
               const currentState = testNavigationManager.getData(key);
               const expectedState = initialStates.get(key);
-              
+
               expect(currentState).toEqual(expectedState);
               expect(currentState?.filename).toBe(expectedState?.filename);
               expect(currentState?.status).toBe(expectedState?.status);
             });
           }
-          
+
           return true;
         }
       ),
@@ -151,7 +159,7 @@ describe('Navigation State Persistence Properties', () => {
         (numOrders, navigationCycles) => {
           // Create fresh navigation manager for this test run
           const testNavigationManager = new MockNavigationManager();
-          
+
           // Create unique orders
           const orders = Array.from({ length: numOrders }, (_, index) => ({
             id: `order-${index}`,
@@ -159,44 +167,48 @@ describe('Navigation State Persistence Properties', () => {
             status: 'completed' as const,
             file_size: 1000 + index,
           }));
-          
+
           // Setup: Cache all orders
           const originalData = new Map();
-          orders.forEach(order => {
+          orders.forEach((order) => {
             const key = `order-${order.id}`;
             testNavigationManager.setData(key, order);
             originalData.set(key, { ...order });
           });
-          
+
           // Verify initial cache state
-          expect(testNavigationManager.getCachedKeys().length).toBe(orders.length);
-          
+          expect(testNavigationManager.getCachedKeys().length).toBe(
+            orders.length
+          );
+
           // Perform multiple navigation cycles
           const paths = ['/dashboard', '/orders', '/upload'];
-          
+
           for (let cycle = 0; cycle < navigationCycles; cycle++) {
             // Navigate through different paths
             for (let i = 0; i < paths.length - 1; i++) {
               testNavigationManager.navigate(paths[i], paths[i + 1]);
-              
+
               // **Property: Multiple navigation cycles should preserve data integrity**
-              orders.forEach(originalOrder => {
+              orders.forEach((originalOrder) => {
                 const key = `order-${originalOrder.id}`;
                 const cachedOrder = testNavigationManager.getData(key);
                 const expectedOrder = originalData.get(key);
-                
+
                 expect(cachedOrder).toEqual(expectedOrder);
                 expect(cachedOrder?.id).toBe(originalOrder.id);
                 expect(cachedOrder?.filename).toBe(originalOrder.filename);
                 expect(cachedOrder?.status).toBe(originalOrder.status);
                 expect(cachedOrder?.file_size).toBe(originalOrder.file_size);
               });
-              
+
               // Verify cache integrity after each navigation
-              expect(testNavigationManager.getCachedKeys().length).toBe(orders.length);
+              expect(testNavigationManager.getCachedKeys().length).toBe(
+                orders.length
+              );
             }
           }
-          
+
           return true;
         }
       ),

@@ -31,7 +31,9 @@ const testSchema: ValidationSchema<TestFormData> = {
       minLength: 6,
       customValidator: (value: string) => {
         if (!value) return null;
-        return value.length >= 6 ? null : 'Password must be at least 6 characters';
+        return value.length >= 6
+          ? null
+          : 'Password must be at least 6 characters';
       },
     },
     name: {
@@ -59,7 +61,10 @@ const validateSingleField = (
   formData?: Record<string, any>
 ): string | null => {
   // Required validation
-  if (fieldValidator.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+  if (
+    fieldValidator.required &&
+    (!value || (typeof value === 'string' && value.trim() === ''))
+  ) {
     return `${fieldName} is required`;
   }
 
@@ -98,15 +103,23 @@ const validateSingleField = (
   return null;
 };
 
-const validateForm = (formData: Record<string, any>, schema: ValidationSchema<any>) => {
+const validateForm = (
+  formData: Record<string, any>,
+  schema: ValidationSchema<any>
+) => {
   const fieldErrors: ValidationError[] = [];
   let firstErrorField: string | undefined;
 
   // Validate individual fields
   Object.entries(schema.fields).forEach(([fieldName, fieldValidator]) => {
     const value = formData[fieldName];
-    const error = validateSingleField(fieldName, value, fieldValidator, formData);
-    
+    const error = validateSingleField(
+      fieldName,
+      value,
+      fieldValidator,
+      formData
+    );
+
     if (error) {
       fieldErrors.push({ field: fieldName, message: error });
       if (!firstErrorField) {
@@ -117,7 +130,7 @@ const validateForm = (formData: Record<string, any>, schema: ValidationSchema<an
 
   // Run custom form-level validators
   if (schema.customValidators) {
-    schema.customValidators.forEach(validator => {
+    schema.customValidators.forEach((validator) => {
       const customErrors = validator(formData);
       fieldErrors.push(...customErrors);
       if (!firstErrorField && customErrors.length > 0) {
@@ -140,14 +153,14 @@ const invalidEmailArbitrary = fc.oneof(
   fc.constant('test@'),
   fc.constant('@test.com'),
   fc.constant('test.com'),
-  fc.string().filter(s => !s.includes('@') || !s.includes('.')),
+  fc.string().filter((s) => !s.includes('@') || !s.includes('.'))
 );
 
 const validEmailArbitrary = fc.emailAddress();
 
 const invalidPasswordArbitrary = fc.oneof(
   fc.constant(''),
-  fc.string({ maxLength: 5 }),
+  fc.string({ maxLength: 5 })
 );
 
 const validPasswordArbitrary = fc.string({ minLength: 6, maxLength: 100 });
@@ -156,10 +169,12 @@ const invalidNameArbitrary = fc.oneof(
   fc.constant(''),
   fc.constant(' '),
   fc.string({ maxLength: 1 }),
-  fc.string({ minLength: 51, maxLength: 100 }),
+  fc.string({ minLength: 51, maxLength: 100 })
 );
 
-const validNameArbitrary = fc.string({ minLength: 2, maxLength: 50 }).filter(s => s.trim().length >= 2);
+const validNameArbitrary = fc
+  .string({ minLength: 2, maxLength: 50 })
+  .filter((s) => s.trim().length >= 2);
 
 describe('Form Validation Feedback Properties', () => {
   /**
@@ -180,16 +195,16 @@ describe('Form Validation Feedback Properties', () => {
 
           // Should be invalid
           expect(validationResult.isValid).toBe(false);
-          
+
           // Should have validation errors
           expect(validationResult.errors.length).toBeGreaterThan(0);
-          
+
           // Should have a first error field for focus management
           expect(validationResult.firstErrorField).toBeDefined();
           expect(typeof validationResult.firstErrorField).toBe('string');
-          
+
           // Each error should have required properties
-          validationResult.errors.forEach(error => {
+          validationResult.errors.forEach((error) => {
             expect(error).toHaveProperty('field');
             expect(error).toHaveProperty('message');
             expect(typeof error.field).toBe('string');
@@ -199,23 +214,31 @@ describe('Form Validation Feedback Properties', () => {
           });
 
           // Error messages should be descriptive (not just "error" or "invalid")
-          validationResult.errors.forEach(error => {
+          validationResult.errors.forEach((error) => {
             expect(error.message.length).toBeGreaterThan(5);
             expect(error.message.toLowerCase()).not.toBe('error');
             expect(error.message.toLowerCase()).not.toBe('invalid');
           });
 
           // Should have specific error for each invalid field
-          const errorFields = validationResult.errors.map(e => e.field);
-          
+          const errorFields = validationResult.errors.map((e) => e.field);
+
           // Check that we get errors for the fields we expect
-          if (!invalidData.email || invalidData.email.trim() === '' || !invalidData.email.includes('@')) {
+          if (
+            !invalidData.email ||
+            invalidData.email.trim() === '' ||
+            !invalidData.email.includes('@')
+          ) {
             expect(errorFields).toContain('email');
           }
           if (!invalidData.password || invalidData.password.length < 6) {
             expect(errorFields).toContain('password');
           }
-          if (!invalidData.name || invalidData.name.trim().length < 2 || invalidData.name.length > 50) {
+          if (
+            !invalidData.name ||
+            invalidData.name.trim().length < 2 ||
+            invalidData.name.length > 50
+          ) {
             expect(errorFields).toContain('name');
           }
         }
@@ -237,10 +260,10 @@ describe('Form Validation Feedback Properties', () => {
 
           // Should be valid
           expect(validationResult.isValid).toBe(true);
-          
+
           // Should have no validation errors
           expect(validationResult.errors.length).toBe(0);
-          
+
           // Should have no first error field
           expect(validationResult.firstErrorField).toBeUndefined();
         }
@@ -262,18 +285,18 @@ describe('Form Validation Feedback Properties', () => {
 
           // Should be invalid due to email
           expect(validationResult.isValid).toBe(false);
-          
+
           // Should have at least one error (for email)
           expect(validationResult.errors.length).toBeGreaterThan(0);
-          
+
           // Should have error for email field
-          const errorFields = validationResult.errors.map(e => e.field);
+          const errorFields = validationResult.errors.map((e) => e.field);
           expect(errorFields).toContain('email');
-          
+
           // Should NOT have errors for valid password and name fields
           expect(errorFields).not.toContain('password');
           expect(errorFields).not.toContain('name');
-          
+
           // First error should be email
           expect(validationResult.firstErrorField).toBe('email');
         }
@@ -284,24 +307,23 @@ describe('Form Validation Feedback Properties', () => {
 
   test('Property 1: Required field validation provides specific messages', () => {
     fc.assert(
-      fc.property(
-        fc.constantFrom('email', 'password', 'name'),
-        (fieldName) => {
-          const emptyData = { email: '', password: '', name: '' };
-          const validationResult = validateForm(emptyData, testSchema);
+      fc.property(fc.constantFrom('email', 'password', 'name'), (fieldName) => {
+        const emptyData = { email: '', password: '', name: '' };
+        const validationResult = validateForm(emptyData, testSchema);
 
-          // Should be invalid
-          expect(validationResult.isValid).toBe(false);
-          
-          // Should have errors for all required fields
-          expect(validationResult.errors.length).toBe(3);
-          
-          // Should have error for the specific field
-          const fieldError = validationResult.errors.find(e => e.field === fieldName);
-          expect(fieldError).toBeDefined();
-          expect(fieldError!.message).toContain('required');
-        }
-      ),
+        // Should be invalid
+        expect(validationResult.isValid).toBe(false);
+
+        // Should have errors for all required fields
+        expect(validationResult.errors.length).toBe(3);
+
+        // Should have error for the specific field
+        const fieldError = validationResult.errors.find(
+          (e) => e.field === fieldName
+        );
+        expect(fieldError).toBeDefined();
+        expect(fieldError!.message).toContain('required');
+      }),
       { numRuns: 50 }
     );
   });
@@ -316,15 +338,17 @@ describe('Form Validation Feedback Properties', () => {
             password: shortPassword,
             name: 'Valid Name',
           };
-          
+
           const validationResult = validateForm(formData, testSchema);
 
           if (shortPassword.length < 6) {
             // Should be invalid due to password length
             expect(validationResult.isValid).toBe(false);
-            
+
             // Should have error for password
-            const passwordError = validationResult.errors.find(e => e.field === 'password');
+            const passwordError = validationResult.errors.find(
+              (e) => e.field === 'password'
+            );
             expect(passwordError).toBeDefined();
             expect(passwordError!.message).toContain('6 characters');
           } else {
@@ -344,7 +368,7 @@ describe('Form Validation Feedback Properties', () => {
           fc.constant('notanemail'),
           fc.constant('test@'),
           fc.constant('@domain.com'),
-          fc.constant('test.domain.com'),
+          fc.constant('test.domain.com')
         ),
         (invalidEmail) => {
           const formData = {
@@ -352,14 +376,16 @@ describe('Form Validation Feedback Properties', () => {
             password: 'validpassword',
             name: 'Valid Name',
           };
-          
+
           const validationResult = validateForm(formData, testSchema);
 
           // Should be invalid due to email
           expect(validationResult.isValid).toBe(false);
-          
+
           // Should have error for email
-          const emailError = validationResult.errors.find(e => e.field === 'email');
+          const emailError = validationResult.errors.find(
+            (e) => e.field === 'email'
+          );
           expect(emailError).toBeDefined();
           expect(emailError!.message.toLowerCase()).toContain('email');
         }

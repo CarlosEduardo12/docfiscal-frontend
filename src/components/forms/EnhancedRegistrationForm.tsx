@@ -89,7 +89,11 @@ const registrationSchema: ValidationSchema<RegistrationFormData> = {
   customValidators: [
     (formData: RegistrationFormData) => {
       const errors = [];
-      if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      if (
+        formData.password &&
+        formData.confirmPassword &&
+        formData.password !== formData.confirmPassword
+      ) {
         errors.push({
           field: 'confirmPassword',
           message: 'Passwords do not match',
@@ -102,27 +106,27 @@ const registrationSchema: ValidationSchema<RegistrationFormData> = {
 
 // Server error mapping for user-friendly messages
 const serverErrorMapping: ServerErrorMapping = {
-  'EMAIL_ALREADY_EXISTS': {
+  EMAIL_ALREADY_EXISTS: {
     field: 'email',
     message: 'An account with this email already exists',
   },
-  'INVALID_EMAIL': {
+  INVALID_EMAIL: {
     field: 'email',
     message: 'Please enter a valid email address',
   },
-  'WEAK_PASSWORD': {
+  WEAK_PASSWORD: {
     field: 'password',
     message: 'Password is too weak. Please choose a stronger password',
   },
-  'INVALID_NAME': {
+  INVALID_NAME: {
     field: 'fullName',
     message: 'Please enter a valid full name',
   },
-  'REGISTRATION_FAILED': {
+  REGISTRATION_FAILED: {
     field: 'general',
     message: 'Registration failed. Please try again',
   },
-  'SERVER_ERROR': {
+  SERVER_ERROR: {
     field: 'general',
     message: 'Server error. Please try again later',
   },
@@ -143,17 +147,17 @@ const RegistrationFormContent: React.FC = () => {
 
   const { validateForm, focusFirstError, clearErrors } = useFormValidator();
 
-  const handleInputChange = (field: keyof RegistrationFormData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear server errors when user starts typing
-    if (serverErrors.length > 0) {
-      setServerErrors([]);
-    }
-  };
+  const handleInputChange =
+    (field: keyof RegistrationFormData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
+
+      // Clear server errors when user starts typing
+      if (serverErrors.length > 0) {
+        setServerErrors([]);
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +168,7 @@ const RegistrationFormContent: React.FC = () => {
 
     // Validate form
     const validationResult = validateForm(formData);
-    
+
     if (!validationResult.isValid) {
       setIsLoading(false);
       focusFirstError();
@@ -181,13 +185,14 @@ const RegistrationFormContent: React.FC = () => {
 
       if (!registerResponse.success) {
         // Map server errors to user-friendly messages
+        const errorResponse = registerResponse as any; // Cast to handle error properties
         const mappedErrors = mapServerErrors(
-          registerResponse.error || registerResponse.message,
+          errorResponse.error || registerResponse.message,
           serverErrorMapping
         );
-        
+
         // Set server errors for display
-        setServerErrors(mappedErrors.map(e => e.message));
+        setServerErrors(mappedErrors.map((e) => e.message));
         return;
       }
 
@@ -201,7 +206,9 @@ const RegistrationFormContent: React.FC = () => {
       });
 
       if (!loginResponse.success) {
-        setSuccessMessage('Account created successfully! Please log in manually.');
+        setSuccessMessage(
+          'Account created successfully! Please log in manually.'
+        );
         setTimeout(() => {
           router.push('/login');
         }, 2000);
@@ -223,7 +230,11 @@ const RegistrationFormContent: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="register-title">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      aria-labelledby="register-title"
+    >
       <ValidatedInput
         fieldName="fullName"
         label="Full Name"
@@ -336,7 +347,7 @@ export default function EnhancedRegistrationForm() {
           >
             <RegistrationFormContent />
           </FormValidator>
-          
+
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-blue-600 hover:underline">

@@ -176,7 +176,7 @@ export class ReportGenerator {
             timestamp: firstError.timestamp,
             description: `Network error details for ${endpoint}`
           }],
-          affectedFlows: [...new Set(errors.map(e => e.flow))],
+          affectedFlows: Array.from(new Set(errors.map(e => e.flow))),
           networkErrors: errors,
           timestamp: new Date()
         };
@@ -189,20 +189,20 @@ export class ReportGenerator {
     failedTests.forEach(test => {
       const bugReport: BugReport = {
         id: bugId(),
-        title: `Test Failure: ${test.title}`,
+        title: `Test Failure: ${(test as any).title || 'Unknown Test'}`,
         severity: this.determineBugSeverity(test),
         category: 'integration',
-        description: `Test "${test.title}" is failing consistently.`,
+        description: `Test "${(test as any).title || 'Unknown Test'}" is failing consistently.`,
         stepsToReproduce: [
-          `1. Run test: ${test.title}`,
+          `1. Run test: ${(test as any).title || 'Unknown Test'}`,
           `2. Observe test failure`,
           `3. Check error details and logs`
         ],
         expectedBehavior: 'Test should pass successfully',
         actualBehavior: `Test fails with error: ${test.error?.message || 'Unknown error'}`,
         evidence: this.extractEvidenceFromTest(test),
-        affectedFlows: [test.title],
-        networkErrors: this.networkErrors.filter(e => e.flow === test.title),
+        affectedFlows: [(test as any).title || 'Unknown Test'],
+        networkErrors: this.networkErrors.filter(e => e.flow === ((test as any).title || 'Unknown Test')),
         timestamp: new Date()
       };
       bugReports.push(bugReport);
@@ -244,7 +244,7 @@ export class ReportGenerator {
    * Determine bug severity from test result
    */
   private determineBugSeverity(test: TestResult): 'critical' | 'high' | 'medium' | 'low' {
-    const title = test.title.toLowerCase();
+    const title = ((test as any).title || '').toLowerCase();
     
     if (title.includes('login') || title.includes('auth') || title.includes('payment')) {
       return 'critical';
@@ -297,7 +297,7 @@ export class ReportGenerator {
     const passedTests = this.testResults.filter(r => r.status === 'passed').length;
     const failedTests = this.testResults.filter(r => r.status === 'failed').length;
     const skippedTests = this.testResults.filter(r => r.status === 'skipped').length;
-    const flakyTests = this.testResults.filter(r => r.status === 'flaky').length;
+    const flakyTests = this.testResults.filter(r => (r as any).status === 'flaky').length;
     const duration = this.testResults.reduce((sum, r) => sum + r.duration, 0);
     const successRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
@@ -327,7 +327,7 @@ export class ReportGenerator {
       'error-handling'
     ];
 
-    const testedFlows = [...new Set(this.testResults.map(r => this.extractFlowName(r.title)))];
+    const testedFlows = Array.from(new Set(this.testResults.map(r => this.extractFlowName((r as any).title || 'Unknown Test'))));
     const coveredFlows = expectedFlows.filter(flow => 
       testedFlows.some(tested => tested.includes(flow) || flow.includes(tested))
     );
@@ -376,8 +376,8 @@ export class ReportGenerator {
     const averageTestDuration = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     const sortedTests = [...this.testResults].sort((a, b) => b.duration - a.duration);
-    const slowestTests = sortedTests.slice(0, 5).map(t => ({ name: t.title, duration: t.duration }));
-    const fastestTests = sortedTests.slice(-5).reverse().map(t => ({ name: t.title, duration: t.duration }));
+    const slowestTests = sortedTests.slice(0, 5).map(t => ({ name: (t as any).title || 'Unknown Test', duration: t.duration }));
+    const fastestTests = sortedTests.slice(-5).reverse().map(t => ({ name: (t as any).title || 'Unknown Test', duration: t.duration }));
 
     return {
       averageTestDuration,

@@ -65,15 +65,25 @@ describe('Authentication Token Storage Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-            }),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-            }),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) }).filter(d => !isNaN(d.getTime())) // Future date within 24 hours
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            expiresAt: fc
+              .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+              .filter((d) => !isNaN(d.getTime())), // Future date within 24 hours
           }),
           async (tokenData) => {
             // Property: For any valid token data, storage should preserve all token information
@@ -84,7 +94,9 @@ describe('Authentication Token Storage Property Tests', () => {
             expect(storedTokens).toBeDefined();
             expect(storedTokens.accessToken).toBe(tokenData.accessToken);
             expect(storedTokens.refreshToken).toBe(tokenData.refreshToken);
-            expect(storedTokens.expiresAt.getTime()).toBe(tokenData.expiresAt.getTime());
+            expect(storedTokens.expiresAt.getTime()).toBe(
+              tokenData.expiresAt.getTime()
+            );
 
             // Property: Stored tokens should be retrievable after page refresh simulation
             const newManager = new AuthTokenManager();
@@ -92,7 +104,9 @@ describe('Authentication Token Storage Property Tests', () => {
             expect(retrievedTokens).toBeDefined();
             expect(retrievedTokens.accessToken).toBe(tokenData.accessToken);
             expect(retrievedTokens.refreshToken).toBe(tokenData.refreshToken);
-            expect(retrievedTokens.expiresAt.getTime()).toBe(tokenData.expiresAt.getTime());
+            expect(retrievedTokens.expiresAt.getTime()).toBe(
+              tokenData.expiresAt.getTime()
+            );
           }
         ),
         { numRuns: 100 }
@@ -103,24 +117,39 @@ describe('Authentication Token Storage Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-            }),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-            }),
-            expiresAt: fc.date({ min: new Date(Date.now() - 86400000), max: new Date(Date.now() + 86400000) }).filter(d => !isNaN(d.getTime())) // Past or future date
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            expiresAt: fc
+              .date({
+                min: new Date(Date.now() - 86400000),
+                max: new Date(Date.now() + 86400000),
+              })
+              .filter((d) => !isNaN(d.getTime())), // Past or future date
           }),
           async (tokenData) => {
             // Store tokens
             authTokenManager.storeTokens(tokenData);
 
             // Property: Token expiration check should correctly identify expired vs valid tokens
-            const isExpired = authTokenManager.isTokenExpired(tokenData.accessToken);
+            const isExpired = authTokenManager.isTokenExpired(
+              tokenData.accessToken
+            );
             const expectedExpired = tokenData.expiresAt.getTime() <= Date.now();
-            
+
             expect(isExpired).toBe(expectedExpired);
 
             // Property: getValidToken should return null for expired tokens, token for valid ones
@@ -143,16 +172,29 @@ describe('Authentication Token Storage Property Tests', () => {
             fc.record({
               operation: fc.constantFrom('store', 'retrieve', 'clear'),
               tokenData: fc.record({
-                accessToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-                  const trimmed = s.trim();
-                  return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-                }),
-                refreshToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-                  const trimmed = s.trim();
-                  return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-                }),
-                expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) }).filter(d => !isNaN(d.getTime()))
-              })
+                accessToken: fc
+                  .string({ minLength: 10, maxLength: 500 })
+                  .filter((s) => {
+                    const trimmed = s.trim();
+                    return (
+                      trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                    );
+                  }),
+                refreshToken: fc
+                  .string({ minLength: 10, maxLength: 500 })
+                  .filter((s) => {
+                    const trimmed = s.trim();
+                    return (
+                      trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                    );
+                  }),
+                expiresAt: fc
+                  .date({
+                    min: new Date(),
+                    max: new Date(Date.now() + 86400000),
+                  })
+                  .filter((d) => !isNaN(d.getTime())),
+              }),
             }),
             { minLength: 1, maxLength: 10 }
           ),
@@ -167,20 +209,28 @@ describe('Authentication Token Storage Property Tests', () => {
                 case 'store':
                   authTokenManager.storeTokens(op.tokenData);
                   lastStoredTokens = op.tokenData;
-                  
+
                   // Property: After storing, tokens should be immediately retrievable
                   const storedTokens = authTokenManager.getStoredTokens();
-                  expect(storedTokens.accessToken).toBe(op.tokenData.accessToken);
-                  expect(storedTokens.refreshToken).toBe(op.tokenData.refreshToken);
+                  expect(storedTokens.accessToken).toBe(
+                    op.tokenData.accessToken
+                  );
+                  expect(storedTokens.refreshToken).toBe(
+                    op.tokenData.refreshToken
+                  );
                   break;
 
                 case 'retrieve':
                   const retrievedTokens = authTokenManager.getStoredTokens();
-                  
+
                   // Property: Retrieved tokens should match last stored tokens or be null if cleared
                   if (lastStoredTokens) {
-                    expect(retrievedTokens.accessToken).toBe(lastStoredTokens.accessToken);
-                    expect(retrievedTokens.refreshToken).toBe(lastStoredTokens.refreshToken);
+                    expect(retrievedTokens.accessToken).toBe(
+                      lastStoredTokens.accessToken
+                    );
+                    expect(retrievedTokens.refreshToken).toBe(
+                      lastStoredTokens.refreshToken
+                    );
                   } else {
                     expect(retrievedTokens.accessToken).toBeNull();
                     expect(retrievedTokens.refreshToken).toBeNull();
@@ -190,7 +240,7 @@ describe('Authentication Token Storage Property Tests', () => {
                 case 'clear':
                   authTokenManager.clearTokens();
                   lastStoredTokens = null;
-                  
+
                   // Property: After clearing, no tokens should be retrievable
                   const clearedTokens = authTokenManager.getStoredTokens();
                   expect(clearedTokens.accessToken).toBeNull();
@@ -208,15 +258,26 @@ describe('Authentication Token Storage Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter((s) => {
+                const trimmed = s.trim();
+                return (
+                  trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed)
+                );
+              }),
+            expiresAt: fc.date({
+              min: new Date(),
+              max: new Date(Date.now() + 86400000),
             }),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 }).filter(s => {
-              const trimmed = s.trim();
-              return trimmed.length >= 10 && /^[A-Za-z0-9._-]+$/.test(trimmed);
-            }),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
           }),
           async (tokenData) => {
             // Simulate storage failure

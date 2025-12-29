@@ -116,7 +116,7 @@ describe('UploadArea Component', () => {
       progress: 0,
       error: null,
       uploadedFile: null,
-      uploadResponse: { orderId: 'test-order-123' },
+      uploadResponse: { upload_id: 'upload-123', order_id: 'test-order-123' },
       reset: jest.fn(),
     });
 
@@ -173,5 +173,74 @@ describe('UploadArea Component', () => {
 
     expect(screen.getByText('45%')).toBeInTheDocument();
     expect(screen.getByText('test.pdf')).toBeInTheDocument();
+  });
+
+  it('handles new standardized error format', () => {
+    mockUseFileUpload.mockReturnValue({
+      uploadFile: mockUploadFile,
+      cancelUpload: jest.fn(),
+      retryUpload: jest.fn(),
+      isUploading: false,
+      progress: 0,
+      error: 'File validation failed: Invalid file format',
+      uploadedFile: { name: 'test.pdf' },
+      uploadResponse: null,
+      reset: jest.fn(),
+    });
+
+    render(<UploadArea {...defaultProps} />);
+
+    expect(
+      screen.getByText(/file validation failed: invalid file format/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+  });
+
+  it('handles network error messages correctly', () => {
+    mockUseFileUpload.mockReturnValue({
+      uploadFile: mockUploadFile,
+      cancelUpload: jest.fn(),
+      retryUpload: jest.fn(),
+      isUploading: false,
+      progress: 0,
+      error: 'Network error: Unable to connect to server',
+      uploadedFile: { name: 'test.pdf' },
+      uploadResponse: null,
+      reset: jest.fn(),
+    });
+
+    render(<UploadArea {...defaultProps} />);
+
+    expect(
+      screen.getByText(/network error: unable to connect to server/i)
+    ).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('displays upload response with new format correctly', () => {
+    mockUseFileUpload.mockReturnValue({
+      uploadFile: mockUploadFile,
+      cancelUpload: jest.fn(),
+      retryUpload: jest.fn(),
+      isUploading: false,
+      progress: 0,
+      error: null,
+      uploadedFile: null,
+      uploadResponse: {
+        upload_id: 'upload-456',
+        order_id: 'order-789',
+        filename: 'document.pdf',
+        file_size: 1024000,
+        status: 'completed',
+      },
+      reset: jest.fn(),
+    });
+
+    render(<UploadArea {...defaultProps} />);
+
+    expect(screen.getByText(/file uploaded successfully/i)).toBeInTheDocument();
+    expect(screen.getByText(/order id: order-789/i)).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 });

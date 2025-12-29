@@ -6,8 +6,8 @@ jest.mock('@/lib/api', () => ({
   apiClient: {
     getPaymentStatus: jest.fn(),
     initiatePayment: jest.fn(),
-    getOrder: jest.fn()
-  }
+    getOrder: jest.fn(),
+  },
 }));
 
 describe('Payment Failure Recovery Property Tests', () => {
@@ -18,8 +18,8 @@ describe('Payment Failure Recovery Property Tests', () => {
   /**
    * Property 14: Payment failures provide recovery options
    * **Validates: Requirements 4.4, 4.5**
-   * 
-   * For any payment failure or timeout, the system should display specific 
+   *
+   * For any payment failure or timeout, the system should display specific
    * error messages with retry options and support contact information
    */
   test('Property 14: Payment failures provide recovery options', async () => {
@@ -41,8 +41,10 @@ describe('Payment Failure Recovery Property Tests', () => {
           supportContact: fc.record({
             email: fc.emailAddress(),
             phone: fc.string({ minLength: 10, maxLength: 15 }),
-            chat_url: fc.string().map(s => `https://support.example.com/chat/${s}`)
-          })
+            chat_url: fc
+              .string()
+              .map((s) => `https://support.example.com/chat/${s}`),
+          }),
         }),
         async (testData) => {
           // Mock payment failure response
@@ -54,11 +56,13 @@ describe('Payment Failure Recovery Property Tests', () => {
               order_id: testData.orderId,
               error_message: testData.errorMessage,
               failed_at: new Date().toISOString(),
-              support_contact: testData.supportContact
-            }
+              support_contact: testData.supportContact,
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: Failed payments should return failure status
           expect(paymentResponse.success).toBe(true);
@@ -76,9 +80,13 @@ describe('Payment Failure Recovery Property Tests', () => {
 
           // Property: Support contact information should be provided
           expect(paymentResponse.data.support_contact).toBeDefined();
-          expect(paymentResponse.data.support_contact.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+          expect(paymentResponse.data.support_contact.email).toMatch(
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          );
           expect(paymentResponse.data.support_contact.phone).toBeDefined();
-          expect(paymentResponse.data.support_contact.chat_url).toMatch(/^https:\/\//);
+          expect(paymentResponse.data.support_contact.chat_url).toMatch(
+            /^https:\/\//
+          );
         }
       ),
       { numRuns: 100 }
@@ -97,7 +105,7 @@ describe('Payment Failure Recovery Property Tests', () => {
             fc.constant('temporary_failure')
           ),
           retryable: fc.boolean(),
-          maxRetries: fc.integer({ min: 1, max: 5 })
+          maxRetries: fc.integer({ min: 1, max: 5 }),
         }),
         async (testData) => {
           // Mock payment failure with retry information
@@ -109,15 +117,15 @@ describe('Payment Failure Recovery Property Tests', () => {
               order_id: testData.orderId,
               retryable: testData.retryable,
               max_retries: testData.maxRetries,
-              retry_options: testData.retryable ? [
-                'retry_payment',
-                'new_payment_method',
-                'contact_support'
-              ] : ['new_payment_method', 'contact_support']
-            }
+              retry_options: testData.retryable
+                ? ['retry_payment', 'new_payment_method', 'contact_support']
+                : ['new_payment_method', 'contact_support'],
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: Recoverable failures should indicate retryability
           expect(paymentResponse.data.retryable).toBe(testData.retryable);
@@ -129,12 +137,16 @@ describe('Payment Failure Recovery Property Tests', () => {
 
           // Property: Retryable failures should include retry_payment option
           if (testData.retryable) {
-            expect(paymentResponse.data.retry_options).toContain('retry_payment');
+            expect(paymentResponse.data.retry_options).toContain(
+              'retry_payment'
+            );
             expect(paymentResponse.data.max_retries).toBe(testData.maxRetries);
           }
 
           // Property: All failures should include alternative options
-          expect(paymentResponse.data.retry_options).toContain('contact_support');
+          expect(paymentResponse.data.retry_options).toContain(
+            'contact_support'
+          );
         }
       ),
       { numRuns: 100 }
@@ -150,30 +162,38 @@ describe('Payment Failure Recovery Property Tests', () => {
           failureScenario: fc.oneof(
             fc.record({
               type: fc.constant('timeout'),
-              expectedMessage: fc.constant('Payment timed out. Please try again.'),
-              userFriendly: fc.constant(true)
+              expectedMessage: fc.constant(
+                'Payment timed out. Please try again.'
+              ),
+              userFriendly: fc.constant(true),
             }),
             fc.record({
               type: fc.constant('cancelled'),
               expectedMessage: fc.constant('Payment was cancelled by user.'),
-              userFriendly: fc.constant(true)
+              userFriendly: fc.constant(true),
             }),
             fc.record({
               type: fc.constant('expired'),
-              expectedMessage: fc.constant('Payment link has expired. Please generate a new payment.'),
-              userFriendly: fc.constant(true)
+              expectedMessage: fc.constant(
+                'Payment link has expired. Please generate a new payment.'
+              ),
+              userFriendly: fc.constant(true),
             }),
             fc.record({
               type: fc.constant('insufficient_funds'),
-              expectedMessage: fc.constant('Insufficient funds. Please check your account balance.'),
-              userFriendly: fc.constant(true)
+              expectedMessage: fc.constant(
+                'Insufficient funds. Please check your account balance.'
+              ),
+              userFriendly: fc.constant(true),
             }),
             fc.record({
               type: fc.constant('network_error'),
-              expectedMessage: fc.constant('Network error occurred. Please check your connection and try again.'),
-              userFriendly: fc.constant(true)
+              expectedMessage: fc.constant(
+                'Network error occurred. Please check your connection and try again.'
+              ),
+              userFriendly: fc.constant(true),
             })
-          )
+          ),
         }),
         async (testData) => {
           // Mock specific failure scenario
@@ -184,22 +204,33 @@ describe('Payment Failure Recovery Property Tests', () => {
               status: testData.failureScenario.type,
               order_id: testData.orderId,
               error_message: testData.failureScenario.expectedMessage,
-              user_friendly: testData.failureScenario.userFriendly
-            }
+              user_friendly: testData.failureScenario.userFriendly,
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: Error message should match expected message for failure type
-          expect(paymentResponse.data.error_message).toBe(testData.failureScenario.expectedMessage);
+          expect(paymentResponse.data.error_message).toBe(
+            testData.failureScenario.expectedMessage
+          );
 
           // Property: Error message should be user-friendly
           expect(paymentResponse.data.user_friendly).toBe(true);
 
           // Property: Error message should not contain technical jargon
-          const technicalTerms = ['500', '404', 'null', 'undefined', 'exception', 'stack trace'];
+          const technicalTerms = [
+            '500',
+            '404',
+            'null',
+            'undefined',
+            'exception',
+            'stack trace',
+          ];
           const messageText = paymentResponse.data.error_message.toLowerCase();
-          technicalTerms.forEach(term => {
+          technicalTerms.forEach((term) => {
             expect(messageText).not.toContain(term);
           });
 
@@ -222,7 +253,7 @@ describe('Payment Failure Recovery Property Tests', () => {
             fc.constant('retry_payment'),
             fc.constant('new_payment'),
             fc.constant('cancel_order')
-          )
+          ),
         }),
         async (testData) => {
           // Mock payment failure
@@ -231,8 +262,8 @@ describe('Payment Failure Recovery Property Tests', () => {
             data: {
               payment_id: testData.paymentId,
               status: 'failed',
-              order_id: testData.orderId
-            }
+              order_id: testData.orderId,
+            },
           });
 
           // Mock order state based on recovery action
@@ -250,11 +281,14 @@ describe('Payment Failure Recovery Property Tests', () => {
             data: {
               id: testData.orderId,
               status: expectedOrderStatus,
-              payment_attempts: testData.recoveryAction === 'retry_payment' ? 2 : 1
-            }
+              payment_attempts:
+                testData.recoveryAction === 'retry_payment' ? 2 : 1,
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
           const orderResponse = await apiClient.getOrder(testData.orderId);
 
           // Property: Payment failure should be recorded
@@ -287,7 +321,7 @@ describe('Payment Failure Recovery Property Tests', () => {
             fc.constant('payment_processing'),
             fc.constant('network_timeout'),
             fc.constant('provider_timeout')
-          )
+          ),
         }),
         async (testData) => {
           // Mock timeout scenario
@@ -304,28 +338,42 @@ describe('Payment Failure Recovery Property Tests', () => {
                 'retry_payment',
                 'check_payment_status',
                 'new_payment_method',
-                'contact_support'
-              ]
-            }
+                'contact_support',
+              ],
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: Timeout should be properly identified
           expect(paymentResponse.data.status).toBe('timeout');
           expect(paymentResponse.data.timeout_type).toBe(testData.timeoutType);
-          expect(paymentResponse.data.timeout_duration).toBe(testData.timeoutDuration);
+          expect(paymentResponse.data.timeout_duration).toBe(
+            testData.timeoutDuration
+          );
 
           // Property: Timeout error message should include duration
-          expect(paymentResponse.data.error_message).toContain(testData.timeoutDuration.toString());
+          expect(paymentResponse.data.error_message).toContain(
+            testData.timeoutDuration.toString()
+          );
 
           // Property: Recovery options should include retry and status check
-          expect(paymentResponse.data.recovery_options).toContain('retry_payment');
-          expect(paymentResponse.data.recovery_options).toContain('check_payment_status');
-          expect(paymentResponse.data.recovery_options).toContain('contact_support');
+          expect(paymentResponse.data.recovery_options).toContain(
+            'retry_payment'
+          );
+          expect(paymentResponse.data.recovery_options).toContain(
+            'check_payment_status'
+          );
+          expect(paymentResponse.data.recovery_options).toContain(
+            'contact_support'
+          );
 
           // Property: Should provide multiple recovery options
-          expect(paymentResponse.data.recovery_options.length).toBeGreaterThanOrEqual(3);
+          expect(
+            paymentResponse.data.recovery_options.length
+          ).toBeGreaterThanOrEqual(3);
         }
       ),
       { numRuns: 100 }
@@ -353,13 +401,13 @@ describe('Payment Failure Recovery Property Tests', () => {
               fc.constant('ticket')
             ),
             { minLength: 1, maxLength: 4 }
-          )
+          ),
         }),
         async (testData) => {
           // Mock payment failure with support information
           const supportInfo: any = {};
-          
-          testData.supportChannels.forEach(channel => {
+
+          testData.supportChannels.forEach((channel) => {
             switch (channel) {
               case 'email':
                 supportInfo.email = 'support@example.com';
@@ -383,11 +431,14 @@ describe('Payment Failure Recovery Property Tests', () => {
               status: testData.failureType,
               order_id: testData.orderId,
               support_contact: supportInfo,
-              support_message: 'If you need assistance, please contact our support team using any of the methods below.'
-            }
+              support_message:
+                'If you need assistance, please contact our support team using any of the methods below.',
+            },
           });
 
-          const paymentResponse = await apiClient.getPaymentStatus(testData.paymentId);
+          const paymentResponse = await apiClient.getPaymentStatus(
+            testData.paymentId
+          );
 
           // Property: Support contact information should be provided
           expect(paymentResponse.data.support_contact).toBeDefined();
@@ -395,7 +446,9 @@ describe('Payment Failure Recovery Property Tests', () => {
 
           // Property: Support message should be present
           expect(paymentResponse.data.support_message).toBeDefined();
-          expect(paymentResponse.data.support_message.length).toBeGreaterThan(0);
+          expect(paymentResponse.data.support_message.length).toBeGreaterThan(
+            0
+          );
 
           // Property: At least one support channel should be available
           const supportContact = paymentResponse.data.support_contact;
@@ -403,11 +456,13 @@ describe('Payment Failure Recovery Property Tests', () => {
           expect(availableChannels.length).toBeGreaterThan(0);
 
           // Property: Support channels should have valid formats
-          testData.supportChannels.forEach(channel => {
+          testData.supportChannels.forEach((channel) => {
             switch (channel) {
               case 'email':
                 if (supportContact.email) {
-                  expect(supportContact.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+                  expect(supportContact.email).toMatch(
+                    /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                  );
                 }
                 break;
               case 'phone':

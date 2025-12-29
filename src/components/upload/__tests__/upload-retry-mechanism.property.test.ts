@@ -10,8 +10,8 @@ import { useFileUploadWithRetry } from '@/hooks/useFileUploadWithRetry';
 // Mock the API client
 jest.mock('@/lib/api', () => ({
   apiClient: {
-    uploadFile: jest.fn()
-  }
+    uploadFile: jest.fn(),
+  },
 }));
 
 import { apiClient } from '@/lib/api';
@@ -33,22 +33,28 @@ describe('Upload Retry Mechanism Property Tests', () => {
           fc.record({
             retryAttempts: fc.integer({ min: 1, max: 3 }),
             baseDelay: fc.integer({ min: 100, max: 1000 }),
-            fileName: fc.string({ minLength: 1, maxLength: 30 })
-              .filter(s => s.trim().length > 0)
-              .map(s => `retry-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`)
+            fileName: fc
+              .string({ minLength: 1, maxLength: 30 })
+              .filter((s) => s.trim().length > 0)
+              .map(
+                (s) =>
+                  `retry-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`
+              ),
           }),
           async (retryData) => {
             const mockFile = new File(['test content'], retryData.fileName, {
-              type: 'application/pdf'
+              type: 'application/pdf',
             });
 
             // Mock API to always fail (to test retry mechanism)
-            (apiClient.uploadFile as jest.Mock).mockRejectedValue(new Error('Network error'));
+            (apiClient.uploadFile as jest.Mock).mockRejectedValue(
+              new Error('Network error')
+            );
 
-            const { result } = renderHook(() => 
+            const { result } = renderHook(() =>
               useFileUploadWithRetry({
                 maxRetries: retryData.retryAttempts,
-                baseRetryDelay: retryData.baseDelay
+                baseRetryDelay: retryData.baseDelay,
               })
             );
 
@@ -63,7 +69,9 @@ describe('Upload Retry Mechanism Property Tests', () => {
 
             // Property: Retry count should be tracked
             expect(result.current.retryCount).toBeGreaterThanOrEqual(0);
-            expect(result.current.retryCount).toBeLessThanOrEqual(retryData.retryAttempts);
+            expect(result.current.retryCount).toBeLessThanOrEqual(
+              retryData.retryAttempts
+            );
 
             // Property: API should be called at least once (initial attempt)
             expect(apiClient.uploadFile).toHaveBeenCalledWith(mockFile);
@@ -78,22 +86,28 @@ describe('Upload Retry Mechanism Property Tests', () => {
         fc.asyncProperty(
           fc.record({
             maxRetries: fc.integer({ min: 1, max: 3 }),
-            fileName: fc.string({ minLength: 1, maxLength: 30 })
-              .filter(s => s.trim().length > 0)
-              .map(s => `limit-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`)
+            fileName: fc
+              .string({ minLength: 1, maxLength: 30 })
+              .filter((s) => s.trim().length > 0)
+              .map(
+                (s) =>
+                  `limit-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`
+              ),
           }),
           async (limitData) => {
             const mockFile = new File(['test content'], limitData.fileName, {
-              type: 'application/pdf'
+              type: 'application/pdf',
             });
 
             // Mock API to always fail
-            (apiClient.uploadFile as jest.Mock).mockRejectedValue(new Error('Persistent network error'));
+            (apiClient.uploadFile as jest.Mock).mockRejectedValue(
+              new Error('Persistent network error')
+            );
 
-            const { result } = renderHook(() => 
+            const { result } = renderHook(() =>
               useFileUploadWithRetry({
                 maxRetries: limitData.maxRetries,
-                baseRetryDelay: 100
+                baseRetryDelay: 100,
               })
             );
 
@@ -105,7 +119,7 @@ describe('Upload Retry Mechanism Property Tests', () => {
             // Property: Should be in error state after max retries
             expect(result.current.error).toBeTruthy();
             expect(result.current.uploadResponse).toBeNull();
-            
+
             // Property: Should track retry attempts
             expect(result.current.retryCount).toBeGreaterThanOrEqual(0);
           }
@@ -118,15 +132,24 @@ describe('Upload Retry Mechanism Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            errorType: fc.constantFrom('network', 'timeout', 'server', 'validation'),
-            fileName: fc.string({ minLength: 1, maxLength: 30 })
-              .filter(s => s.trim().length > 0)
-              .map(s => `error-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`),
-            shouldRetry: fc.boolean()
+            errorType: fc.constantFrom(
+              'network',
+              'timeout',
+              'server',
+              'validation'
+            ),
+            fileName: fc
+              .string({ minLength: 1, maxLength: 30 })
+              .filter((s) => s.trim().length > 0)
+              .map(
+                (s) =>
+                  `error-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`
+              ),
+            shouldRetry: fc.boolean(),
           }),
           async (errorData) => {
             const mockFile = new File(['test content'], errorData.fileName, {
-              type: 'application/pdf'
+              type: 'application/pdf',
             });
 
             // Mock different error types
@@ -134,11 +157,11 @@ describe('Upload Retry Mechanism Property Tests', () => {
               network: 'Network connection failed',
               timeout: 'Request timeout',
               server: 'Internal server error',
-              validation: 'File validation failed'
+              validation: 'File validation failed',
             };
 
             const mockError = new Error(errorMessages[errorData.errorType]);
-            
+
             // Mock API behavior based on error type
             if (errorData.shouldRetry) {
               let callCount = 0;
@@ -155,18 +178,18 @@ describe('Upload Retry Mechanism Property Tests', () => {
                     filename: errorData.fileName,
                     file_size: mockFile.size,
                     status: 'uploaded',
-                    progress: 100
-                  }
+                    progress: 100,
+                  },
                 });
               });
             } else {
               (apiClient.uploadFile as jest.Mock).mockRejectedValue(mockError);
             }
 
-            const { result } = renderHook(() => 
+            const { result } = renderHook(() =>
               useFileUploadWithRetry({
                 maxRetries: 3,
-                baseRetryDelay: 100
+                baseRetryDelay: 100,
               })
             );
 
@@ -177,12 +200,16 @@ describe('Upload Retry Mechanism Property Tests', () => {
 
             // Property: Should handle initial failure appropriately
             expect(result.current.error).toBeTruthy();
-            
+
             // The error message might be the original error or a retry message
             const errorMessage = result.current.error!;
-            const isRetryMessage = errorMessage.includes('Retrying in') || errorMessage.includes('Attempt');
-            const isOriginalError = errorMessage.includes(errorMessages[errorData.errorType]);
-            
+            const isRetryMessage =
+              errorMessage.includes('Retrying in') ||
+              errorMessage.includes('Attempt');
+            const isOriginalError = errorMessage.includes(
+              errorMessages[errorData.errorType]
+            );
+
             expect(isRetryMessage || isOriginalError).toBe(true);
 
             // Attempt retry
@@ -208,15 +235,23 @@ describe('Upload Retry Mechanism Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            fileName: fc.string({ minLength: 1, maxLength: 30 })
-              .filter(s => s.trim().length > 0)
-              .map(s => `state-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`),
-            fileSize: fc.integer({ min: 1024, max: 10 * 1024 * 1024 }) // 1KB to 10MB
+            fileName: fc
+              .string({ minLength: 1, maxLength: 30 })
+              .filter((s) => s.trim().length > 0)
+              .map(
+                (s) =>
+                  `state-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`
+              ),
+            fileSize: fc.integer({ min: 1024, max: 10 * 1024 * 1024 }), // 1KB to 10MB
           }),
           async (stateData) => {
-            const mockFile = new File(['x'.repeat(stateData.fileSize)], stateData.fileName, {
-              type: 'application/pdf'
-            });
+            const mockFile = new File(
+              ['x'.repeat(stateData.fileSize)],
+              stateData.fileName,
+              {
+                type: 'application/pdf',
+              }
+            );
 
             // Mock API to fail once, then succeed
             let callCount = 0;
@@ -233,8 +268,8 @@ describe('Upload Retry Mechanism Property Tests', () => {
                   filename: stateData.fileName,
                   file_size: stateData.fileSize,
                   status: 'uploaded',
-                  progress: 100
-                }
+                  progress: 100,
+                },
               });
             });
 
@@ -257,8 +292,12 @@ describe('Upload Retry Mechanism Property Tests', () => {
 
             // Property: File state should remain consistent after retry
             expect(result.current.uploadedFile).toBe(mockFile);
-            expect(result.current.uploadResponse?.filename).toBe(stateData.fileName);
-            expect(result.current.uploadResponse?.file_size).toBe(stateData.fileSize);
+            expect(result.current.uploadResponse?.filename).toBe(
+              stateData.fileName
+            );
+            expect(result.current.uploadResponse?.file_size).toBe(
+              stateData.fileSize
+            );
           }
         ),
         { numRuns: 10 }
@@ -269,14 +308,18 @@ describe('Upload Retry Mechanism Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            fileName: fc.string({ minLength: 1, maxLength: 30 })
-              .filter(s => s.trim().length > 0)
-              .map(s => `reset-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`),
-            initialProgress: fc.integer({ min: 10, max: 90 })
+            fileName: fc
+              .string({ minLength: 1, maxLength: 30 })
+              .filter((s) => s.trim().length > 0)
+              .map(
+                (s) =>
+                  `reset-test-${s.trim().replace(/[^a-zA-Z0-9]/g, 'x')}.pdf`
+              ),
+            initialProgress: fc.integer({ min: 10, max: 90 }),
           }),
           async (resetData) => {
             const mockFile = new File(['test content'], resetData.fileName, {
-              type: 'application/pdf'
+              type: 'application/pdf',
             });
 
             // Mock API to fail once, then succeed
@@ -294,8 +337,8 @@ describe('Upload Retry Mechanism Property Tests', () => {
                   filename: resetData.fileName,
                   file_size: mockFile.size,
                   status: 'uploaded',
-                  progress: 100
-                }
+                  progress: 100,
+                },
               });
             });
 

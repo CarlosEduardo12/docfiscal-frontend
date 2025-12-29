@@ -32,28 +32,32 @@ function PaymentSuccessContent() {
       // Se temos payment_id, verificar status do pagamento
       if (paymentId) {
         const response = await apiClient.getPaymentStatus(paymentId);
-        
+
         if (response.success) {
           const status = response.data.status;
-          
-          if (status === 'paid') {
+
+          if (status === 'completed') {
             // Pagamento confirmado, invalidar cache e redirecionar
             queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
             if (orderId) {
-              queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(orderId) });
+              queryClient.invalidateQueries({
+                queryKey: queryKeys.orders.byId(orderId),
+              });
             }
-            
-            setPaymentStatus('paid');
+
+            setPaymentStatus('completed');
             setMessage('Pagamento confirmado! Redirecionando...');
             setTimeout(() => {
-              router.push(`/payment/complete?payment_id=${paymentId}&order_id=${orderId || response.data.order_id}`);
+              router.push(
+                `/payment/complete?payment_id=${paymentId}&order_id=${orderId || response.data.order_id}`
+              );
             }, 2000);
           } else if (status === 'pending') {
             setPaymentStatus('pending');
             setMessage('Pagamento ainda pendente. Verificando novamente...');
             // Continuar verificando
             setTimeout(checkPaymentStatus, 3000);
-          } else if (status === 'cancelled' || status === 'expired') {
+          } else if (status === 'failed' || status === 'expired') {
             setPaymentStatus('cancelled');
             setMessage('Pagamento cancelado ou expirado.');
           } else {
@@ -64,10 +68,10 @@ function PaymentSuccessContent() {
       } else if (orderId) {
         // Se só temos order_id, verificar status do pedido
         const response = await apiClient.getOrder(orderId);
-        
+
         if (response.success) {
           const orderStatus = response.data.status;
-          
+
           if (orderStatus === 'completed' || orderStatus === 'processing') {
             // Pedido já está sendo processado ou completo
             router.push(`/payment/complete?order_id=${orderId}`);
@@ -88,7 +92,7 @@ function PaymentSuccessContent() {
     } finally {
       setLoading(false);
     }
-  }, [paymentId, orderId, router]);
+  }, [paymentId, orderId, router, queryClient]);
 
   useEffect(() => {
     checkPaymentStatus();
@@ -109,7 +113,7 @@ function PaymentSuccessContent() {
             </>
           )}
 
-          {paymentStatus === 'paid' && (
+          {paymentStatus === 'completed' && (
             <>
               <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                 <RefreshCw className="w-8 h-8 text-green-600 animate-spin" />
@@ -157,27 +161,30 @@ function PaymentSuccessContent() {
             </div>
           )}
 
-          {!loading && (paymentStatus === 'cancelled' || paymentStatus === 'error' || paymentStatus === 'unknown') && (
-            <div className="space-y-2">
-              <Button
-                onClick={() => router.push('/')}
-                className="w-full"
-                size="lg"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Tentar Novamente
-              </Button>
+          {!loading &&
+            (paymentStatus === 'cancelled' ||
+              paymentStatus === 'error' ||
+              paymentStatus === 'unknown') && (
+              <div className="space-y-2">
+                <Button
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full"
+                  size="lg"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Tentar Novamente
+                </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => router.push('/')}
-                className="w-full"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar ao Início
-              </Button>
-            </div>
-          )}
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Voltar ao Dashboard
+                </Button>
+              </div>
+            )}
 
           {(paymentId || orderId) && (
             <div className="text-xs text-gray-500 text-center space-y-1">
@@ -193,11 +200,13 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
       <PaymentSuccessContent />
     </Suspense>
   );

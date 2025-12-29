@@ -5,6 +5,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as fc from 'fast-check';
 import { UploadArea } from '@/components/upload/UploadArea';
 import { OrderStatusCard } from '@/components/order/OrderStatusCard';
@@ -34,6 +35,26 @@ jest.mock('@/hooks/useFileUpload', () => ({
     reset: jest.fn(),
   }),
 }));
+
+// Helper function to render components with QueryClient provider
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>
+  );
+};
 
 // Helper function to check if element has responsive classes
 const hasResponsiveClasses = (element: HTMLElement): boolean => {
@@ -88,15 +109,15 @@ describe('Responsive Design Property Tests', () => {
   test('OrderStatusCard component has responsive layout classes', () => {
     const mockOrder: Order = {
       id: 'test-order-12345678',
-      userId: 'user-123',
+      user_id: 'user-123',
       filename: 'test-document.pdf',
-      originalFileSize: 1024 * 1024,
+      file_size: 1024 * 1024,
       status: 'completed',
-      createdAt: new Date('2023-01-01'),
-      updatedAt: new Date('2023-01-01'),
+      created_at: '2023-01-01T00:00:00.000Z',
+      updated_at: '2023-01-01T00:00:00.000Z',
     };
 
-    const { container } = render(
+    const { container } = renderWithQueryClient(
       <OrderStatusCard
         order={mockOrder}
         onPaymentClick={jest.fn()}

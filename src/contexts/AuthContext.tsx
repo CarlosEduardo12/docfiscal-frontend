@@ -1,8 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { authTokenManager, AuthTokens } from '@/lib/AuthTokenManager';
+import { apiClient } from '@/lib/api';
 
 interface User {
   id: string;
@@ -14,7 +21,10 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
 }
@@ -38,10 +48,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const initializeAuth = async () => {
     try {
       setIsLoading(true);
-      
+
       // Check if we have valid tokens
       const isAuthenticated = await authTokenManager.isAuthenticated();
-      
+
       if (isAuthenticated) {
         // Fetch user profile
         const validToken = await authTokenManager.getValidToken();
@@ -65,68 +75,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUserProfile = async (token: string): Promise<User | null> => {
     try {
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await apiClient.getProfile();
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.success && response.data) {
         return {
-          id: data.id,
-          email: data.email,
-          name: data.name,
+          id: response.data.id,
+          email: response.data.email,
+          name: response.data.name,
         };
       }
     } catch (error) {
       console.error('❌ Failed to fetch user profile:', error);
     }
-    
+
     return null;
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await apiClient.login({ email, password });
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (response.success && response.data) {
         // Store tokens
         const tokens: AuthTokens = {
-          accessToken: data.tokens.access_token,
-          refreshToken: data.tokens.refresh_token,
-          expiresAt: new Date(Date.now() + (data.tokens.expires_in * 1000))
+          accessToken: response.data.access_token,
+          refreshToken: response.data.refresh_token,
+          expiresAt: new Date(Date.now() + response.data.expires_in * 1000),
         };
-        
+
         authTokenManager.storeTokens(tokens);
 
         // Set user data
         setUser({
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.name,
+          id: response.data.user.id,
+          email: response.data.user.email,
+          name: response.data.user.name,
         });
 
         console.log('✅ Login successful');
         return { success: true };
       } else {
-        const errorMessage = data.error || 'Login failed';
+        const errorMessage = response.message || 'Login failed';
         console.error('❌ Login failed:', errorMessage);
         return { success: false, error: errorMessage };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Network error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Network error';
       console.error('❌ Login error:', error);
       return { success: false, error: errorMessage };
     } finally {
@@ -140,18 +140,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Call logout endpoint (optional - for server-side cleanup)
       try {
-        const validToken = await authTokenManager.getValidToken();
-        if (validToken) {
-          await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${validToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
-        }
+        await apiClient.logout();
       } catch (error) {
-        console.warn('⚠️ Server logout failed, continuing with client cleanup:', error);
+        console.warn(
+          '⚠️ Server logout failed, continuing with client cleanup:',
+          error
+        );
       }
 
       // Clear tokens and user state
@@ -159,7 +153,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(null);
 
       console.log('✅ Logout successful');
-      
+
       // Redirect to login page
       router.push('/login');
     } catch (error) {
@@ -176,16 +170,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshSession = async (): Promise<boolean> => {
     try {
       const refreshResult = await authTokenManager.refreshToken();
-      
+
       if (refreshResult.success && refreshResult.tokens) {
         // Fetch updated user profile
-        const userProfile = await fetchUserProfile(refreshResult.tokens.accessToken);
+        const userProfile = await fetchUserProfile(
+          refreshResult.tokens.accessToken
+        );
         if (userProfile) {
           setUser(userProfile);
           return true;
         }
       }
-      
+
       // Refresh failed, clear state
       authTokenManager.clearTokens();
       setUser(null);
@@ -208,9 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }
 

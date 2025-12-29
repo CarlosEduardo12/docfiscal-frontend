@@ -32,12 +32,12 @@ export function UploadProgress({
   error,
   onCancel,
   onRetry,
-  className
+  className,
 }: UploadProgressProps) {
   const formatFileSize = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
     const kb = bytes / 1024;
-    
+
     if (mb >= 1) {
       return `${mb.toFixed(1)} MB`;
     } else if (kb >= 1) {
@@ -50,7 +50,7 @@ export function UploadProgress({
   const formatUploadSpeed = (bytesPerSecond: number): string => {
     const mbps = bytesPerSecond / (1024 * 1024);
     const kbps = bytesPerSecond / 1024;
-    
+
     if (mbps >= 1) {
       return `${mbps.toFixed(1)} MB/s`;
     } else if (kbps >= 1) {
@@ -66,7 +66,9 @@ export function UploadProgress({
     } else {
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
-      return remainingSeconds > 0 ? `${minutes}min ${remainingSeconds}s` : `${minutes}min`;
+      return remainingSeconds > 0
+        ? `${minutes}min ${remainingSeconds}s`
+        : `${minutes}min`;
     }
   };
 
@@ -116,7 +118,12 @@ export function UploadProgress({
   };
 
   return (
-    <div className={cn('w-full p-4 border rounded-lg bg-white shadow-sm', className)}>
+    <div
+      className={cn(
+        'w-full p-4 border rounded-lg bg-white shadow-sm',
+        className
+      )}
+    >
       {/* Status Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
@@ -125,7 +132,7 @@ export function UploadProgress({
             {getStatusText()}
           </span>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex items-center space-x-2">
           {onCancel && (status === 'uploading' || status === 'processing') && (
@@ -139,7 +146,7 @@ export function UploadProgress({
               Cancelar
             </Button>
           )}
-          
+
           {onRetry && status === 'error' && (
             <Button
               variant="outline"
@@ -156,7 +163,10 @@ export function UploadProgress({
 
       {/* File Information */}
       <div className="mb-3">
-        <p className="text-sm font-medium text-gray-900 truncate" title={fileName}>
+        <p
+          className="text-sm font-medium text-gray-900 truncate"
+          title={fileName}
+        >
           {fileName}
         </p>
         {fileSize && (
@@ -169,8 +179,8 @@ export function UploadProgress({
       {/* Progress Bar */}
       {(status === 'uploading' || status === 'processing') && (
         <div className="mb-3">
-          <Progress 
-            value={progress} 
+          <Progress
+            value={progress}
             className="w-full h-2"
             aria-label={`Upload progress: ${progress}%`}
           />
@@ -178,14 +188,14 @@ export function UploadProgress({
             <span className="text-sm font-medium text-gray-700">
               {progress}%
             </span>
-            
+
             {/* Speed and Time Information */}
             <div className="text-xs text-gray-500 space-x-2">
-              {uploadSpeed && (
-                <span>{formatUploadSpeed(uploadSpeed)}</span>
-              )}
+              {uploadSpeed && <span>{formatUploadSpeed(uploadSpeed)}</span>}
               {estimatedTimeRemaining && estimatedTimeRemaining > 0 && (
-                <span>• {formatTimeRemaining(estimatedTimeRemaining)} restantes</span>
+                <span>
+                  • {formatTimeRemaining(estimatedTimeRemaining)} restantes
+                </span>
               )}
             </div>
           </div>

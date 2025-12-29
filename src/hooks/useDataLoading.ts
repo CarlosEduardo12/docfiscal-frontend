@@ -35,57 +35,61 @@ export function useDataLoading<T>(options: UseDataLoadingOptions = {}) {
 
   const [retryAttempts, setRetryAttempts] = useState(0);
 
-  const load = useCallback(async <TResult = T>(
-    loadFn: () => Promise<TResult>
-  ): Promise<TResult | null> => {
-    setState(prev => ({
-      ...prev,
-      isLoading: true,
-      error: null,
-    }));
-
-    try {
-      const result = await loadFn();
-      
-      setState(prev => ({
+  const load = useCallback(
+    async <TResult = T>(
+      loadFn: () => Promise<TResult>
+    ): Promise<TResult | null> => {
+      setState((prev) => ({
         ...prev,
-        data: result as T,
-        isLoading: false,
-        hasLoaded: true,
+        isLoading: true,
+        error: null,
       }));
 
-      setRetryAttempts(0);
+      try {
+        const result = await loadFn();
 
-      if (onSuccess) {
-        onSuccess(result);
+        setState((prev) => ({
+          ...prev,
+          data: result as T,
+          isLoading: false,
+          hasLoaded: true,
+        }));
+
+        setRetryAttempts(0);
+
+        if (onSuccess) {
+          onSuccess(result);
+        }
+
+        return result;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to load data';
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+          hasLoaded: true,
+        }));
+
+        if (onError) {
+          onError(errorMessage);
+        }
+
+        // Auto-retry if configured
+        if (retryAttempts < retryCount) {
+          setRetryAttempts((prev) => prev + 1);
+          setTimeout(() => {
+            load(loadFn);
+          }, retryDelay);
+        }
+
+        return null;
       }
-
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load data';
-      
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: errorMessage,
-        hasLoaded: true,
-      }));
-
-      if (onError) {
-        onError(errorMessage);
-      }
-
-      // Auto-retry if configured
-      if (retryAttempts < retryCount) {
-        setRetryAttempts(prev => prev + 1);
-        setTimeout(() => {
-          load(loadFn);
-        }, retryDelay);
-      }
-
-      return null;
-    }
-  }, [onSuccess, onError, retryAttempts, retryCount, retryDelay]);
+    },
+    [onSuccess, onError, retryAttempts, retryCount, retryDelay]
+  );
 
   const reset = useCallback(() => {
     setState({
@@ -98,7 +102,7 @@ export function useDataLoading<T>(options: UseDataLoadingOptions = {}) {
   }, [initialData]);
 
   const clearError = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error: null,
     }));

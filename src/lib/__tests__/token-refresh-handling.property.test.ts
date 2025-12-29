@@ -50,36 +50,44 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            expiredToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            refreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
-              return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
-            }),
-            newAccessToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'c');
-              return cleaned.length > 0 ? cleaned : 'c'.repeat(20);
-            }),
-            newRefreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'd');
-              return cleaned.length > 0 ? cleaned : 'd'.repeat(20);
-            }),
-            expiresIn: fc.integer({ min: 300, max: 86400 }) // 5 minutes to 24 hours
+            expiredToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            refreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
+                return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
+              }),
+            newAccessToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'c');
+                return cleaned.length > 0 ? cleaned : 'c'.repeat(20);
+              }),
+            newRefreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'd');
+                return cleaned.length > 0 ? cleaned : 'd'.repeat(20);
+              }),
+            expiresIn: fc.integer({ min: 300, max: 86400 }), // 5 minutes to 24 hours
           }),
           async (tokenData) => {
             // Clear any previous mocks and reset state
             mockFetch.mockClear();
             mockFetch.mockReset();
             mockLocalStorage.clear();
-            
+
             // Store expired tokens
             const expiredDate = new Date(Date.now() - 60000); // 1 minute ago
             authTokenManager.storeTokens({
               accessToken: tokenData.expiredToken,
               refreshToken: tokenData.refreshToken,
-              expiresAt: expiredDate
+              expiresAt: expiredDate,
             });
 
             // Mock successful refresh response
@@ -90,9 +98,9 @@ describe('Token Refresh Handling Property Tests', () => {
                 tokens: {
                   access_token: tokenData.newAccessToken,
                   refresh_token: tokenData.newRefreshToken,
-                  expires_in: tokenData.expiresIn
-                }
-              })
+                  expires_in: tokenData.expiresIn,
+                },
+              }),
             });
 
             // Property: getValidToken should attempt refresh for expired tokens
@@ -105,8 +113,8 @@ describe('Token Refresh Handling Property Tests', () => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                refresh_token: tokenData.refreshToken
-              })
+                refresh_token: tokenData.refreshToken,
+              }),
             });
 
             // Property: After successful refresh, new token should be returned
@@ -126,16 +134,20 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            expiredToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            refreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
-              return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
-            }),
+            expiredToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            refreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
+                return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
+              }),
             errorStatus: fc.constantFrom(401, 403, 500, 502, 503),
-            errorMessage: fc.string({ minLength: 1, maxLength: 100 })
+            errorMessage: fc.string({ minLength: 1, maxLength: 100 }),
           }),
           async (tokenData) => {
             // Store expired tokens
@@ -143,7 +155,7 @@ describe('Token Refresh Handling Property Tests', () => {
             authTokenManager.storeTokens({
               accessToken: tokenData.expiredToken,
               refreshToken: tokenData.refreshToken,
-              expiresAt: expiredDate
+              expiresAt: expiredDate,
             });
 
             // Mock failed refresh response
@@ -152,8 +164,8 @@ describe('Token Refresh Handling Property Tests', () => {
               status: tokenData.errorStatus,
               json: async () => ({
                 success: false,
-                error: tokenData.errorMessage
-              })
+                error: tokenData.errorMessage,
+              }),
             });
 
             // Property: getValidToken should return null when refresh fails
@@ -174,20 +186,24 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            expiredToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            refreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
-              return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
-            }),
+            expiredToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            refreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
+                return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
+              }),
             networkError: fc.constantFrom(
               'Network error',
               'Connection timeout',
               'DNS resolution failed',
               'Connection refused'
-            )
+            ),
           }),
           async (tokenData) => {
             // Store expired tokens
@@ -195,7 +211,7 @@ describe('Token Refresh Handling Property Tests', () => {
             authTokenManager.storeTokens({
               accessToken: tokenData.expiredToken,
               refreshToken: tokenData.refreshToken,
-              expiresAt: expiredDate
+              expiresAt: expiredDate,
             });
 
             // Mock network error
@@ -217,32 +233,40 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            refreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
-              return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
-            }),
-            newAccessToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'c');
-              return cleaned.length > 0 ? cleaned : 'c'.repeat(20);
-            }),
-            minutesUntilExpiry: fc.integer({ min: 1, max: 10 }) // 1-10 minutes until expiry
+            accessToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            refreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
+                return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
+              }),
+            newAccessToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'c');
+                return cleaned.length > 0 ? cleaned : 'c'.repeat(20);
+              }),
+            minutesUntilExpiry: fc.integer({ min: 1, max: 10 }), // 1-10 minutes until expiry
           }),
           async (tokenData) => {
             // Clear any previous mocks and reset state
             mockFetch.mockClear();
             mockFetch.mockReset();
             mockLocalStorage.clear();
-            
+
             // Store token that expires soon (within refresh threshold)
-            const soonToExpireDate = new Date(Date.now() + (tokenData.minutesUntilExpiry * 60 * 1000));
+            const soonToExpireDate = new Date(
+              Date.now() + tokenData.minutesUntilExpiry * 60 * 1000
+            );
             authTokenManager.storeTokens({
               accessToken: tokenData.accessToken,
               refreshToken: tokenData.refreshToken,
-              expiresAt: soonToExpireDate
+              expiresAt: soonToExpireDate,
             });
 
             // Only mock if refresh should happen
@@ -255,9 +279,9 @@ describe('Token Refresh Handling Property Tests', () => {
                   tokens: {
                     access_token: tokenData.newAccessToken,
                     refresh_token: tokenData.refreshToken, // Keep same refresh token
-                    expires_in: 3600 // 1 hour
-                  }
-                })
+                    expires_in: 3600, // 1 hour
+                  },
+                }),
               });
             }
 
@@ -266,7 +290,10 @@ describe('Token Refresh Handling Property Tests', () => {
 
             if (tokenData.minutesUntilExpiry <= 5) {
               // Should have attempted refresh
-              expect(mockFetch).toHaveBeenCalledWith('/api/auth/refresh', expect.any(Object));
+              expect(mockFetch).toHaveBeenCalledWith(
+                '/api/auth/refresh',
+                expect.any(Object)
+              );
               expect(validToken).toBe(tokenData.newAccessToken);
             } else {
               // Should return original token without refresh
@@ -283,25 +310,43 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            tokenState: fc.constantFrom('expired', 'missing_refresh', 'no_tokens')
+            accessToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            tokenState: fc.constantFrom(
+              'expired',
+              'missing_refresh',
+              'no_tokens'
+            ),
           }),
           async (tokenData) => {
             switch (tokenData.tokenState) {
               case 'expired':
                 // Store expired token without refresh token - this will be rejected by AuthTokenManager
-                mockLocalStorage.setItem('docfiscal_access_token', tokenData.accessToken);
+                mockLocalStorage.setItem(
+                  'docfiscal_access_token',
+                  tokenData.accessToken
+                );
                 mockLocalStorage.setItem('docfiscal_refresh_token', ''); // Empty refresh token
-                mockLocalStorage.setItem('docfiscal_token_expires_at', new Date(Date.now() - 60000).toISOString());
+                mockLocalStorage.setItem(
+                  'docfiscal_token_expires_at',
+                  new Date(Date.now() - 60000).toISOString()
+                );
                 break;
               case 'missing_refresh':
                 // Store valid token but no refresh token - this will be rejected by AuthTokenManager
-                mockLocalStorage.setItem('docfiscal_access_token', tokenData.accessToken);
+                mockLocalStorage.setItem(
+                  'docfiscal_access_token',
+                  tokenData.accessToken
+                );
                 mockLocalStorage.setItem('docfiscal_refresh_token', ''); // Empty refresh token
-                mockLocalStorage.setItem('docfiscal_token_expires_at', new Date(Date.now() + 3600000).toISOString());
+                mockLocalStorage.setItem(
+                  'docfiscal_token_expires_at',
+                  new Date(Date.now() + 3600000).toISOString()
+                );
                 break;
               case 'no_tokens':
                 // No tokens stored
@@ -324,28 +369,36 @@ describe('Token Refresh Handling Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            expiredToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
-              return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
-            }),
-            refreshToken: fc.string({ minLength: 20, maxLength: 64 }).map(s => {
-              const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
-              return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
-            }),
-            responseType: fc.constantFrom('invalid_json', 'missing_tokens', 'malformed_structure')
+            expiredToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'a');
+                return cleaned.length > 0 ? cleaned : 'a'.repeat(20);
+              }),
+            refreshToken: fc
+              .string({ minLength: 20, maxLength: 64 })
+              .map((s) => {
+                const cleaned = s.replace(/[^a-zA-Z0-9]/g, 'b');
+                return cleaned.length > 0 ? cleaned : 'b'.repeat(20);
+              }),
+            responseType: fc.constantFrom(
+              'invalid_json',
+              'missing_tokens',
+              'malformed_structure'
+            ),
           }),
           async (tokenData) => {
             // Clear any previous mocks and reset state
             mockFetch.mockClear();
             mockFetch.mockReset();
             mockLocalStorage.clear();
-            
+
             // Store expired tokens to force refresh attempt
             const expiredDate = new Date(Date.now() - 60000);
             authTokenManager.storeTokens({
               accessToken: tokenData.expiredToken,
               refreshToken: tokenData.refreshToken,
-              expiresAt: expiredDate
+              expiresAt: expiredDate,
             });
 
             // Mock different types of malformed responses
@@ -355,7 +408,7 @@ describe('Token Refresh Handling Property Tests', () => {
                   ok: true,
                   json: async () => {
                     throw new Error('Invalid JSON');
-                  }
+                  },
                 });
                 break;
               case 'missing_tokens':
@@ -364,7 +417,7 @@ describe('Token Refresh Handling Property Tests', () => {
                   json: async () => ({
                     success: true,
                     // Missing tokens field - this should cause refresh to fail
-                  })
+                  }),
                 });
                 break;
               case 'malformed_structure':
@@ -372,8 +425,8 @@ describe('Token Refresh Handling Property Tests', () => {
                   ok: true,
                   json: async () => ({
                     success: false,
-                    tokens: 'not an object'
-                  })
+                    tokens: 'not an object',
+                  }),
                 });
                 break;
             }
@@ -383,7 +436,10 @@ describe('Token Refresh Handling Property Tests', () => {
             expect(validToken).toBeNull();
 
             // Property: Refresh should have been attempted
-            expect(mockFetch).toHaveBeenCalledWith('/api/auth/refresh', expect.any(Object));
+            expect(mockFetch).toHaveBeenCalledWith(
+              '/api/auth/refresh',
+              expect.any(Object)
+            );
 
             // Property: Malformed responses should not crash the application
             expect(() => authTokenManager.getValidToken()).not.toThrow();

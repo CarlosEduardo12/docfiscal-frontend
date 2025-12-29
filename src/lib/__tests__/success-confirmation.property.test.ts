@@ -35,7 +35,7 @@ describe('Success Confirmation Properties', () => {
           // Toast should be added with correct properties
           expect(result.current.toasts).toHaveLength(1);
           const toast = result.current.toasts[0];
-          
+
           expect(toast.id).toBe(toastId);
           expect(toast.type).toBe('success');
           expect(toast.title).toBe(title);
@@ -82,19 +82,19 @@ describe('Success Confirmation Properties', () => {
 
           // Should not exceed maxToasts
           expect(result.current.toasts.length).toBeLessThanOrEqual(maxToasts);
-          
+
           // If we have fewer confirmations than maxToasts, all should be present
           if (confirmations.length <= maxToasts) {
             expect(result.current.toasts).toHaveLength(confirmations.length);
-            
+
             // All toasts should be success type
-            result.current.toasts.forEach(toast => {
+            result.current.toasts.forEach((toast) => {
               expect(toast.type).toBe('success');
             });
           }
 
           // Each visible toast should have valid content
-          result.current.toasts.forEach(toast => {
+          result.current.toasts.forEach((toast) => {
             expect(toast.title.length).toBeGreaterThan(0);
             expect(toast.message.length).toBeGreaterThan(0);
             expect(toast.id).toBeDefined();
@@ -177,14 +177,14 @@ describe('Success Confirmation Properties', () => {
           expect(result.current.toasts).toHaveLength(4);
 
           // Each toast should have a distinct type
-          const types = result.current.toasts.map(toast => toast.type);
+          const types = result.current.toasts.map((toast) => toast.type);
           expect(types).toContain('success');
           expect(types).toContain('error');
           expect(types).toContain('warning');
           expect(types).toContain('info');
 
           // All types should be valid
-          types.forEach(type => {
+          types.forEach((type) => {
             expect(['success', 'error', 'warning', 'info']).toContain(type);
           });
         }

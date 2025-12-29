@@ -8,10 +8,10 @@ import { describe, it, expect, afterEach } from '@jest/globals';
 import fc from 'fast-check';
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
-import { 
-  ActionAvailabilityIndicator, 
+import {
+  ActionAvailabilityIndicator,
   CompactActionIndicator,
-  getAvailableActions 
+  getAvailableActions,
 } from '@/components/ui/action-indicator';
 import type { OrderStatus } from '@/types';
 
@@ -27,7 +27,7 @@ const orderStatusGenerator = fc.oneof(
 const handlersGenerator = fc.record({
   onPayment: fc.option(fc.constant(() => {})),
   onDownload: fc.option(fc.constant(() => {})),
-  onRetry: fc.option(fc.constant(() => {}))
+  onRetry: fc.option(fc.constant(() => {})),
 });
 
 const booleanGenerator = fc.boolean();
@@ -40,19 +40,19 @@ describe('Action Availability Indication Properties', () => {
 
   /**
    * Property 35: Order actions indicate availability clearly
-   * For any order with possible actions, the system should clearly indicate 
+   * For any order with possible actions, the system should clearly indicate
    * available actions and disable unavailable ones with explanatory tooltips
    */
-  
+
   it('should clearly indicate available and unavailable actions for all order statuses', () => {
     fc.assert(
       fc.property(orderStatusGenerator, (status) => {
         // Arrange: Get actions for status
         const actions = getAvailableActions(status);
-        
+
         // Act & Assert: Verify action structure
         expect(Array.isArray(actions)).toBe(true);
-        
+
         actions.forEach((action) => {
           // Verify required action properties
           expect(action.id).toBeDefined();
@@ -60,13 +60,13 @@ describe('Action Availability Indication Properties', () => {
           expect(action.description).toBeDefined();
           expect(action.icon).toBeDefined();
           expect(typeof action.available).toBe('boolean');
-          
+
           // Verify label is meaningful
           expect(action.label.trim().length).toBeGreaterThan(0);
-          
+
           // Verify description is helpful
           expect(action.description.trim().length).toBeGreaterThan(0);
-          
+
           // Verify disabled actions have reasons when appropriate
           if (action.disabled && action.available) {
             expect(action.disabledReason).toBeDefined();
@@ -88,38 +88,44 @@ describe('Action Availability Indication Properties', () => {
           // Arrange & Act: Render action availability indicator with unique container
           const { container, unmount } = render(
             <div data-testid={`action-indicator-${status}-${Date.now()}`}>
-              <ActionAvailabilityIndicator 
+              <ActionAvailabilityIndicator
                 status={status}
                 {...handlers}
                 isLoading={isLoading}
               />
             </div>
           );
-          
+
           try {
             // Assert: Verify structure and accessibility
             const actions = getAvailableActions(status, handlers);
-            const availableActions = actions.filter(action => action.available);
-            const unavailableActions = actions.filter(action => !action.available);
-            
+            const availableActions = actions.filter(
+              (action) => action.available
+            );
+            const unavailableActions = actions.filter(
+              (action) => !action.available
+            );
+
             // Verify available actions section
             if (availableActions.length > 0) {
               expect(container.textContent).toContain('Ações Disponíveis');
-              
+
               availableActions.forEach((action) => {
                 // Check if action label appears in the container text
                 expect(container.textContent).toContain(action.label);
               });
             }
-            
+
             // Verify unavailable actions section
             if (unavailableActions.length > 0) {
               expect(container.textContent).toContain('Ações Indisponíveis');
             }
-            
+
             // Verify no actions message when appropriate
             if (actions.length === 0) {
-              expect(container.textContent).toContain('Nenhuma ação disponível para este status');
+              expect(container.textContent).toContain(
+                'Nenhuma ação disponível para este status'
+              );
             }
           } finally {
             // Ensure cleanup after each property run
@@ -133,36 +139,41 @@ describe('Action Availability Indication Properties', () => {
 
   it('should provide explanatory tooltips for disabled actions', () => {
     fc.assert(
-      fc.property(orderStatusGenerator, handlersGenerator, (status, handlers) => {
-        // Arrange & Act: Render action indicator with unique container
-        const { container, unmount } = render(
-          <div data-testid={`tooltip-test-${status}-${Date.now()}`}>
-            <ActionAvailabilityIndicator 
-              status={status}
-              {...handlers}
-            />
-          </div>
-        );
-        
-        try {
-          // Assert: Verify tooltips for disabled actions
-          const actions = getAvailableActions(status, handlers);
-          const disabledActions = actions.filter(action => action.available && action.disabled);
-          
-          disabledActions.forEach((action) => {
-            if (action.disabledReason) {
-              // Verify tooltip element exists within our container
-              const tooltip = container.querySelector(`#${action.id}-description`);
-              if (tooltip) {
-                expect(tooltip.getAttribute('role')).toBe('tooltip');
-                expect(tooltip.textContent).toBe(action.disabledReason);
+      fc.property(
+        orderStatusGenerator,
+        handlersGenerator,
+        (status, handlers) => {
+          // Arrange & Act: Render action indicator with unique container
+          const { container, unmount } = render(
+            <div data-testid={`tooltip-test-${status}-${Date.now()}`}>
+              <ActionAvailabilityIndicator status={status} {...handlers} />
+            </div>
+          );
+
+          try {
+            // Assert: Verify tooltips for disabled actions
+            const actions = getAvailableActions(status, handlers);
+            const disabledActions = actions.filter(
+              (action) => action.available && action.disabled
+            );
+
+            disabledActions.forEach((action) => {
+              if (action.disabledReason) {
+                // Verify tooltip element exists within our container
+                const tooltip = container.querySelector(
+                  `#${action.id}-description`
+                );
+                if (tooltip) {
+                  expect(tooltip.getAttribute('role')).toBe('tooltip');
+                  expect(tooltip.textContent).toBe(action.disabledReason);
+                }
               }
-            }
-          });
-        } finally {
-          unmount();
+            });
+          } finally {
+            unmount();
+          }
         }
-      }),
+      ),
       { numRuns: 25 }
     );
   });
@@ -176,19 +187,23 @@ describe('Action Availability Indication Properties', () => {
             <CompactActionIndicator status={status} />
           </div>
         );
-        
+
         try {
           // Assert: Verify action count display
           const actions = getAvailableActions(status);
-          const availableCount = actions.filter(action => action.available).length;
+          const availableCount = actions.filter(
+            (action) => action.available
+          ).length;
           const totalCount = actions.length;
-          
+
           const countText = `${availableCount} de ${totalCount} ações`;
           expect(container.textContent).toContain(countText);
-          
+
           // Verify appropriate icon based on availability
           if (availableCount > 0) {
-            const checkIcon = container.querySelector('.lucide-circle-check-big');
+            const checkIcon = container.querySelector(
+              '.lucide-circle-check-big'
+            );
             expect(checkIcon).toBeTruthy();
           } else if (totalCount > 0) {
             const clockIcon = container.querySelector('.lucide-clock');
@@ -208,10 +223,10 @@ describe('Action Availability Indication Properties', () => {
         // Arrange: Get actions multiple times
         const actions1 = getAvailableActions(status);
         const actions2 = getAvailableActions(status);
-        
+
         // Act & Assert: Verify consistency
         expect(actions1).toEqual(actions2);
-        
+
         // Verify each action has consistent structure
         actions1.forEach((action, index) => {
           const action2 = actions2[index];
@@ -227,34 +242,42 @@ describe('Action Availability Indication Properties', () => {
 
   it('should handle handler availability correctly', () => {
     fc.assert(
-      fc.property(orderStatusGenerator, handlersGenerator, (status, handlers) => {
-        // Arrange: Get actions with handlers
-        const actions = getAvailableActions(status, handlers);
-        
-        // Act & Assert: Verify handler-dependent actions
-        actions.forEach((action) => {
-          if (action.id === 'payment') {
-            expect(action.disabled).toBe(!handlers.onPayment);
-            if (!handlers.onPayment) {
-              expect(action.disabledReason).toContain('pagamento não disponível');
+      fc.property(
+        orderStatusGenerator,
+        handlersGenerator,
+        (status, handlers) => {
+          // Arrange: Get actions with handlers
+          const actions = getAvailableActions(status, handlers);
+
+          // Act & Assert: Verify handler-dependent actions
+          actions.forEach((action) => {
+            if (action.id === 'payment') {
+              expect(action.disabled).toBe(!handlers.onPayment);
+              if (!handlers.onPayment) {
+                expect(action.disabledReason).toContain(
+                  'pagamento não disponível'
+                );
+              }
             }
-          }
-          
-          if (action.id === 'download') {
-            expect(action.disabled).toBe(!handlers.onDownload);
-            if (!handlers.onDownload) {
-              expect(action.disabledReason).toContain('download não disponível');
+
+            if (action.id === 'download') {
+              expect(action.disabled).toBe(!handlers.onDownload);
+              if (!handlers.onDownload) {
+                expect(action.disabledReason).toContain(
+                  'download não disponível'
+                );
+              }
             }
-          }
-          
-          if (action.id === 'retry') {
-            expect(action.disabled).toBe(!handlers.onRetry);
-            if (!handlers.onRetry) {
-              expect(action.disabledReason).toContain('retry não disponível');
+
+            if (action.id === 'retry') {
+              expect(action.disabled).toBe(!handlers.onRetry);
+              if (!handlers.onRetry) {
+                expect(action.disabledReason).toContain('retry não disponível');
+              }
             }
-          }
-        });
-      }),
+          });
+        }
+      ),
       { numRuns: 50 }
     );
   });
@@ -264,15 +287,15 @@ describe('Action Availability Indication Properties', () => {
       fc.property(orderStatusGenerator, (status) => {
         // Arrange: Get actions for status
         const actions = getAvailableActions(status);
-        
+
         // Act & Assert: Verify description quality
         actions.forEach((action) => {
           expect(action.description).toBeDefined();
           expect(action.description.trim().length).toBeGreaterThan(5);
-          
+
           // Verify descriptions are contextual and helpful - more flexible validation
           const description = action.description.toLowerCase();
-          const hasContextualContent = 
+          const hasContextualContent =
             description.includes('pagamento') ||
             description.includes('download') ||
             description.includes('arquivo') ||
@@ -286,7 +309,7 @@ describe('Action Availability Indication Properties', () => {
             description.includes('status') ||
             description.includes('ordem') ||
             description.includes('processo');
-          
+
           // More lenient validation - just ensure description has some meaningful content
           expect(description.length).toBeGreaterThan(10);
         });
@@ -297,28 +320,32 @@ describe('Action Availability Indication Properties', () => {
 
   it('should handle loading states appropriately', () => {
     fc.assert(
-      fc.property(orderStatusGenerator, handlersGenerator, (status, handlers) => {
-        // Arrange & Act: Render with loading state and unique container
-        const { container, unmount } = render(
-          <div data-testid={`loading-test-${status}-${Date.now()}`}>
-            <ActionAvailabilityIndicator 
-              status={status}
-              {...handlers}
-              isLoading={true}
-            />
-          </div>
-        );
-        
-        try {
-          // Assert: Verify all buttons are disabled during loading
-          const buttons = container.querySelectorAll('button');
-          buttons.forEach((button) => {
-            expect(button.disabled).toBe(true);
-          });
-        } finally {
-          unmount();
+      fc.property(
+        orderStatusGenerator,
+        handlersGenerator,
+        (status, handlers) => {
+          // Arrange & Act: Render with loading state and unique container
+          const { container, unmount } = render(
+            <div data-testid={`loading-test-${status}-${Date.now()}`}>
+              <ActionAvailabilityIndicator
+                status={status}
+                {...handlers}
+                isLoading={true}
+              />
+            </div>
+          );
+
+          try {
+            // Assert: Verify all buttons are disabled during loading
+            const buttons = container.querySelectorAll('button');
+            buttons.forEach((button) => {
+              expect(button.disabled).toBe(true);
+            });
+          } finally {
+            unmount();
+          }
         }
-      }),
+      ),
       { numRuns: 25 }
     );
   });

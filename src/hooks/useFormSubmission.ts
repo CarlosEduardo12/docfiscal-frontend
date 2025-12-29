@@ -38,7 +38,7 @@ export function useFormSubmission(options: UseFormSubmissionOptions = {}) {
   const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
   // Use ref to track submission state synchronously
   const isSubmittingRef = useRef(false);
-  
+
   // Store options in refs to avoid stale closures
   const optionsRef = useRef({
     onSuccess,
@@ -47,7 +47,7 @@ export function useFormSubmission(options: UseFormSubmissionOptions = {}) {
     resetAfterError,
     successDuration,
   });
-  
+
   // Update options ref when they change
   useEffect(() => {
     optionsRef.current = {
@@ -58,104 +58,106 @@ export function useFormSubmission(options: UseFormSubmissionOptions = {}) {
       successDuration,
     };
   }, [onSuccess, onError, resetAfterSuccess, resetAfterError, successDuration]);
-  
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
       // Clear all timeouts on unmount
-      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+      timeoutRefs.current.forEach((timeout) => clearTimeout(timeout));
       timeoutRefs.current = [];
     };
   }, []);
 
-  const submit = useCallback(<T>(
-    submitFn: () => Promise<T>
-  ): Promise<T | null> | null => {
-    // Prevent double submission using ref for immediate check
-    if (isSubmittingRef.current) {
-      return null;
-    }
-
-    // Set submitting flag immediately
-    isSubmittingRef.current = true;
-
-    setState(prev => ({
-      ...prev,
-      isSubmitting: true,
-      isDisabled: true,
-      error: null,
-      success: false,
-    }));
-
-    // Return the actual async operation as a Promise
-    return (async () => {
-      try {
-        const result = await submitFn();
-        
-        if (isMountedRef.current) {
-          setState(prev => ({
-            ...prev,
-            isSubmitting: false,
-            isDisabled: false,
-            success: true,
-          }));
-
-          if (optionsRef.current.onSuccess) {
-            optionsRef.current.onSuccess();
-          }
-
-          // Auto-reset success state
-          if (optionsRef.current.resetAfterSuccess) {
-            const timeout = setTimeout(() => {
-              if (isMountedRef.current) {
-                setState(prev => ({
-                  ...prev,
-                  success: false,
-                }));
-              }
-            }, optionsRef.current.successDuration);
-            timeoutRefs.current.push(timeout);
-          }
-        }
-
-        // Reset submitting flag
-        isSubmittingRef.current = false;
-        return result;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-        
-        if (isMountedRef.current) {
-          setState(prev => ({
-            ...prev,
-            isSubmitting: false,
-            isDisabled: false,
-            error: errorMessage,
-          }));
-
-          if (optionsRef.current.onError) {
-            optionsRef.current.onError(errorMessage);
-          }
-
-          // Auto-reset error state if configured
-          if (optionsRef.current.resetAfterError) {
-            const timeout = setTimeout(() => {
-              if (isMountedRef.current) {
-                setState(prev => ({
-                  ...prev,
-                  error: null,
-                }));
-              }
-            }, 3000);
-            timeoutRefs.current.push(timeout);
-          }
-        }
-
-        // Reset submitting flag
-        isSubmittingRef.current = false;
+  const submit = useCallback(
+    <T>(submitFn: () => Promise<T>): Promise<T | null> | null => {
+      // Prevent double submission using ref for immediate check
+      if (isSubmittingRef.current) {
         return null;
       }
-    })();
-  }, []); // Remove all dependencies to ensure the function is stable
+
+      // Set submitting flag immediately
+      isSubmittingRef.current = true;
+
+      setState((prev) => ({
+        ...prev,
+        isSubmitting: true,
+        isDisabled: true,
+        error: null,
+        success: false,
+      }));
+
+      // Return the actual async operation as a Promise
+      return (async () => {
+        try {
+          const result = await submitFn();
+
+          if (isMountedRef.current) {
+            setState((prev) => ({
+              ...prev,
+              isSubmitting: false,
+              isDisabled: false,
+              success: true,
+            }));
+
+            if (optionsRef.current.onSuccess) {
+              optionsRef.current.onSuccess();
+            }
+
+            // Auto-reset success state
+            if (optionsRef.current.resetAfterSuccess) {
+              const timeout = setTimeout(() => {
+                if (isMountedRef.current) {
+                  setState((prev) => ({
+                    ...prev,
+                    success: false,
+                  }));
+                }
+              }, optionsRef.current.successDuration);
+              timeoutRefs.current.push(timeout);
+            }
+          }
+
+          // Reset submitting flag
+          isSubmittingRef.current = false;
+          return result;
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'An error occurred';
+
+          if (isMountedRef.current) {
+            setState((prev) => ({
+              ...prev,
+              isSubmitting: false,
+              isDisabled: false,
+              error: errorMessage,
+            }));
+
+            if (optionsRef.current.onError) {
+              optionsRef.current.onError(errorMessage);
+            }
+
+            // Auto-reset error state if configured
+            if (optionsRef.current.resetAfterError) {
+              const timeout = setTimeout(() => {
+                if (isMountedRef.current) {
+                  setState((prev) => ({
+                    ...prev,
+                    error: null,
+                  }));
+                }
+              }, 3000);
+              timeoutRefs.current.push(timeout);
+            }
+          }
+
+          // Reset submitting flag
+          isSubmittingRef.current = false;
+          return null;
+        }
+      })();
+    },
+    []
+  ); // Remove all dependencies to ensure the function is stable
 
   const reset = useCallback(() => {
     isSubmittingRef.current = false;
@@ -168,7 +170,7 @@ export function useFormSubmission(options: UseFormSubmissionOptions = {}) {
   }, []);
 
   const clearError = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error: null,
     }));

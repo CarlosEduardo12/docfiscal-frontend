@@ -73,6 +73,23 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
+// Helper function to get file size from either new or legacy field
+const getFileSize = (order: Order): number => {
+  return order.file_size || order.originalFileSize || 0;
+};
+
+// Helper function to get creation date from either new or legacy field
+const getCreatedDate = (order: Order): Date => {
+  // Handle legacy createdAt field (could be Date or string)
+  if (order.createdAt) {
+    return order.createdAt instanceof Date
+      ? order.createdAt
+      : new Date(order.createdAt);
+  }
+  // Handle new API created_at field (string)
+  return new Date(order.created_at);
+};
+
 export function OrderHistoryTable({
   orders,
   onDownload,
@@ -122,7 +139,7 @@ export function OrderHistoryTable({
 
   // Sort orders by most recent first
   const sortedOrders = [...orders].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => getCreatedDate(b).getTime() - getCreatedDate(a).getTime()
   );
 
   return (
@@ -189,9 +206,9 @@ export function OrderHistoryTable({
                       </div>
                     </td>
                     <td className="py-4 px-4 text-sm text-gray-900">
-                      {format(new Date(order.createdAt), 'MMM dd, yyyy')}
+                      {format(getCreatedDate(order), 'MMM dd, yyyy')}
                       <div className="text-xs text-gray-500">
-                        {format(new Date(order.createdAt), 'HH:mm')}
+                        {format(getCreatedDate(order), 'HH:mm')}
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -204,7 +221,7 @@ export function OrderHistoryTable({
                       </Badge>
                     </td>
                     <td className="py-4 px-4 text-sm text-gray-900">
-                      {formatFileSize(order.originalFileSize)}
+                      {formatFileSize(getFileSize(order))}
                     </td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex justify-end gap-2">
@@ -247,11 +264,12 @@ export function OrderHistoryTable({
                           </Button>
                         )}
                       </div>
-                      {order.status === 'failed' && order.errorMessage && (
-                        <div className="text-xs text-red-600 max-w-32 truncate mt-1">
-                          {order.errorMessage}
-                        </div>
-                      )}
+                      {order.status === 'failed' &&
+                        (order.error_message || order.errorMessage) && (
+                          <div className="text-xs text-red-600 max-w-32 truncate mt-1">
+                            {order.error_message || order.errorMessage}
+                          </div>
+                        )}
                     </td>
                   </tr>
                 ))}
@@ -298,9 +316,9 @@ export function OrderHistoryTable({
 
               <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
                 <span>
-                  {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}
+                  {format(getCreatedDate(order), 'MMM dd, yyyy HH:mm')}
                 </span>
-                <span>{formatFileSize(order.originalFileSize)}</span>
+                <span>{formatFileSize(getFileSize(order))}</span>
               </div>
 
               <div className="space-y-2">
@@ -341,11 +359,12 @@ export function OrderHistoryTable({
                   </Button>
                 )}
 
-                {order.status === 'failed' && order.errorMessage && (
-                  <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                    {order.errorMessage}
-                  </div>
-                )}
+                {order.status === 'failed' &&
+                  (order.error_message || order.errorMessage) && (
+                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                      {order.error_message || order.errorMessage}
+                    </div>
+                  )}
               </div>
             </div>
           ))}

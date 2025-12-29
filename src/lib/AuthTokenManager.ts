@@ -31,9 +31,18 @@ export class AuthTokenManager {
         return;
       }
 
-      localStorage.setItem(AuthTokenManager.ACCESS_TOKEN_KEY, tokens.accessToken);
-      localStorage.setItem(AuthTokenManager.REFRESH_TOKEN_KEY, tokens.refreshToken);
-      localStorage.setItem(AuthTokenManager.EXPIRES_AT_KEY, tokens.expiresAt.toISOString());
+      localStorage.setItem(
+        AuthTokenManager.ACCESS_TOKEN_KEY,
+        tokens.accessToken
+      );
+      localStorage.setItem(
+        AuthTokenManager.REFRESH_TOKEN_KEY,
+        tokens.refreshToken
+      );
+      localStorage.setItem(
+        AuthTokenManager.EXPIRES_AT_KEY,
+        tokens.expiresAt.toISOString()
+      );
 
       console.log('✅ Tokens stored successfully');
     } catch (error) {
@@ -51,35 +60,47 @@ export class AuthTokenManager {
         return {
           accessToken: null as any,
           refreshToken: null as any,
-          expiresAt: null as any
+          expiresAt: null as any,
         };
       }
 
-      const accessToken = localStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
-      const refreshToken = localStorage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
-      const expiresAtStr = localStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+      const accessToken = localStorage.getItem(
+        AuthTokenManager.ACCESS_TOKEN_KEY
+      );
+      const refreshToken = localStorage.getItem(
+        AuthTokenManager.REFRESH_TOKEN_KEY
+      );
+      const expiresAtStr = localStorage.getItem(
+        AuthTokenManager.EXPIRES_AT_KEY
+      );
 
       // Return null values if any token is missing or empty
-      if (!accessToken || !refreshToken || !expiresAtStr || 
-          accessToken.trim() === '' || refreshToken.trim() === '' || expiresAtStr.trim() === '') {
+      if (
+        !accessToken ||
+        !refreshToken ||
+        !expiresAtStr ||
+        accessToken.trim() === '' ||
+        refreshToken.trim() === '' ||
+        expiresAtStr.trim() === ''
+      ) {
         return {
           accessToken: null as any,
           refreshToken: null as any,
-          expiresAt: null as any
+          expiresAt: null as any,
         };
       }
 
       return {
         accessToken,
         refreshToken,
-        expiresAt: new Date(expiresAtStr)
+        expiresAt: new Date(expiresAtStr),
       };
     } catch (error) {
       console.error('❌ Failed to retrieve tokens:', error);
       return {
         accessToken: null as any,
         refreshToken: null as any,
-        expiresAt: null as any
+        expiresAt: null as any,
       };
     }
   }
@@ -89,22 +110,25 @@ export class AuthTokenManager {
    */
   async getValidToken(): Promise<string | null> {
     const tokens = this.getStoredTokens();
-    
+
     if (!tokens.accessToken) {
       return null;
     }
 
     // Check if token is expired or about to expire
-    if (this.isTokenExpired(tokens.accessToken) || this.shouldRefreshToken(tokens.expiresAt)) {
+    if (
+      this.isTokenExpired(tokens.accessToken) ||
+      this.shouldRefreshToken(tokens.expiresAt)
+    ) {
       console.log('🔄 Token expired or about to expire, attempting refresh...');
-      
+
       // Only attempt refresh if we have a refresh token
       if (!tokens.refreshToken) {
         console.log('❌ No refresh token available, clearing tokens');
         this.clearTokens();
         return null;
       }
-      
+
       const refreshResult = await this.refreshToken();
       if (refreshResult.success && refreshResult.tokens) {
         return refreshResult.tokens.accessToken;
@@ -124,24 +148,26 @@ export class AuthTokenManager {
   async refreshToken(): Promise<TokenRefreshResult> {
     try {
       const tokens = this.getStoredTokens();
-      
+
       if (!tokens.refreshToken) {
         return {
           success: false,
-          error: 'No refresh token available'
+          error: 'No refresh token available',
         };
       }
 
       console.log('🔄 Attempting token refresh...');
 
-      const response = await fetch('/api/auth/refresh', {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          refresh_token: tokens.refreshToken
-        })
+          refresh_token: tokens.refreshToken,
+        }),
       });
 
       if (!response.ok) {
@@ -149,30 +175,35 @@ export class AuthTokenManager {
       }
 
       const data = await response.json();
-      
+
       // Validate response structure
       if (!data || typeof data !== 'object') {
         throw new Error('Invalid response format');
       }
-      
+
       if (data.success && data.tokens && typeof data.tokens === 'object') {
         // Validate required token fields
-        if (!data.tokens.access_token || typeof data.tokens.access_token !== 'string') {
+        if (
+          !data.tokens.access_token ||
+          typeof data.tokens.access_token !== 'string'
+        ) {
           throw new Error('Invalid access token in response');
         }
-        
+
         const newTokens: AuthTokens = {
           accessToken: data.tokens.access_token,
           refreshToken: data.tokens.refresh_token || tokens.refreshToken,
-          expiresAt: new Date(Date.now() + ((data.tokens.expires_in || 3600) * 1000))
+          expiresAt: new Date(
+            Date.now() + (data.tokens.expires_in || 3600) * 1000
+          ),
         };
 
         this.storeTokens(newTokens);
-        
+
         console.log('✅ Token refresh successful');
         return {
           success: true,
-          tokens: newTokens
+          tokens: newTokens,
         };
       } else {
         throw new Error(data.error || 'Token refresh failed');
@@ -181,7 +212,7 @@ export class AuthTokenManager {
       console.error('❌ Token refresh error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

@@ -18,16 +18,21 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
 
   useEffect(() => {
     // Set up automatic token refresh interval
-    const refreshInterval = setInterval(async () => {
-      if (auth.isAuthenticated && !persistence.isRefreshing) {
-        console.log('🔄 Performing automatic session refresh...');
-        const success = await auth.refreshSession();
-        
-        if (!success) {
-          console.log('❌ Automatic session refresh failed, user will need to re-login');
+    const refreshInterval = setInterval(
+      async () => {
+        if (auth.isAuthenticated && !persistence.isRefreshing) {
+          console.log('🔄 Performing automatic session refresh...');
+          const success = await auth.refreshSession();
+
+          if (!success) {
+            console.log(
+              '❌ Automatic session refresh failed, user will need to re-login'
+            );
+          }
         }
-      }
-    }, 15 * 60 * 1000); // Refresh every 15 minutes
+      },
+      15 * 60 * 1000
+    ); // Refresh every 15 minutes
 
     return () => {
       clearInterval(refreshInterval);
@@ -38,7 +43,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     // Handle page visibility change - refresh session when page becomes visible
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && auth.isAuthenticated) {
-        const timeSinceLastRefresh = persistence.lastRefreshAttempt 
+        const timeSinceLastRefresh = persistence.lastRefreshAttempt
           ? Date.now() - persistence.lastRefreshAttempt.getTime()
           : Infinity;
 
@@ -51,11 +56,15 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [auth.isAuthenticated, auth.refreshSession, persistence.lastRefreshAttempt]);
+  }, [
+    auth.isAuthenticated,
+    auth.refreshSession,
+    persistence.lastRefreshAttempt,
+  ]);
 
   useEffect(() => {
     // Handle storage events (for multi-tab synchronization)
@@ -64,7 +73,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
       if (event.key?.startsWith('docfiscal_') && event.newValue === null) {
         console.log('🔄 Tokens cleared in another tab, updating state...');
         persistence.clearSession();
-        
+
         if (auth.isAuthenticated) {
           auth.logout();
         }
@@ -72,7 +81,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };

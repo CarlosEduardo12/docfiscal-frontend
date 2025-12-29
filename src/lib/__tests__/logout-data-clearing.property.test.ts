@@ -20,7 +20,7 @@ const mockLocalStorage = (() => {
       store = {};
     },
     getAllKeys: () => Object.keys(store),
-    getAllData: () => ({ ...store })
+    getAllData: () => ({ ...store }),
   };
 })();
 
@@ -30,17 +30,18 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock fetch for testing - provide comprehensive mock responses
-const mockFetch = jest.fn().mockImplementation(() => 
+const mockFetch = jest.fn().mockImplementation(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({
-      success: true,
-      tokens: {
-        access_token: 'new_access_token_' + Date.now(),
-        refresh_token: 'new_refresh_token_' + Date.now(),
-        expires_in: 3600
-      }
-    })
+    json: () =>
+      Promise.resolve({
+        success: true,
+        tokens: {
+          access_token: 'new_access_token_' + Date.now(),
+          refresh_token: 'new_refresh_token_' + Date.now(),
+          expires_in: 3600,
+        },
+      }),
   })
 );
 global.fetch = mockFetch;
@@ -63,12 +64,19 @@ describe('Logout Data Clearing Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
-              .filter(d => !isNaN(d.getTime()))
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            expiresAt: fc
+              .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+              .filter((d) => !isNaN(d.getTime())),
           }),
           async (tokenData) => {
             // Store tokens first
@@ -77,7 +85,9 @@ describe('Logout Data Clearing Property Tests', () => {
             // Verify tokens are stored
             const storedTokensBefore = authTokenManager.getStoredTokens();
             expect(storedTokensBefore.accessToken).toBe(tokenData.accessToken);
-            expect(storedTokensBefore.refreshToken).toBe(tokenData.refreshToken);
+            expect(storedTokensBefore.refreshToken).toBe(
+              tokenData.refreshToken
+            );
 
             // Property: clearTokens should remove all authentication data
             authTokenManager.clearTokens();
@@ -99,40 +109,68 @@ describe('Logout Data Clearing Property Tests', () => {
           fc.record({
             accessToken: fc.oneof(
               // Valid tokens
-              fc.string({ minLength: 10, maxLength: 500 })
-                .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
+              fc
+                .string({ minLength: 10, maxLength: 500 })
+                .filter(
+                  (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+                ),
               // Whitespace-only tokens
-              fc.string({ minLength: 1, maxLength: 50 })
-                .filter(s => s.trim() === '' && s.length > 0)
+              fc
+                .string({ minLength: 1, maxLength: 50 })
+                .filter((s) => s.trim() === '' && s.length > 0)
             ),
             refreshToken: fc.oneof(
               // Valid tokens
-              fc.string({ minLength: 10, maxLength: 500 })
-                .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
+              fc
+                .string({ minLength: 10, maxLength: 500 })
+                .filter(
+                  (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+                ),
               // Whitespace-only tokens
-              fc.string({ minLength: 1, maxLength: 50 })
-                .filter(s => s.trim() === '' && s.length > 0)
+              fc
+                .string({ minLength: 1, maxLength: 50 })
+                .filter((s) => s.trim() === '' && s.length > 0)
             ),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
-              .filter(d => !isNaN(d.getTime()))
+            expiresAt: fc
+              .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+              .filter((d) => !isNaN(d.getTime())),
           }),
           async (tokenData) => {
             // Directly store tokens in localStorage to test edge cases
-            mockLocalStorage.setItem('docfiscal_access_token', tokenData.accessToken);
-            mockLocalStorage.setItem('docfiscal_refresh_token', tokenData.refreshToken);
-            mockLocalStorage.setItem('docfiscal_token_expires_at', tokenData.expiresAt.toISOString());
+            mockLocalStorage.setItem(
+              'docfiscal_access_token',
+              tokenData.accessToken
+            );
+            mockLocalStorage.setItem(
+              'docfiscal_refresh_token',
+              tokenData.refreshToken
+            );
+            mockLocalStorage.setItem(
+              'docfiscal_token_expires_at',
+              tokenData.expiresAt.toISOString()
+            );
 
             // Verify tokens are stored in localStorage
-            expect(mockLocalStorage.getItem('docfiscal_access_token')).toBe(tokenData.accessToken);
-            expect(mockLocalStorage.getItem('docfiscal_refresh_token')).toBe(tokenData.refreshToken);
+            expect(mockLocalStorage.getItem('docfiscal_access_token')).toBe(
+              tokenData.accessToken
+            );
+            expect(mockLocalStorage.getItem('docfiscal_refresh_token')).toBe(
+              tokenData.refreshToken
+            );
 
             // Property: clearTokens should remove all authentication data, including whitespace-only tokens
             authTokenManager.clearTokens();
 
             // Verify all tokens are cleared from localStorage
-            expect(mockLocalStorage.getItem('docfiscal_access_token')).toBeNull();
-            expect(mockLocalStorage.getItem('docfiscal_refresh_token')).toBeNull();
-            expect(mockLocalStorage.getItem('docfiscal_token_expires_at')).toBeNull();
+            expect(
+              mockLocalStorage.getItem('docfiscal_access_token')
+            ).toBeNull();
+            expect(
+              mockLocalStorage.getItem('docfiscal_refresh_token')
+            ).toBeNull();
+            expect(
+              mockLocalStorage.getItem('docfiscal_token_expires_at')
+            ).toBeNull();
 
             // Verify getStoredTokens returns null values after clearing
             const storedTokensAfter = authTokenManager.getStoredTokens();
@@ -150,23 +188,33 @@ describe('Logout Data Clearing Property Tests', () => {
         fc.asyncProperty(
           fc.record({
             authTokens: fc.record({
-              accessToken: fc.string({ minLength: 10, maxLength: 500 })
-                .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-              refreshToken: fc.string({ minLength: 10, maxLength: 500 })
-                .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-              expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
-                .filter(d => !isNaN(d.getTime()))
+              accessToken: fc
+                .string({ minLength: 10, maxLength: 500 })
+                .filter(
+                  (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+                ),
+              refreshToken: fc
+                .string({ minLength: 10, maxLength: 500 })
+                .filter(
+                  (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+                ),
+              expiresAt: fc
+                .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+                .filter((d) => !isNaN(d.getTime())),
             }),
             otherData: fc.dictionary(
-              fc.string({ minLength: 1, maxLength: 50 }).filter(key => 
-                !key.startsWith('docfiscal_') && 
-                key.trim().length > 0 && 
-                key !== '__proto__' && 
-                key !== 'constructor' && 
-                key !== 'prototype' // Avoid conflicts with auth keys and prototype pollution
+              fc.string({ minLength: 1, maxLength: 50 }).filter(
+                (key) =>
+                  !key.startsWith('docfiscal_') &&
+                  key.trim().length > 0 &&
+                  key !== '__proto__' &&
+                  key !== 'constructor' &&
+                  key !== 'prototype' // Avoid conflicts with auth keys and prototype pollution
               ),
-              fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0)
-            )
+              fc
+                .string({ minLength: 1, maxLength: 100 })
+                .filter((s) => s.trim().length > 0)
+            ),
           }),
           async (testData) => {
             // Store authentication tokens
@@ -193,9 +241,13 @@ describe('Logout Data Clearing Property Tests', () => {
 
             // Verify only auth keys were removed
             const finalKeys = mockLocalStorage.getAllKeys();
-            const authKeys = ['docfiscal_access_token', 'docfiscal_refresh_token', 'docfiscal_token_expires_at'];
-            
-            authKeys.forEach(authKey => {
+            const authKeys = [
+              'docfiscal_access_token',
+              'docfiscal_refresh_token',
+              'docfiscal_token_expires_at',
+            ];
+
+            authKeys.forEach((authKey) => {
               expect(finalKeys).not.toContain(authKey);
             });
           }
@@ -234,12 +286,19 @@ describe('Logout Data Clearing Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
-              .filter(d => !isNaN(d.getTime()))
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            expiresAt: fc
+              .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+              .filter((d) => !isNaN(d.getTime())),
           }),
           async (tokenData) => {
             // Store tokens first
@@ -250,7 +309,8 @@ describe('Logout Data Clearing Property Tests', () => {
             let removeCallCount = 0;
             mockLocalStorage.removeItem = (key: string) => {
               removeCallCount++;
-              if (removeCallCount <= 2) { // Fail first two calls
+              if (removeCallCount <= 2) {
+                // Fail first two calls
                 throw new Error('Storage removal failed');
               }
               originalRemoveItem(key);
@@ -277,20 +337,27 @@ describe('Logout Data Clearing Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            expiresAt: fc.date({ min: new Date(), max: new Date(Date.now() + 86400000) })
-              .filter(d => !isNaN(d.getTime())),
-            clearOperations: fc.integer({ min: 1, max: 5 })
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            expiresAt: fc
+              .date({ min: new Date(), max: new Date(Date.now() + 86400000) })
+              .filter((d) => !isNaN(d.getTime())),
+            clearOperations: fc.integer({ min: 1, max: 5 }),
           }),
           async (testData) => {
             // Store tokens
             authTokenManager.storeTokens({
               accessToken: testData.accessToken,
               refreshToken: testData.refreshToken,
-              expiresAt: testData.expiresAt
+              expiresAt: testData.expiresAt,
             });
 
             // Verify tokens are stored
@@ -323,14 +390,22 @@ describe('Logout Data Clearing Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            accessToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            refreshToken: fc.string({ minLength: 10, maxLength: 500 })
-              .filter(s => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)),
-            expiresAt: fc.date({ 
-              min: new Date(Date.now() + 3600000), // 1 hour from now
-              max: new Date(Date.now() + 86400000) // 24 hours from now
-            }).filter(d => !isNaN(d.getTime()))
+            accessToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            refreshToken: fc
+              .string({ minLength: 10, maxLength: 500 })
+              .filter(
+                (s) => s.trim().length >= 10 && /^[a-zA-Z0-9_-]+$/.test(s)
+              ),
+            expiresAt: fc
+              .date({
+                min: new Date(Date.now() + 3600000), // 1 hour from now
+                max: new Date(Date.now() + 86400000), // 24 hours from now
+              })
+              .filter((d) => !isNaN(d.getTime())),
           }),
           async (tokenData) => {
             // Store valid tokens with future expiry
@@ -340,7 +415,8 @@ describe('Logout Data Clearing Property Tests', () => {
             const validTokenBefore = await authTokenManager.getValidToken();
             expect(validTokenBefore).toBe(tokenData.accessToken);
 
-            const isAuthenticatedBefore = await authTokenManager.isAuthenticated();
+            const isAuthenticatedBefore =
+              await authTokenManager.isAuthenticated();
             expect(isAuthenticatedBefore).toBe(true);
 
             // Property: Clearing tokens should affect authentication state
@@ -350,7 +426,8 @@ describe('Logout Data Clearing Property Tests', () => {
             const validTokenAfter = await authTokenManager.getValidToken();
             expect(validTokenAfter).toBeNull();
 
-            const isAuthenticatedAfter = await authTokenManager.isAuthenticated();
+            const isAuthenticatedAfter =
+              await authTokenManager.isAuthenticated();
             expect(isAuthenticatedAfter).toBe(false);
           }
         ),

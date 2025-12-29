@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { 
-  CreditCard, 
-  Download, 
-  RefreshCw, 
-  AlertCircle, 
+import {
+  CreditCard,
+  Download,
+  RefreshCw,
+  AlertCircle,
   Clock,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -48,7 +48,7 @@ export const getAvailableActions = (
   const { onPayment, onDownload, onRetry } = handlers;
 
   const actionConfigs: Record<OrderStatus, OrderAction[]> = {
-    'pending_payment': [
+    pending_payment: [
       {
         id: 'payment',
         label: 'Efetuar Pagamento',
@@ -57,8 +57,10 @@ export const getAvailableActions = (
         available: true,
         primary: true,
         disabled: !onPayment,
-        disabledReason: !onPayment ? 'Função de pagamento não disponível' : undefined,
-        onClick: onPayment
+        disabledReason: !onPayment
+          ? 'Função de pagamento não disponível'
+          : undefined,
+        onClick: onPayment,
       },
       {
         id: 'cancel',
@@ -67,10 +69,10 @@ export const getAvailableActions = (
         icon: AlertCircle,
         available: true,
         primary: false,
-        disabled: false
-      }
+        disabled: false,
+      },
     ],
-    'paid': [
+    paid: [
       {
         id: 'wait',
         label: 'Aguardar Processamento',
@@ -79,10 +81,10 @@ export const getAvailableActions = (
         available: false,
         primary: false,
         disabled: true,
-        disabledReason: 'Processamento será iniciado automaticamente'
-      }
+        disabledReason: 'Processamento será iniciado automaticamente',
+      },
     ],
-    'processing': [
+    processing: [
       {
         id: 'wait',
         label: 'Processando...',
@@ -91,7 +93,7 @@ export const getAvailableActions = (
         available: false,
         primary: false,
         disabled: true,
-        disabledReason: 'Processamento em andamento'
+        disabledReason: 'Processamento em andamento',
       },
       {
         id: 'refresh',
@@ -100,10 +102,10 @@ export const getAvailableActions = (
         icon: RefreshCw,
         available: true,
         primary: false,
-        disabled: false
-      }
+        disabled: false,
+      },
     ],
-    'completed': [
+    completed: [
       {
         id: 'download',
         label: 'Baixar Arquivo',
@@ -112,8 +114,10 @@ export const getAvailableActions = (
         available: true,
         primary: true,
         disabled: !onDownload,
-        disabledReason: !onDownload ? 'Função de download não disponível' : undefined,
-        onClick: onDownload
+        disabledReason: !onDownload
+          ? 'Função de download não disponível'
+          : undefined,
+        onClick: onDownload,
       },
       {
         id: 'new_order',
@@ -122,10 +126,10 @@ export const getAvailableActions = (
         icon: RefreshCw,
         available: true,
         primary: false,
-        disabled: false
-      }
+        disabled: false,
+      },
     ],
-    'failed': [
+    failed: [
       {
         id: 'retry',
         label: 'Tentar Novamente',
@@ -135,7 +139,7 @@ export const getAvailableActions = (
         primary: true,
         disabled: !onRetry,
         disabledReason: !onRetry ? 'Função de retry não disponível' : undefined,
-        onClick: onRetry
+        onClick: onRetry,
       },
       {
         id: 'support',
@@ -144,9 +148,9 @@ export const getAvailableActions = (
         icon: HelpCircle,
         available: true,
         primary: false,
-        disabled: false
-      }
-    ]
+        disabled: false,
+      },
+    ],
   };
 
   return actionConfigs[status] || [];
@@ -158,11 +162,15 @@ export function ActionAvailabilityIndicator({
   onDownload,
   onRetry,
   isLoading = false,
-  className
+  className,
 }: ActionAvailabilityProps) {
-  const actions = getAvailableActions(status, { onPayment, onDownload, onRetry });
-  const availableActions = actions.filter(action => action.available);
-  const unavailableActions = actions.filter(action => !action.available);
+  const actions = getAvailableActions(status, {
+    onPayment,
+    onDownload,
+    onRetry,
+  });
+  const availableActions = actions.filter((action) => action.available);
+  const unavailableActions = actions.filter((action) => !action.available);
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -176,7 +184,7 @@ export function ActionAvailabilityIndicator({
             {availableActions.map((action) => {
               const ActionIcon = action.icon;
               const isDisabled = action.disabled || isLoading;
-              
+
               return (
                 <div key={action.id} className="relative group">
                   <Button
@@ -189,10 +197,10 @@ export function ActionAvailabilityIndicator({
                     <ActionIcon className="h-4 w-4 mr-2" aria-hidden="true" />
                     {action.label}
                   </Button>
-                  
+
                   {/* Tooltip for disabled actions */}
                   {isDisabled && action.disabledReason && (
-                    <div 
+                    <div
                       id={`${action.id}-description`}
                       className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap"
                       role="tooltip"
@@ -200,10 +208,10 @@ export function ActionAvailabilityIndicator({
                       {action.disabledReason}
                     </div>
                   )}
-                  
+
                   {/* Description tooltip for enabled actions */}
                   {!isDisabled && (
-                    <div 
+                    <div
                       id={`${action.id}-description`}
                       className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap"
                       role="tooltip"
@@ -227,15 +235,15 @@ export function ActionAvailabilityIndicator({
           <div className="space-y-2">
             {unavailableActions.map((action) => {
               const ActionIcon = action.icon;
-              
+
               return (
-                <div 
-                  key={action.id} 
+                <div
+                  key={action.id}
                   className="flex items-center space-x-3 p-2 bg-muted rounded-md"
                 >
-                  <ActionIcon 
-                    className="h-4 w-4 text-muted-foreground" 
-                    aria-hidden="true" 
+                  <ActionIcon
+                    className="h-4 w-4 text-muted-foreground"
+                    aria-hidden="true"
                   />
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
@@ -273,13 +281,13 @@ export function ActionAvailabilityIndicator({
 // Compact action indicator for tables and cards
 export function CompactActionIndicator({
   status,
-  className
+  className,
 }: {
   status: OrderStatus;
   className?: string;
 }) {
   const actions = getAvailableActions(status);
-  const availableCount = actions.filter(action => action.available).length;
+  const availableCount = actions.filter((action) => action.available).length;
   const totalCount = actions.length;
 
   const getStatusColor = (status: OrderStatus) => {
@@ -301,17 +309,17 @@ export function CompactActionIndicator({
 
   return (
     <div className={cn('inline-flex items-center space-x-2', className)}>
-      <Badge 
-        variant="outline" 
+      <Badge
+        variant="outline"
         className={cn('text-xs', getStatusColor(status))}
       >
         {availableCount} de {totalCount} ações
       </Badge>
-      
+
       {availableCount > 0 && (
         <CheckCircle className="h-4 w-4 text-green-600" aria-hidden="true" />
       )}
-      
+
       {availableCount === 0 && totalCount > 0 && (
         <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       )}

@@ -1,9 +1,9 @@
 /**
  * Property-Based Tests for State Change Propagation
- * 
+ *
  * **Feature: frontend-issues-resolution, Property 28: State changes update all relevant components**
  * **Validates: Requirements 8.1**
- * 
+ *
  * Tests that when order status changes occur, the state management system
  * updates all relevant UI components automatically without requiring manual refresh.
  */
@@ -29,14 +29,16 @@ const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 // Test wrapper component
 const createWrapper = (queryClient: QueryClient) => {
-  return ({ children }: { children: React.ReactNode }) => 
+  const TestWrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 };
 
 // Order status generator
 const orderStatusArb = fc.constantFrom(
   'pending_payment',
-  'processing', 
+  'processing',
   'completed',
   'failed',
   'cancelled'
@@ -44,13 +46,25 @@ const orderStatusArb = fc.constantFrom(
 
 // Order data generator
 const orderDataArb = fc.record({
-  id: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
-  filename: fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
+  id: fc
+    .string({ minLength: 1, maxLength: 50 })
+    .filter((s) => s.trim().length > 0),
+  filename: fc
+    .string({ minLength: 1, maxLength: 100 })
+    .filter((s) => s.trim().length > 0),
   status: orderStatusArb,
-  created_at: fc.integer({ min: 1577836800000, max: 1893456000000 }).map(ts => new Date(ts).toISOString()),
-  updated_at: fc.integer({ min: 1577836800000, max: 1893456000000 }).map(ts => new Date(ts).toISOString()),
+  created_at: fc
+    .integer({ min: 1577836800000, max: 1893456000000 })
+    .map((ts) => new Date(ts).toISOString()),
+  updated_at: fc
+    .integer({ min: 1577836800000, max: 1893456000000 })
+    .map((ts) => new Date(ts).toISOString()),
   file_size: fc.integer({ min: 1, max: 100000000 }),
-  processed_at: fc.option(fc.integer({ min: 1577836800000, max: 1893456000000 }).map(ts => new Date(ts).toISOString())),
+  processed_at: fc.option(
+    fc
+      .integer({ min: 1577836800000, max: 1893456000000 })
+      .map((ts) => new Date(ts).toISOString())
+  ),
   error: fc.option(fc.string()),
 });
 
@@ -93,7 +107,7 @@ describe('State Change Propagation Properties', () => {
 
           // Setup initial order data
           const updatedOrder = { ...initialOrder, status: newStatus };
-          
+
           mockApiClient.getOrder.mockResolvedValue({
             success: true,
             data: initialOrder,
@@ -123,7 +137,10 @@ describe('State Change Propagation Properties', () => {
 
           // **Property: When order status changes, all components should receive the update**
           await act(async () => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), updatedOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              updatedOrder
+            );
           });
 
           // Wait for the update to propagate
@@ -147,7 +164,9 @@ describe('State Change Propagation Properties', () => {
   test('Order list updates propagate to all components using user orders', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+        fc
+          .string({ minLength: 1, maxLength: 50 })
+          .filter((s) => s.trim().length > 0),
         userOrdersArb,
         orderDataArb,
         async (userId, initialOrders, newOrder) => {
@@ -172,15 +191,13 @@ describe('State Change Propagation Properties', () => {
           const wrapper = createWrapper(queryClient);
 
           // Render multiple hooks that use the same user orders
-          const { result: result1 } = renderHook(
-            () => useUserOrders(userId),
-            { wrapper }
-          );
+          const { result: result1 } = renderHook(() => useUserOrders(userId), {
+            wrapper,
+          });
 
-          const { result: result2 } = renderHook(
-            () => useUserOrders(userId),
-            { wrapper }
-          );
+          const { result: result2 } = renderHook(() => useUserOrders(userId), {
+            wrapper,
+          });
 
           // Wait for initial data to load with longer timeout
           await waitFor(
@@ -193,14 +210,21 @@ describe('State Change Propagation Properties', () => {
 
           // **Property: When order list changes, all components should receive the update**
           await act(async () => {
-            queryClient.setQueryData(queryKeys.orders.userOrders(userId), updatedOrders);
+            queryClient.setQueryData(
+              queryKeys.orders.userOrders(userId),
+              updatedOrders
+            );
           });
 
           // Wait for the update to propagate
           await waitFor(
             () => {
-              expect(result1.current.data?.orders).toHaveLength(updatedOrders.orders.length);
-              expect(result2.current.data?.orders).toHaveLength(updatedOrders.orders.length);
+              expect(result1.current.data?.orders).toHaveLength(
+                updatedOrders.orders.length
+              );
+              expect(result2.current.data?.orders).toHaveLength(
+                updatedOrders.orders.length
+              );
             },
             { timeout: 1000 }
           );
@@ -217,7 +241,9 @@ describe('State Change Propagation Properties', () => {
   test('Cache invalidation propagates to all dependent queries', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+        fc
+          .string({ minLength: 1, maxLength: 50 })
+          .filter((s) => s.trim().length > 0),
         orderDataArb,
         userOrdersArb,
         async (userId, orderData, userOrdersData) => {
@@ -319,9 +345,12 @@ describe('State Change Propagation Properties', () => {
 
           // **Property: Optimistic updates should be immediately visible across all components**
           const optimisticOrder = { ...initialOrder, status: optimisticStatus };
-          
+
           await act(async () => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), optimisticOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              optimisticOrder
+            );
           });
 
           // Wait for the update to propagate
@@ -332,7 +361,7 @@ describe('State Change Propagation Properties', () => {
             },
             { timeout: 1000 }
           );
-          
+
           // Data should be consistent across components
           expect(result1.current.data).toEqual(result2.current.data);
         }
@@ -345,7 +374,9 @@ describe('State Change Propagation Properties', () => {
     await fc.assert(
       fc.asyncProperty(
         orderDataArb,
-        fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
+        fc
+          .string({ minLength: 1, maxLength: 100 })
+          .filter((s) => s.trim().length > 0),
         async (orderData, newFilename) => {
           // Skip if filename is the same to ensure we're testing actual changes
           if (orderData.filename === newFilename) return;
@@ -357,10 +388,9 @@ describe('State Change Propagation Properties', () => {
 
           const wrapper = createWrapper(queryClient);
 
-          const { result } = renderHook(
-            () => useOrderStatus(orderData.id),
-            { wrapper }
-          );
+          const { result } = renderHook(() => useOrderStatus(orderData.id), {
+            wrapper,
+          });
 
           // Wait for initial data to load with longer timeout
           await waitFor(
@@ -374,9 +404,12 @@ describe('State Change Propagation Properties', () => {
 
           // **Property: Updating unrelated data should not affect referential equality of unchanged fields**
           const updatedOrder = { ...orderData, filename: newFilename };
-          
+
           await act(async () => {
-            queryClient.setQueryData(queryKeys.orders.byId(orderData.id), updatedOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(orderData.id),
+              updatedOrder
+            );
           });
 
           // Wait for the update to propagate
@@ -390,10 +423,10 @@ describe('State Change Propagation Properties', () => {
           // Status should remain the same value if unchanged
           expect(result.current.data?.status).toBe(initialData?.status);
           expect(result.current.data?.id).toBe(initialData?.id);
-          
+
           // But filename should be updated
           expect(result.current.data?.filename).toBe(newFilename);
-          
+
           // Verify the update was applied
           expect(result.current.data?.filename).not.toBe(orderData.filename);
         }

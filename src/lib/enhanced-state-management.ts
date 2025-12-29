@@ -1,6 +1,6 @@
 /**
  * Enhanced State Management System
- * 
+ *
  * Provides automatic UI updates for order status changes, state persistence during navigation,
  * single source of truth for data consistency, graceful handling of state update failures,
  * and optimistic updates with rollback functionality.
@@ -43,8 +43,8 @@ export class EnhancedStateManager {
    * Update order status with optimistic updates and rollback support
    */
   async updateOrderStatus(
-    orderId: string, 
-    newStatus: string, 
+    orderId: string,
+    newStatus: string,
     options: StateUpdateOptions = {}
   ): Promise<StateUpdateResult> {
     const queryKey = queryKeys.orders.byId(orderId);
@@ -59,7 +59,10 @@ export class EnhancedStateManager {
 
       // Apply optimistic update if requested
       if (options.optimistic) {
-        const optimisticData = { ...currentData, status: newStatus };
+        const optimisticData =
+          currentData && typeof currentData === 'object'
+            ? { ...currentData, status: newStatus }
+            : { status: newStatus };
         this.optimisticUpdates.set(keyString, optimisticData);
         this.queryClient.setQueryData(queryKey, optimisticData);
       }
@@ -88,14 +91,17 @@ export class EnhancedStateManager {
     const orderQueryKey = queryKeys.orders.byId(orderId);
     const currentOrderData = this.queryClient.getQueryData(orderQueryKey);
     if (currentOrderData) {
-      this.queryClient.setQueryData(orderQueryKey, { ...currentOrderData, ...updates });
+      this.queryClient.setQueryData(orderQueryKey, {
+        ...currentOrderData,
+        ...updates,
+      });
     }
 
     // Update user orders lists that might contain this order
     const queryCache = this.queryClient.getQueryCache();
     const queries = queryCache.getAll();
 
-    queries.forEach(query => {
+    queries.forEach((query) => {
       const queryKey = query.queryKey;
       if (this.isUserOrdersQuery(queryKey)) {
         const data = query.state.data as any;
@@ -103,7 +109,10 @@ export class EnhancedStateManager {
           const updatedOrders = data.orders.map((order: any) =>
             order.id === orderId ? { ...order, ...updates } : order
           );
-          this.queryClient.setQueryData(queryKey, { ...data, orders: updatedOrders });
+          this.queryClient.setQueryData(queryKey, {
+            ...data,
+            orders: updatedOrders,
+          });
         }
       }
     });
@@ -113,18 +122,20 @@ export class EnhancedStateManager {
    * Check if a query key represents a user orders query
    */
   private isUserOrdersQuery(queryKey: QueryKey): boolean {
-    return Array.isArray(queryKey) && 
-           queryKey.length >= 3 && 
-           queryKey[0] === 'orders' && 
-           queryKey[1] === 'user';
+    return (
+      Array.isArray(queryKey) &&
+      queryKey.length >= 3 &&
+      queryKey[0] === 'orders' &&
+      queryKey[1] === 'user'
+    );
   }
 
   /**
    * Handle state update failures with recovery mechanisms
    */
   async handleStateFailure(
-    queryKey: QueryKey, 
-    error: Error, 
+    queryKey: QueryKey,
+    error: Error,
     options: StateUpdateOptions = {}
   ): Promise<StateRecoveryMechanism> {
     const keyString = JSON.stringify(queryKey);
@@ -142,7 +153,10 @@ export class EnhancedStateManager {
   /**
    * Create recovery mechanisms for failed state updates
    */
-  private createRecoveryMechanism(queryKey: QueryKey, keyString: string): StateRecoveryMechanism {
+  private createRecoveryMechanism(
+    queryKey: QueryKey,
+    keyString: string
+  ): StateRecoveryMechanism {
     return {
       retry: async () => {
         await this.queryClient.refetchQueries({ queryKey });
@@ -174,7 +188,7 @@ export class EnhancedStateManager {
     const queryCache = this.queryClient.getQueryCache();
     const queries = queryCache.getAll();
 
-    queries.forEach(query => {
+    queries.forEach((query) => {
       if (this.queryContainsOrder(query.queryKey, orderId)) {
         // Force consistency by invalidating and refetching
         this.queryClient.invalidateQueries({ queryKey: query.queryKey });
@@ -253,7 +267,7 @@ export class StateSynchronizer {
    * Synchronize state across multiple queries
    */
   async synchronizeQueries(queryKeys: QueryKey[]): Promise<void> {
-    const promises = queryKeys.map(queryKey =>
+    const promises = queryKeys.map((queryKey) =>
       this.queryClient.refetchQueries({ queryKey })
     );
 
@@ -270,7 +284,11 @@ export class StateSynchronizer {
    * Handle concurrent state updates
    */
   async handleConcurrentUpdates(
-    updates: Array<{ queryKey: QueryKey; data: any; options?: StateUpdateOptions }>
+    updates: Array<{
+      queryKey: QueryKey;
+      data: any;
+      options?: StateUpdateOptions;
+    }>
   ): Promise<StateUpdateResult[]> {
     const results: StateUpdateResult[] = [];
 
@@ -278,7 +296,7 @@ export class StateSynchronizer {
     for (const update of updates) {
       try {
         const currentData = this.queryClient.getQueryData(update.queryKey);
-        
+
         // Apply optimistic update if requested
         if (update.options?.optimistic) {
           this.queryClient.setQueryData(update.queryKey, update.data);
@@ -289,7 +307,10 @@ export class StateSynchronizer {
         results.push({
           success: false,
           error: error as Error,
-          recovery: this.stateManager['createRecoveryMechanism'](update.queryKey, JSON.stringify(update.queryKey)),
+          recovery: this.stateManager['createRecoveryMechanism'](
+            update.queryKey,
+            JSON.stringify(update.queryKey)
+          ),
         });
       }
     }
@@ -351,10 +372,10 @@ export class NavigationStateManager {
    */
   restoreStateAfterNavigation(): void {
     // Ensure persisted queries are not refetched unnecessarily
-    this.persistedQueries.forEach(keyString => {
+    this.persistedQueries.forEach((keyString) => {
       const queryKey = JSON.parse(keyString);
       const query = this.queryClient.getQueryCache().find({ queryKey });
-      
+
       if (query && query.state.data) {
         // Data is available, no need to refetch
         query.setState({
@@ -388,20 +409,26 @@ export function createEnhancedStateManagement(queryClient: QueryClient) {
     stateManager,
     stateSynchronizer,
     navigationStateManager,
-    
+
     // Convenience methods
-    updateOrderStatus: (orderId: string, status: string, options?: StateUpdateOptions) =>
-      stateManager.updateOrderStatus(orderId, status, options),
-    
+    updateOrderStatus: (
+      orderId: string,
+      status: string,
+      options?: StateUpdateOptions
+    ) => stateManager.updateOrderStatus(orderId, status, options),
+
     ensureConsistency: (orderId: string) =>
       stateManager.ensureDataConsistency(orderId),
-    
-    handleFailure: (queryKey: QueryKey, error: Error, options?: StateUpdateOptions) =>
-      stateManager.handleStateFailure(queryKey, error, options),
-    
+
+    handleFailure: (
+      queryKey: QueryKey,
+      error: Error,
+      options?: StateUpdateOptions
+    ) => stateManager.handleStateFailure(queryKey, error, options),
+
     persistAcrossNavigation: (queryKey: QueryKey) =>
       navigationStateManager.persistQuery(queryKey),
-    
+
     cleanup: () => {
       stateManager.cleanup();
       navigationStateManager.cleanup();

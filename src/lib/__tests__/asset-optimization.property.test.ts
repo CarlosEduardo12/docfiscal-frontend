@@ -38,16 +38,24 @@ class AssetOptimizer {
   private static readonly COMPRESSION_THRESHOLD = 50; // KB
 
   static optimizeAsset(asset: AssetInfo): OptimizationResult {
-    const compressionRatio = this.COMPRESSION_RATIOS[asset.format as keyof typeof this.COMPRESSION_RATIOS] || 0.9;
+    const compressionRatio =
+      this.COMPRESSION_RATIOS[
+        asset.format as keyof typeof this.COMPRESSION_RATIOS
+      ] || 0.9;
     const shouldCompress = asset.size > this.COMPRESSION_THRESHOLD;
-    const optimizedSize = shouldCompress ? Math.round(asset.size * compressionRatio) : asset.size;
+    const optimizedSize = shouldCompress
+      ? Math.round(asset.size * compressionRatio)
+      : asset.size;
 
     // Determine loading strategy
     let loadingStrategy: 'eager' | 'lazy' | 'preload';
-    
+
     if (asset.priority === 'high') {
       loadingStrategy = 'preload';
-    } else if (asset.size > this.LAZY_LOAD_THRESHOLD || asset.priority === 'low') {
+    } else if (
+      asset.size > this.LAZY_LOAD_THRESHOLD ||
+      asset.priority === 'low'
+    ) {
       loadingStrategy = 'lazy';
     } else {
       loadingStrategy = 'eager';
@@ -69,12 +77,14 @@ class AssetOptimizer {
       return sum + result.optimizedSize;
     }, 0);
 
-    return totalOriginal > 0 ? (totalOriginal - totalOptimized) / totalOriginal : 0;
+    return totalOriginal > 0
+      ? (totalOriginal - totalOptimized) / totalOriginal
+      : 0;
   }
 
   static getInitialLoadSize(assets: AssetInfo[]): number {
     return assets
-      .filter(asset => {
+      .filter((asset) => {
         const result = this.optimizeAsset(asset);
         return result.loadingStrategy !== 'lazy';
       })
@@ -92,11 +102,22 @@ describe('Asset Optimization Properties', () => {
         fc.record({
           assets: fc.array(
             fc.record({
-              type: fc.constantFrom('image', 'video', 'document', 'font', 'script'),
+              type: fc.constantFrom(
+                'image',
+                'video',
+                'document',
+                'font',
+                'script'
+              ),
               size: fc.integer({ min: 10, max: 2000 }), // 10KB to 2MB
               format: fc.constantFrom(
-                'image/jpeg', 'image/png', 'image/webp',
-                'video/mp4', 'application/pdf', 'font/woff2', 'text/javascript'
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'video/mp4',
+                'application/pdf',
+                'font/woff2',
+                'text/javascript'
               ),
               priority: fc.constantFrom('high', 'medium', 'low'),
             }),
@@ -104,9 +125,9 @@ describe('Asset Optimization Properties', () => {
           ),
         }),
         ({ assets }) => {
-          const optimizationResults = assets.map(asset => ({
+          const optimizationResults = assets.map((asset) => ({
             asset,
-            result: AssetOptimizer.optimizeAsset(asset)
+            result: AssetOptimizer.optimizeAsset(asset),
           }));
 
           // Property 1: Large assets should use lazy loading
@@ -137,8 +158,10 @@ describe('Asset Optimization Properties', () => {
           // Property 4: Lazy loading reduces initial bundle size
           const initialLoadSize = AssetOptimizer.getInitialLoadSize(assets);
           const totalSize = assets.reduce((sum, asset) => sum + asset.size, 0);
-          
-          const hasLazyAssets = optimizationResults.some(({ result }) => result.loadingStrategy === 'lazy');
+
+          const hasLazyAssets = optimizationResults.some(
+            ({ result }) => result.loadingStrategy === 'lazy'
+          );
           if (hasLazyAssets) {
             expect(initialLoadSize).toBeLessThan(totalSize);
           }
@@ -153,25 +176,37 @@ describe('Asset Optimization Properties', () => {
       fc.property(
         fc.array(
           fc.record({
-            type: fc.constantFrom('image', 'video', 'document', 'font', 'script'),
+            type: fc.constantFrom(
+              'image',
+              'video',
+              'document',
+              'font',
+              'script'
+            ),
             size: fc.integer({ min: 100, max: 1000 }), // Larger assets for compression
             format: fc.constantFrom(
-              'image/jpeg', 'image/png', 'image/webp',
-              'video/mp4', 'application/pdf', 'font/woff2', 'text/javascript'
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'video/mp4',
+              'application/pdf',
+              'font/woff2',
+              'text/javascript'
             ),
             priority: fc.constantFrom('high', 'medium', 'low'),
           }),
           { minLength: 1, maxLength: 10 }
         ),
         (assets) => {
-          const bandwidthSavings = AssetOptimizer.calculateBandwidthSavings(assets);
-          
+          const bandwidthSavings =
+            AssetOptimizer.calculateBandwidthSavings(assets);
+
           // Should have some bandwidth savings from compression
           expect(bandwidthSavings).toBeGreaterThanOrEqual(0);
           expect(bandwidthSavings).toBeLessThanOrEqual(1);
 
           // If all assets are large enough to compress, should have meaningful savings
-          const allLargeAssets = assets.every(asset => asset.size > 50);
+          const allLargeAssets = assets.every((asset) => asset.size > 50);
           if (allLargeAssets) {
             expect(bandwidthSavings).toBeGreaterThanOrEqual(0.1); // At least 10% savings (inclusive)
           }
@@ -186,21 +221,43 @@ describe('Asset Optimization Properties', () => {
       fc.property(
         fc.record({
           highPriorityAsset: fc.record({
-            type: fc.constantFrom('image', 'video', 'document', 'font', 'script'),
+            type: fc.constantFrom(
+              'image',
+              'video',
+              'document',
+              'font',
+              'script'
+            ),
             size: fc.integer({ min: 10, max: 500 }),
-            format: fc.constantFrom('image/jpeg', 'image/png', 'text/javascript'),
+            format: fc.constantFrom(
+              'image/jpeg',
+              'image/png',
+              'text/javascript'
+            ),
             priority: fc.constant('high' as const),
           }),
           lowPriorityAsset: fc.record({
-            type: fc.constantFrom('image', 'video', 'document', 'font', 'script'),
+            type: fc.constantFrom(
+              'image',
+              'video',
+              'document',
+              'font',
+              'script'
+            ),
             size: fc.integer({ min: 10, max: 500 }),
-            format: fc.constantFrom('image/jpeg', 'image/png', 'text/javascript'),
+            format: fc.constantFrom(
+              'image/jpeg',
+              'image/png',
+              'text/javascript'
+            ),
             priority: fc.constant('low' as const),
           }),
         }),
         ({ highPriorityAsset, lowPriorityAsset }) => {
-          const highPriorityResult = AssetOptimizer.optimizeAsset(highPriorityAsset);
-          const lowPriorityResult = AssetOptimizer.optimizeAsset(lowPriorityAsset);
+          const highPriorityResult =
+            AssetOptimizer.optimizeAsset(highPriorityAsset);
+          const lowPriorityResult =
+            AssetOptimizer.optimizeAsset(lowPriorityAsset);
 
           // High priority assets should be preloaded
           expect(highPriorityResult.loadingStrategy).toBe('preload');
@@ -220,19 +277,22 @@ describe('Asset Optimization Properties', () => {
       fc.property(
         fc.record({
           size: fc.integer({ min: 100, max: 1000 }),
-          formats: fc.shuffledSubarray(['image/jpeg', 'image/png', 'image/webp', 'text/javascript'], { minLength: 2, maxLength: 4 }),
+          formats: fc.shuffledSubarray(
+            ['image/jpeg', 'image/png', 'image/webp', 'text/javascript'],
+            { minLength: 2, maxLength: 4 }
+          ),
         }),
         ({ size, formats }) => {
-          const results = formats.map(format => {
+          const results = formats.map((format) => {
             const asset: AssetInfo = {
               type: format.startsWith('image') ? 'image' : 'script',
               size,
               format,
-              priority: 'medium'
+              priority: 'medium',
             };
             return {
               format,
-              result: AssetOptimizer.optimizeAsset(asset)
+              result: AssetOptimizer.optimizeAsset(asset),
             };
           });
 
@@ -243,11 +303,17 @@ describe('Asset Optimization Properties', () => {
           });
 
           // WebP should be more efficient than PNG for same size
-          const webpResult = results.find(r => r.format === 'image/webp')?.result;
-          const pngResult = results.find(r => r.format === 'image/png')?.result;
-          
+          const webpResult = results.find(
+            (r) => r.format === 'image/webp'
+          )?.result;
+          const pngResult = results.find(
+            (r) => r.format === 'image/png'
+          )?.result;
+
           if (webpResult && pngResult) {
-            expect(webpResult.optimizedSize).toBeLessThanOrEqual(pngResult.optimizedSize);
+            expect(webpResult.optimizedSize).toBeLessThanOrEqual(
+              pngResult.optimizedSize
+            );
           }
         }
       ),
@@ -260,11 +326,22 @@ describe('Asset Optimization Properties', () => {
       fc.property(
         fc.record({
           asset: fc.record({
-            type: fc.constantFrom('image', 'video', 'document', 'font', 'script'),
+            type: fc.constantFrom(
+              'image',
+              'video',
+              'document',
+              'font',
+              'script'
+            ),
             size: fc.integer({ min: 10, max: 2000 }),
             format: fc.constantFrom(
-              'image/jpeg', 'image/png', 'image/webp',
-              'video/mp4', 'application/pdf', 'font/woff2', 'text/javascript'
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'video/mp4',
+              'application/pdf',
+              'font/woff2',
+              'text/javascript'
             ),
             priority: fc.constantFrom('high', 'medium', 'low'),
           }),
@@ -279,7 +356,9 @@ describe('Asset Optimization Properties', () => {
           }
 
           // Loading strategy should be valid
-          expect(['eager', 'lazy', 'preload']).toContain(result.loadingStrategy);
+          expect(['eager', 'lazy', 'preload']).toContain(
+            result.loadingStrategy
+          );
 
           // Optimized size should never be larger than original
           expect(result.optimizedSize).toBeLessThanOrEqual(asset.size);

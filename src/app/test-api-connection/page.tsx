@@ -14,9 +14,9 @@ export default function TestApiConnectionPage() {
       test,
       success,
       data,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
     };
-    setResults(prev => [result, ...prev]);
+    setResults((prev) => [result, ...prev]);
   };
 
   const testHealthCheck = async () => {
@@ -50,15 +50,15 @@ export default function TestApiConnectionPage() {
   const runAllTests = async () => {
     setLoading(true);
     setResults([]);
-    
+
     await testHealthCheck();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     await testAuthenticatedCall();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     await testPaymentCall();
-    
+
     setLoading(false);
   };
 
@@ -76,24 +76,34 @@ export default function TestApiConnectionPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>API URL:</strong> {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
+                <strong>API URL:</strong>{' '}
+                {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}
               </div>
               <div>
-                <strong>Autenticado:</strong> {apiClient.isAuthenticated ? 'Sim' : 'Não'}
+                <strong>Autenticado:</strong>{' '}
+                {apiClient.isAuthenticated ? 'Sim' : 'Não'}
               </div>
             </div>
-            
+
             <div className="flex gap-2 flex-wrap">
               <Button onClick={testHealthCheck} size="sm" variant="outline">
                 Testar Health Check
               </Button>
-              <Button onClick={testAuthenticatedCall} size="sm" variant="outline">
+              <Button
+                onClick={testAuthenticatedCall}
+                size="sm"
+                variant="outline"
+              >
                 Testar Autenticação
               </Button>
               <Button onClick={testPaymentCall} size="sm" variant="outline">
                 Testar Pagamento
               </Button>
-              <Button onClick={runAllTests} disabled={loading} className="bg-blue-600">
+              <Button
+                onClick={runAllTests}
+                disabled={loading}
+                className="bg-blue-600"
+              >
                 {loading ? 'Testando...' : 'Executar Todos'}
               </Button>
               <Button onClick={clearResults} variant="outline" size="sm">
@@ -113,11 +123,11 @@ export default function TestApiConnectionPage() {
             ) : (
               <div className="space-y-4">
                 {results.map((result, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`p-4 rounded border ${
-                      result.success 
-                        ? 'bg-green-50 border-green-200' 
+                      result.success
+                        ? 'bg-green-50 border-green-200'
                         : 'bg-red-50 border-red-200'
                     }`}
                   >
@@ -125,7 +135,9 @@ export default function TestApiConnectionPage() {
                       <h3 className="font-semibold">
                         {result.success ? '✅' : '❌'} {result.test}
                       </h3>
-                      <span className="text-xs text-gray-500">{result.timestamp}</span>
+                      <span className="text-xs text-gray-500">
+                        {result.timestamp}
+                      </span>
                     </div>
                     <pre className="text-xs overflow-auto bg-white p-2 rounded border">
                       {JSON.stringify(result.data, null, 2)}

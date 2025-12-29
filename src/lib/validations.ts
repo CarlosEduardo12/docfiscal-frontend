@@ -14,8 +14,8 @@ export const UserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email('Invalid email format'),
   name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  created_at: z.string(),
+  updated_at: z.string(),
 }) satisfies z.ZodType<User>;
 
 // Order status validation
@@ -29,18 +29,27 @@ export const OrderStatusSchema = z.enum([
 
 // Order validation schema
 export const OrderSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
+  id: z.string(),
+  user_id: z.string(),
   filename: z.string().min(1, 'Filename is required'),
-  originalFileSize: z.number().positive('File size must be positive'),
+  file_size: z.number().positive('File size must be positive'),
   status: OrderStatusSchema,
-  paymentId: z.string().optional(),
-  paymentUrl: z.string().url().optional(),
-  downloadUrl: z.string().url().optional(),
-  errorMessage: z.string().optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  processing_started_at: z.string().optional(),
+  processing_completed_at: z.string().optional(),
+  error_message: z.string().optional(),
+  download_url: z.string().optional(),
+  expires_at: z.string().optional(),
+  // Legacy fields for backward compatibility
+  paymentUrl: z.string().optional(),
+  downloadUrl: z.string().optional(),
+  originalFileSize: z.number().optional(),
+  createdAt: z.date().optional(),
   completedAt: z.date().optional(),
+  errorMessage: z.string().optional(),
+  // New API fields
+  checkout_url: z.string().optional(),
 }) satisfies z.ZodType<Order>;
 
 // File upload validation schema

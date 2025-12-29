@@ -10,35 +10,41 @@ import { useUserOrders } from '@/lib/react-query';
 export default function DebugPaymentPage() {
   const { user } = useAuth();
   const [logs, setLogs] = useState<string[]>([]);
-  
+
   const { data: ordersData } = useUserOrders(user?.id || '', {
     page: 1,
     limit: 10,
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    sort: 'created_at',
+    order: 'desc',
   });
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
   };
 
   const testPaymentAPI = async (orderId: string) => {
     addLog(`🔄 Iniciando teste de pagamento para order: ${orderId}`);
-    
+
     try {
       // Verificar se o usuário está autenticado
-      addLog(`👤 Usuário autenticado: ${apiClient.isAuthenticated ? 'Sim' : 'Não'}`);
-      addLog(`🔑 Token presente: ${apiClient.currentAccessToken ? 'Sim' : 'Não'}`);
-      
+      addLog(
+        `👤 Usuário autenticado: ${apiClient.isAuthenticated ? 'Sim' : 'Não'}`
+      );
+      addLog(
+        `🔑 Token presente: ${apiClient.currentAccessToken ? 'Sim' : 'Não'}`
+      );
+
       // Fazer a chamada da API
       const response = await apiClient.initiatePayment(orderId);
       addLog(`📡 Resposta recebida: ${JSON.stringify(response, null, 2)}`);
-      
+
       if (response.success) {
         if (response.data?.payment_url) {
-          addLog(`✅ URL de pagamento encontrada: ${response.data.payment_url}`);
-          
+          addLog(
+            `✅ URL de pagamento encontrada: ${response.data.payment_url}`
+          );
+
           // Tentar abrir a URL
           const opened = window.open(response.data.payment_url, '_blank');
           if (opened) {
@@ -52,7 +58,6 @@ export default function DebugPaymentPage() {
       } else {
         addLog(`❌ API retornou erro: ${response.message || 'Sem mensagem'}`);
       }
-      
     } catch (error: any) {
       addLog(`💥 Erro na chamada da API: ${error.message}`);
       addLog(`📋 Stack trace: ${error.stack || 'Não disponível'}`);
@@ -75,7 +80,10 @@ export default function DebugPaymentPage() {
     );
   }
 
-  const pendingOrders = ordersData?.orders?.filter(order => order.status === 'pending_payment') || [];
+  const pendingOrders =
+    ordersData?.orders?.filter(
+      (order: any) => order.status === 'pending_payment'
+    ) || [];
 
   return (
     <div className="min-h-screen p-8">
@@ -90,13 +98,15 @@ export default function DebugPaymentPage() {
                 <strong>Usuário:</strong> {user.name} ({user.email})
               </div>
               <div>
-                <strong>Autenticado:</strong> {apiClient.isAuthenticated ? 'Sim' : 'Não'}
+                <strong>Autenticado:</strong>{' '}
+                {apiClient.isAuthenticated ? 'Sim' : 'Não'}
               </div>
               <div>
                 <strong>API URL:</strong> {process.env.NEXT_PUBLIC_API_URL}
               </div>
               <div>
-                <strong>Return URL:</strong> {process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL}
+                <strong>Return URL:</strong>{' '}
+                {process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL}
               </div>
             </div>
           </CardContent>
@@ -108,19 +118,25 @@ export default function DebugPaymentPage() {
           </CardHeader>
           <CardContent>
             {pendingOrders.length === 0 ? (
-              <p className="text-gray-500">Nenhum pedido com pagamento pendente encontrado.</p>
+              <p className="text-gray-500">
+                Nenhum pedido com pagamento pendente encontrado.
+              </p>
             ) : (
               <div className="space-y-2">
                 {pendingOrders.map((order: any) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 border rounded">
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between p-3 border rounded"
+                  >
                     <div>
-                      <div className="font-medium">{order.original_filename || 'Arquivo'}</div>
-                      <div className="text-sm text-gray-500">ID: {order.id}</div>
+                      <div className="font-medium">
+                        {order.original_filename || 'Arquivo'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        ID: {order.id}
+                      </div>
                     </div>
-                    <Button 
-                      onClick={() => testPaymentAPI(order.id)}
-                      size="sm"
-                    >
+                    <Button onClick={() => testPaymentAPI(order.id)} size="sm">
                       Testar Pagamento
                     </Button>
                   </div>

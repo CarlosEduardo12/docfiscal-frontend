@@ -34,7 +34,7 @@ export class PaymentStatusPoller {
       maxAttempts: 20,
       onStatusChange: () => {},
       onError: () => {},
-      ...config
+      ...config,
     };
     this.currentInterval = this.config.initialInterval;
   }
@@ -78,13 +78,15 @@ export class PaymentStatusPoller {
 
     try {
       const response = await apiClient.getPaymentStatus(this.config.paymentId);
-      
+
       if (response.success && response.data) {
         const status = response.data as PaymentStatus;
         this.config.onStatusChange(status);
 
         // Stop polling if we reach a final status
-        if (['paid', 'failed', 'cancelled', 'expired'].includes(status.status)) {
+        if (
+          ['paid', 'failed', 'cancelled', 'expired'].includes(status.status)
+        ) {
           this.stopPolling();
           return;
         }
@@ -95,7 +97,8 @@ export class PaymentStatusPoller {
           this.config.maxInterval
         );
       } else {
-        throw new Error(response.error || 'Failed to get payment status');
+        const errorResponse = response as any; // Cast to handle error properties
+        throw new Error(errorResponse.error || 'Failed to get payment status');
       }
     } catch (error) {
       console.error('Payment status polling error:', error);

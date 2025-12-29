@@ -60,35 +60,37 @@ const loginSchema: ValidationSchema<LoginFormData> = {
 
 // Server error mapping for user-friendly messages
 const serverErrorMapping: ServerErrorMapping = {
-  'INVALID_CREDENTIALS': {
+  INVALID_CREDENTIALS: {
     field: 'general',
-    message: 'Invalid email or password. Please check your credentials and try again.',
+    message:
+      'Invalid email or password. Please check your credentials and try again.',
   },
-  'USER_NOT_FOUND': {
+  USER_NOT_FOUND: {
     field: 'email',
     message: 'No account found with this email address',
   },
-  'INVALID_PASSWORD': {
+  INVALID_PASSWORD: {
     field: 'password',
     message: 'Incorrect password. Please try again.',
   },
-  'ACCOUNT_LOCKED': {
+  ACCOUNT_LOCKED: {
     field: 'general',
-    message: 'Account temporarily locked due to multiple failed attempts. Please try again later.',
+    message:
+      'Account temporarily locked due to multiple failed attempts. Please try again later.',
   },
-  'EMAIL_NOT_VERIFIED': {
+  EMAIL_NOT_VERIFIED: {
     field: 'general',
     message: 'Please verify your email address before logging in',
   },
-  'LOGIN_FAILED': {
+  LOGIN_FAILED: {
     field: 'general',
     message: 'Login failed. Please try again',
   },
-  'SERVER_ERROR': {
+  SERVER_ERROR: {
     field: 'general',
     message: 'Server error. Please try again later',
   },
-  'NETWORK_ERROR': {
+  NETWORK_ERROR: {
     field: 'general',
     message: 'Network error. Please check your connection and try again',
   },
@@ -107,17 +109,17 @@ const LoginFormContent: React.FC = () => {
 
   const { validateForm, focusFirstError, clearErrors } = useFormValidator();
 
-  const handleInputChange = (field: keyof LoginFormData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear server errors when user starts typing
-    if (serverErrors.length > 0) {
-      setServerErrors([]);
-    }
-  };
+  const handleInputChange =
+    (field: keyof LoginFormData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
+
+      // Clear server errors when user starts typing
+      if (serverErrors.length > 0) {
+        setServerErrors([]);
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +130,7 @@ const LoginFormContent: React.FC = () => {
 
     // Validate form
     const validationResult = validateForm(formData);
-    
+
     if (!validationResult.isValid) {
       setIsLoading(false);
       focusFirstError();
@@ -143,31 +145,33 @@ const LoginFormContent: React.FC = () => {
 
       if (!result.success) {
         // Map server errors to user-friendly messages
+        const errorResult = result as any; // Cast to handle error properties
         const mappedErrors = mapServerErrors(
-          result.error || result.message,
+          errorResult.error || result.message,
           serverErrorMapping
         );
-        
+
         // Set server errors for display
-        setServerErrors(mappedErrors.map(e => e.message));
+        setServerErrors(mappedErrors.map((e) => e.message));
         return;
       }
 
       // Show success message
       setSuccessMessage('Login successful! Redirecting to dashboard...');
-      
+
       // Redirect to dashboard
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
-      
     } catch (error) {
       console.error('Login error:', error);
-      
+
       // Handle different types of errors
       if (error instanceof Error) {
         if (error.message.includes('fetch')) {
-          setServerErrors(['Network error. Please check your connection and try again.']);
+          setServerErrors([
+            'Network error. Please check your connection and try again.',
+          ]);
         } else {
           setServerErrors([error.message]);
         }
@@ -180,7 +184,11 @@ const LoginFormContent: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="login-title">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      aria-labelledby="login-title"
+    >
       <ValidatedInput
         fieldName="email"
         label="Email"
@@ -269,7 +277,7 @@ export default function EnhancedLoginForm() {
           >
             <LoginFormContent />
           </FormValidator>
-          
+
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="text-blue-600 hover:underline">

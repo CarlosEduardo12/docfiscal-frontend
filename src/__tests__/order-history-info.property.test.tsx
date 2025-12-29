@@ -33,35 +33,34 @@ describe('Order History Information Property Tests', () => {
     'failed'
   ) as fc.Arbitrary<OrderStatus>;
 
-  // Generator for valid orders with required information
+  // Generator for valid orders with required information using new API format
   const orderArb = fc.integer({ min: 0 }).chain((index) =>
     fc.record({
       id: fc.constant(`info-order-${index}-${Date.now()}`),
-      userId: fc.constant('info-user-123'),
+      user_id: fc.constant('info-user-123'),
       filename: fc
         .string({ minLength: 1, maxLength: 50 })
         .map((name) => name.trim() || 'document')
         .map((name) => `${name}.pdf`),
-      originalFileSize: fc.integer({ min: 1, max: 10000000 }),
+      file_size: fc.integer({ min: 1, max: 10000000 }),
       status: orderStatusArb,
-      paymentId: fc.option(fc.constant(`payment-${index}`)),
-      paymentUrl: fc.option(fc.webUrl()),
-      downloadUrl: fc.option(fc.webUrl()),
-      errorMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
-      createdAt: fc.date({
+      created_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      updatedAt: fc.date({
+      }).map(d => d.toISOString()),
+      updated_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      completedAt: fc.option(
+      }).map(d => d.toISOString()),
+      processing_completed_at: fc.option(
         fc.date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        })
+        }).map(d => d.toISOString())
       ),
+      checkout_url: fc.option(fc.webUrl()),
+      download_url: fc.option(fc.webUrl()),
+      error_message: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
     })
   ) as fc.Arbitrary<Order>;
 
@@ -207,7 +206,7 @@ describe('Order History Information Property Tests', () => {
             const uniqueOrders = orders.map((order, index) => ({
               ...order,
               id: `size-order-${index}-${Date.now()}`,
-              originalFileSize: 1024 * (index + 1), // 1KB, 2KB, etc.
+              file_size: 1024 * (index + 1), // 1KB, 2KB, etc.
             }));
 
             const mockOnDownload = jest.fn();
@@ -241,7 +240,7 @@ describe('Order History Information Property Tests', () => {
             orderArb.map((order) => ({
               ...order,
               status: 'failed' as OrderStatus,
-              errorMessage: fc.sample(
+              error_message: fc.sample(
                 fc.string({ minLength: 1, maxLength: 50 }),
                 1
               )[0],
@@ -254,7 +253,7 @@ describe('Order History Information Property Tests', () => {
               ...order,
               id: `failed-order-${index}-${Date.now()}`,
               status: 'failed' as OrderStatus,
-              errorMessage: `Error ${index + 1}: Processing failed`,
+              error_message: `Error ${index + 1}: Processing failed`,
             }));
 
             const mockOnDownload = jest.fn();
@@ -269,7 +268,7 @@ describe('Order History Information Property Tests', () => {
 
             // Property: Error messages should be displayed for failed orders
             uniqueFailedOrders.forEach((order, index) => {
-              if (order.errorMessage) {
+              if (order.error_message) {
                 // Check that some error indication is present
                 // The component might truncate long error messages
                 const errorElements = screen.queryAllByText(

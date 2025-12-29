@@ -40,13 +40,19 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   className,
 }) => {
   const clampedProgress = Math.max(0, Math.min(100, progress));
-  const hasTimeEstimate = estimatedTimeRemaining !== null && estimatedTimeRemaining !== undefined && estimatedTimeRemaining > 0;
+  const hasTimeEstimate =
+    estimatedTimeRemaining !== null &&
+    estimatedTimeRemaining !== undefined &&
+    estimatedTimeRemaining > 0;
 
   return (
-    <div className={cn('space-y-2', className)} data-testid="progress-indicator">
+    <div
+      className={cn('space-y-2', className)}
+      data-testid="progress-indicator"
+    >
       {/* Progress bar */}
       <Progress value={clampedProgress} className="w-full" />
-      
+
       {/* Progress info */}
       <div className="flex items-center justify-between text-sm text-gray-600">
         <div className="flex items-center space-x-2">
@@ -61,14 +67,14 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {showElapsedTime && elapsedTime !== undefined && (
             <span data-testid="elapsed-time" className="text-gray-500">
               {formatTime(elapsedTime)}
             </span>
           )}
-          
+
           {showTimeEstimate && hasTimeEstimate && (
             <span data-testid="time-remaining" className="text-gray-500">
               ~{formatTime(estimatedTimeRemaining!)} remaining
@@ -99,19 +105,19 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (clampedProgress / 100) * circumference;
+  const strokeDashoffset =
+    circumference - (clampedProgress / 100) * circumference;
 
   return (
-    <div 
-      className={cn('relative inline-flex items-center justify-center', className)}
+    <div
+      className={cn(
+        'relative inline-flex items-center justify-center',
+        className
+      )}
       style={{ width: size, height: size }}
       data-testid="circular-progress"
     >
-      <svg
-        width={size}
-        height={size}
-        className="transform -rotate-90"
-      >
+      <svg width={size} height={size} className="transform -rotate-90">
         {/* Background circle */}
         <circle
           cx={size / 2}
@@ -136,7 +142,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
           className="text-blue-600 transition-all duration-300 ease-in-out"
         />
       </svg>
-      
+
       {showPercentage && (
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-sm font-medium text-gray-700">

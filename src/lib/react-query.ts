@@ -48,8 +48,9 @@ interface RegisterData {
 interface PaginationParams {
   page?: number;
   limit?: number;
-  sort_by?: string;
-  sort_order?: 'asc' | 'desc';
+  sort?: string;
+  order?: 'asc' | 'desc';
+  status?: string;
 }
 
 interface UploadResponse {
@@ -269,6 +270,7 @@ export const useUserOrders = (
   return useQuery({
     queryKey: queryKeys.orders.userOrders(userId, params),
     queryFn: async () => {
+      // Pass parameters directly to API client (already uses correct parameter names)
       const response = await apiClient.getUserOrders(userId, params);
       if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to get user orders');
@@ -406,25 +408,37 @@ export const usePaymentStatus = (
 export const useDownloadFile = () => {
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const blob = await apiClient.downloadOrder(orderId);
+      const { blob, filename } = await apiClient.downloadOrder(orderId);
+
+      // Use filename from Content-Disposition header if available, otherwise fallback
+      const downloadFilename = filename || `converted-${orderId}.csv`;
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `converted-${orderId}.csv`;
+      link.download = downloadFilename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      return { success: true };
+      return { success: true, filename: downloadFilename };
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error(
         'Download failed:',
         error instanceof Error ? error.message : 'Unknown error'
       );
+
+      // Additional logging for specific error types
+      if (error.code === 'DOWNLOAD_LINK_EXPIRED') {
+        console.warn(
+          'Download link has expired, user should retry or regenerate link'
+        );
+      } else if (error.code === 'ORDER_NOT_FOUND') {
+        console.warn('Order not found for download');
+      }
     },
   });
 };
@@ -456,7 +470,7 @@ export const useUpdateUserProfile = () => {
       userId: string;
       userData: Partial<User>;
     }) => {
-      const response = await apiClient.updateProfile(userId, userData);
+      const response = await apiClient.updateProfile(userData);
       if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to update user profile');
       }

@@ -34,7 +34,7 @@ export default function OrderStatusPage() {
 
     console.log('🔄 Iniciando pagamento para order:', order.id);
     setIsPaymentLoading(true);
-    
+
     try {
       if (order.paymentUrl) {
         console.log('✅ Usando URL de pagamento existente:', order.paymentUrl);
@@ -48,16 +48,24 @@ export default function OrderStatusPage() {
         // Create new payment
         const paymentResponse = await apiClient.initiatePayment(order.id);
         console.log('📡 Resposta da API:', paymentResponse);
-        
+
         if (paymentResponse.success && paymentResponse.data?.payment_url) {
-          console.log('✅ Nova URL de pagamento criada:', paymentResponse.data.payment_url);
-          const opened = window.open(paymentResponse.data.payment_url, '_blank');
+          console.log(
+            '✅ Nova URL de pagamento criada:',
+            paymentResponse.data.payment_url
+          );
+          const opened = window.open(
+            paymentResponse.data.payment_url,
+            '_blank'
+          );
           if (!opened) {
             alert(`Pop-up bloqueado! URL: ${paymentResponse.data.payment_url}`);
           }
         } else {
           console.error('❌ Erro na resposta da API:', paymentResponse);
-          alert(`Erro: ${paymentResponse.message || 'Falha ao criar URL de pagamento'}`);
+          alert(
+            `Erro: ${paymentResponse.message || 'Falha ao criar URL de pagamento'}`
+          );
         }
       }
     } catch (error: any) {
@@ -78,11 +86,11 @@ export default function OrderStatusPage() {
         window.open(order.downloadUrl, '_blank');
       } else {
         // Download through service
-        const blob = await apiClient.downloadOrder(order.id);
+        const { blob, filename } = await apiClient.downloadOrder(order.id);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${order.filename.replace('.pdf', '')}.csv`;
+        a.download = filename || `${order.filename.replace('.pdf', '')}.csv`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

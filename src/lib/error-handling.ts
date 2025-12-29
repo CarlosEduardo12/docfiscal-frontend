@@ -62,19 +62,25 @@ export class AppError extends Error {
 
 // Network error class
 export class NetworkError extends AppError {
-  constructor(message: string, context?: Record<string, any>, originalStack?: string) {
+  constructor(
+    message: string,
+    context?: Record<string, any>,
+    originalStack?: string
+  ) {
     // Determine severity based on error type
     let severity = ErrorSeverity.MEDIUM;
     const lowerMessage = message.toLowerCase();
-    
+
     // Offline errors are high severity
-    if (lowerMessage.includes('offline') || 
-        lowerMessage.includes('no internet') ||
-        lowerMessage.includes('internet connection') ||
-        context?.errorType === 'offline') {
+    if (
+      lowerMessage.includes('offline') ||
+      lowerMessage.includes('no internet') ||
+      lowerMessage.includes('internet connection') ||
+      context?.errorType === 'offline'
+    ) {
       severity = ErrorSeverity.HIGH;
     }
-    
+
     super(message, ErrorType.NETWORK, severity, context, true, originalStack);
     this.name = 'NetworkError';
   }
@@ -82,15 +88,30 @@ export class NetworkError extends AppError {
 
 // Validation error class
 export class ValidationError extends AppError {
-  constructor(message: string, context?: Record<string, any>, originalStack?: string) {
-    super(message, ErrorType.VALIDATION, ErrorSeverity.LOW, context, false, originalStack);
+  constructor(
+    message: string,
+    context?: Record<string, any>,
+    originalStack?: string
+  ) {
+    super(
+      message,
+      ErrorType.VALIDATION,
+      ErrorSeverity.LOW,
+      context,
+      false,
+      originalStack
+    );
     this.name = 'ValidationError';
   }
 }
 
 // Authentication error class
 export class AuthenticationError extends AppError {
-  constructor(message: string, context?: Record<string, any>, originalStack?: string) {
+  constructor(
+    message: string,
+    context?: Record<string, any>,
+    originalStack?: string
+  ) {
     super(
       message,
       ErrorType.AUTHENTICATION,
@@ -111,15 +132,33 @@ export class UploadError extends AppError {
     retryable: boolean = true,
     originalStack?: string
   ) {
-    super(message, ErrorType.UPLOAD, ErrorSeverity.MEDIUM, context, retryable, originalStack);
+    super(
+      message,
+      ErrorType.UPLOAD,
+      ErrorSeverity.MEDIUM,
+      context,
+      retryable,
+      originalStack
+    );
     this.name = 'UploadError';
   }
 }
 
 // Payment error class
 export class PaymentError extends AppError {
-  constructor(message: string, context?: Record<string, any>, originalStack?: string) {
-    super(message, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, false, originalStack);
+  constructor(
+    message: string,
+    context?: Record<string, any>,
+    originalStack?: string
+  ) {
+    super(
+      message,
+      ErrorType.PAYMENT,
+      ErrorSeverity.HIGH,
+      context,
+      false,
+      originalStack
+    );
     this.name = 'PaymentError';
   }
 }
@@ -143,7 +182,11 @@ export function classifyError(error: unknown): AppError {
       message.includes('payment failed') ||
       message.includes('payment timeout')
     ) {
-      return new PaymentError(error.message, { originalError: error.message }, originalStack);
+      return new PaymentError(
+        error.message,
+        { originalError: error.message },
+        originalStack
+      );
     }
 
     // Upload errors - check for upload-specific patterns (specific)
@@ -154,7 +197,12 @@ export function classifyError(error: unknown): AppError {
       message.includes('file corrupted') ||
       message.includes('size limit exceeded')
     ) {
-      return new UploadError(error.message, { originalError: error.message }, true, originalStack);
+      return new UploadError(
+        error.message,
+        { originalError: error.message },
+        true,
+        originalStack
+      );
     }
 
     // Authentication errors - check for auth-specific patterns (specific)
@@ -166,9 +214,13 @@ export function classifyError(error: unknown): AppError {
       message.includes('invalid token') ||
       message.includes('login required')
     ) {
-      return new AuthenticationError(error.message, {
-        originalError: error.message,
-      }, originalStack);
+      return new AuthenticationError(
+        error.message,
+        {
+          originalError: error.message,
+        },
+        originalStack
+      );
     }
 
     // Network errors - check for network-specific patterns (less specific, can overlap)
@@ -188,7 +240,11 @@ export function classifyError(error: unknown): AppError {
       message.includes('no internet') ||
       message.includes('internet connection')
     ) {
-      return new NetworkError(error.message, { originalError: error.message }, originalStack);
+      return new NetworkError(
+        error.message,
+        { originalError: error.message },
+        originalStack
+      );
     }
 
     // Validation errors - check for validation patterns (general)
@@ -200,17 +256,23 @@ export function classifyError(error: unknown): AppError {
       message.includes('invalid input') ||
       message.includes('invalid email')
     ) {
-      return new ValidationError(error.message, {
-        originalError: error.message,
-      }, originalStack);
+      return new ValidationError(
+        error.message,
+        {
+          originalError: error.message,
+        },
+        originalStack
+      );
     }
 
     // Generic file errors (fallback for file-related issues not caught above)
-    if (
-      message.includes('file') ||
-      message.includes('size')
-    ) {
-      return new UploadError(error.message, { originalError: error.message }, true, originalStack);
+    if (message.includes('file') || message.includes('size')) {
+      return new UploadError(
+        error.message,
+        { originalError: error.message },
+        true,
+        originalStack
+      );
     }
 
     // Generic error
@@ -370,12 +432,20 @@ export function getUserFriendlyMessage(error: AppError): string {
       // Check if user is offline
       const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
       const message = error.message.toLowerCase();
-      
-      if (isOffline || message.includes('offline') || message.includes('no internet')) {
+
+      if (
+        isOffline ||
+        message.includes('offline') ||
+        message.includes('no internet')
+      ) {
         return 'No internet connection. Please check your connectivity and try again.';
       } else if (message.includes('timeout') || message.includes('etimedout')) {
         return 'Connection slow. Please check your internet connection and try again.';
-      } else if (message.includes('connection') || message.includes('econnrefused') || message.includes('enotfound')) {
+      } else if (
+        message.includes('connection') ||
+        message.includes('econnrefused') ||
+        message.includes('enotfound')
+      ) {
         return 'Connection problem. Please verify your internet connection and try again.';
       } else {
         return 'Network error. Please check your internet connection and try again.';

@@ -27,18 +27,25 @@ export default function TestPaymentPage() {
       console.log('🔄 Testando pagamento para order:', orderId);
       const paymentResponse = await apiClient.initiatePayment(orderId);
       console.log('📡 Resposta da API:', paymentResponse);
-      
+
       setResponse(paymentResponse);
-      
+
       if (paymentResponse.success && paymentResponse.data?.payment_url) {
-        console.log('✅ URL de pagamento encontrada:', paymentResponse.data.payment_url);
+        console.log(
+          '✅ URL de pagamento encontrada:',
+          paymentResponse.data.payment_url
+        );
         // Tentar abrir em nova aba
         const opened = window.open(paymentResponse.data.payment_url, '_blank');
         if (!opened) {
-          setError('Pop-up bloqueado. Verifique as configurações do navegador.');
+          setError(
+            'Pop-up bloqueado. Verifique as configurações do navegador.'
+          );
         }
       } else {
-        setError(`Falha ao iniciar pagamento: ${paymentResponse.message || 'Resposta inválida'}`);
+        setError(
+          `Falha ao iniciar pagamento: ${paymentResponse.message || 'Resposta inválida'}`
+        );
       }
     } catch (err: any) {
       console.error('💥 Erro no pagamento:', err);
@@ -81,11 +88,7 @@ export default function TestPaymentPage() {
               />
             </div>
 
-            <Button 
-              onClick={testPayment} 
-              disabled={loading}
-              className="w-full"
-            >
+            <Button onClick={testPayment} disabled={loading} className="w-full">
               {loading ? 'Testando...' : 'Testar Pagamento'}
             </Button>
 
@@ -105,8 +108,13 @@ export default function TestPaymentPage() {
             )}
 
             <div className="text-sm text-gray-600">
-              <p><strong>Usuário logado:</strong> {user.name} ({user.email})</p>
-              <p><strong>Token presente:</strong> {apiClient.isAuthenticated ? 'Sim' : 'Não'}</p>
+              <p>
+                <strong>Usuário logado:</strong> {user.name} ({user.email})
+              </p>
+              <p>
+                <strong>Token presente:</strong>{' '}
+                {apiClient.isAuthenticated ? 'Sim' : 'Não'}
+              </p>
             </div>
           </CardContent>
         </Card>

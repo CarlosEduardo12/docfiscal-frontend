@@ -20,7 +20,13 @@ const UserFeedbackContext = createContext<UserFeedbackContextType | null>(null);
 
 export interface UserFeedbackProviderProps {
   children: React.ReactNode;
-  toastPosition?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  toastPosition?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'top-center'
+    | 'bottom-center';
   maxToasts?: number;
   defaultToastDuration?: number;
 }
@@ -60,7 +66,9 @@ export const UserFeedbackProvider: React.FC<UserFeedbackProviderProps> = ({
 export const useUserFeedback = () => {
   const context = useContext(UserFeedbackContext);
   if (!context) {
-    throw new Error('useUserFeedback must be used within a UserFeedbackProvider');
+    throw new Error(
+      'useUserFeedback must be used within a UserFeedbackProvider'
+    );
   }
   return context;
 };

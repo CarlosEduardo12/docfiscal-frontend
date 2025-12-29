@@ -33,8 +33,8 @@ export function useToast(options: UseToastOptions = {}) {
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-    
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+
     // Clear timeout if exists
     const timeout = timeoutRefs.current.get(id);
     if (timeout) {
@@ -43,93 +43,113 @@ export function useToast(options: UseToastOptions = {}) {
     }
   }, []);
 
-  const showToast = useCallback((toast: Omit<ToastNotification, 'id'>) => {
-    const id = generateId();
-    const duration = toast.duration ?? defaultDuration;
-    
-    const newToast: ToastNotification = {
-      ...toast,
-      id,
-      duration, // Ensure duration is always set
-    };
+  const showToast = useCallback(
+    (toast: Omit<ToastNotification, 'id'>) => {
+      const id = generateId();
+      const duration = toast.duration ?? defaultDuration;
 
-    setToasts(prev => {
-      const updated = [...prev, newToast];
-      // Remove oldest toasts if exceeding max
-      if (updated.length > maxToasts) {
-        const toRemove = updated.slice(0, updated.length - maxToasts);
-        toRemove.forEach(t => {
-          const timeout = timeoutRefs.current.get(t.id);
-          if (timeout) {
-            clearTimeout(timeout);
-            timeoutRefs.current.delete(t.id);
-          }
-        });
-        return updated.slice(-maxToasts);
+      const newToast: ToastNotification = {
+        ...toast,
+        id,
+        duration, // Ensure duration is always set
+      };
+
+      setToasts((prev) => {
+        const updated = [...prev, newToast];
+        // Remove oldest toasts if exceeding max
+        if (updated.length > maxToasts) {
+          const toRemove = updated.slice(0, updated.length - maxToasts);
+          toRemove.forEach((t) => {
+            const timeout = timeoutRefs.current.get(t.id);
+            if (timeout) {
+              clearTimeout(timeout);
+              timeoutRefs.current.delete(t.id);
+            }
+          });
+          return updated.slice(-maxToasts);
+        }
+        return updated;
+      });
+
+      // Auto-remove after duration (unless persistent)
+      if (!toast.persistent && duration > 0) {
+        const timeout = setTimeout(() => {
+          removeToast(id);
+        }, duration);
+        timeoutRefs.current.set(id, timeout);
       }
-      return updated;
-    });
 
-    // Auto-remove after duration (unless persistent)
-    if (!toast.persistent && duration > 0) {
-      const timeout = setTimeout(() => {
-        removeToast(id);
-      }, duration);
-      timeoutRefs.current.set(id, timeout);
-    }
+      return id;
+    },
+    [generateId, defaultDuration, maxToasts, removeToast]
+  );
 
-    return id;
-  }, [generateId, defaultDuration, maxToasts, removeToast]);
+  const showSuccess = useCallback(
+    (title: string, message: string, options?: Partial<ToastNotification>) => {
+      return showToast({
+        type: 'success',
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showToast]
+  );
 
-  const showSuccess = useCallback((title: string, message: string, options?: Partial<ToastNotification>) => {
-    return showToast({
-      type: 'success',
-      title,
-      message,
-      ...options,
-    });
-  }, [showToast]);
+  const showError = useCallback(
+    (title: string, message: string, options?: Partial<ToastNotification>) => {
+      return showToast({
+        type: 'error',
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showToast]
+  );
 
-  const showError = useCallback((title: string, message: string, options?: Partial<ToastNotification>) => {
-    return showToast({
-      type: 'error',
-      title,
-      message,
-      ...options,
-    });
-  }, [showToast]);
+  const showWarning = useCallback(
+    (title: string, message: string, options?: Partial<ToastNotification>) => {
+      return showToast({
+        type: 'warning',
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showToast]
+  );
 
-  const showWarning = useCallback((title: string, message: string, options?: Partial<ToastNotification>) => {
-    return showToast({
-      type: 'warning',
-      title,
-      message,
-      ...options,
-    });
-  }, [showToast]);
-
-  const showInfo = useCallback((title: string, message: string, options?: Partial<ToastNotification>) => {
-    return showToast({
-      type: 'info',
-      title,
-      message,
-      ...options,
-    });
-  }, [showToast]);
+  const showInfo = useCallback(
+    (title: string, message: string, options?: Partial<ToastNotification>) => {
+      return showToast({
+        type: 'info',
+        title,
+        message,
+        ...options,
+      });
+    },
+    [showToast]
+  );
 
   const clearAll = useCallback(() => {
     // Clear all timeouts
-    timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+    timeoutRefs.current.forEach((timeout) => clearTimeout(timeout));
     timeoutRefs.current.clear();
-    
+
     setToasts([]);
   }, []);
 
-  const updateToast = useCallback((id: string, updates: Partial<ToastNotification>) => {
-    setToasts(prev => prev.map(toast => 
-      toast.id === id ? { ...toast, ...updates } : toast
-    ));
-  }, []);
+  const updateToast = useCallback(
+    (id: string, updates: Partial<ToastNotification>) => {
+      setToasts((prev) =>
+        prev.map((toast) =>
+          toast.id === id ? { ...toast, ...updates } : toast
+        )
+      );
+    },
+    []
+  );
 
   return {
     toasts,

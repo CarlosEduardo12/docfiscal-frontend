@@ -32,8 +32,8 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
     {
       page: 1,
       limit: 5,
-      sort_by: 'created_at',
-      sort_order: 'desc',
+      sort: 'created_at',
+      order: 'desc',
     },
     {
       enabled: !!user?.id,

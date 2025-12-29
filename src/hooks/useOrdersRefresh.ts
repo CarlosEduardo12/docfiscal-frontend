@@ -22,13 +22,13 @@ export function useOrdersRefresh({
     if (!userId) return;
 
     // Invalidar todas as queries relacionadas a pedidos
-    queryClient.invalidateQueries({ 
-      queryKey: queryKeys.orders.all 
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.orders.all,
     });
-    
+
     // Invalidar especificamente os pedidos do usuário
-    queryClient.invalidateQueries({ 
-      queryKey: queryKeys.orders.byUser(userId) 
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.orders.byUser(userId),
     });
 
     console.log('🔄 Lista de pedidos atualizada automaticamente');
@@ -67,7 +67,10 @@ export function useOrdersRefresh({
 }
 
 // Hook para detectar mudanças de status de pedidos específicos
-export function useOrderStatusMonitor(orderId: string, enabled: boolean = true) {
+export function useOrderStatusMonitor(
+  orderId: string,
+  enabled: boolean = true
+) {
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,12 +80,12 @@ export function useOrderStatusMonitor(orderId: string, enabled: boolean = true) 
     try {
       // Invalidar o pedido específico para forçar refetch
       queryClient.invalidateQueries({
-        queryKey: queryKeys.orders.byId(orderId)
+        queryKey: queryKeys.orders.byId(orderId),
       });
 
       // Também invalidar a lista geral para manter consistência
       queryClient.invalidateQueries({
-        queryKey: queryKeys.orders.all
+        queryKey: queryKeys.orders.all,
       });
     } catch (error) {
       console.error('Erro ao verificar status do pedido:', error);
@@ -108,7 +111,10 @@ export function useOrderStatusMonitor(orderId: string, enabled: boolean = true) 
 }
 
 // Hook para monitorar pedidos com pagamento pendente
-export function usePendingPaymentsMonitor(userId?: string, enabled: boolean = true) {
+export function usePendingPaymentsMonitor(
+  userId?: string,
+  enabled: boolean = true
+) {
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -123,15 +129,18 @@ export function usePendingPaymentsMonitor(userId?: string, enabled: boolean = tr
 
       if (ordersData?.orders) {
         const pendingOrders = ordersData.orders.filter(
-          (order: any) => order.status === 'pending_payment' || order.status === 'processing'
+          (order: any) =>
+            order.status === 'pending_payment' || order.status === 'processing'
         );
 
         if (pendingOrders.length > 0) {
-          console.log(`🔍 Verificando ${pendingOrders.length} pedidos pendentes...`);
-          
+          console.log(
+            `🔍 Verificando ${pendingOrders.length} pedidos pendentes...`
+          );
+
           // Invalidar queries para forçar refetch
           queryClient.invalidateQueries({
-            queryKey: queryKeys.orders.all
+            queryKey: queryKeys.orders.all,
           });
         }
       }

@@ -58,7 +58,7 @@ beforeEach(() => {
   consoleErrorSpy = jest.fn();
   consoleWarnSpy = jest.fn();
   consoleInfoSpy = jest.fn();
-  
+
   console.error = consoleErrorSpy;
   console.warn = consoleWarnSpy;
   console.info = consoleInfoSpy;
@@ -78,22 +78,22 @@ const unexpectedErrorGenerator = fc.oneof(
   fc.record({
     type: fc.constant('TypeError'),
     message: fc.string({ minLength: 1, maxLength: 100 }),
-    stack: fc.string({ minLength: 10, maxLength: 500 })
+    stack: fc.string({ minLength: 10, maxLength: 500 }),
   }),
   fc.record({
     type: fc.constant('ReferenceError'),
     message: fc.string({ minLength: 1, maxLength: 100 }),
-    stack: fc.string({ minLength: 10, maxLength: 500 })
+    stack: fc.string({ minLength: 10, maxLength: 500 }),
   }),
   fc.record({
     type: fc.constant('SyntaxError'),
     message: fc.string({ minLength: 1, maxLength: 100 }),
-    stack: fc.string({ minLength: 10, maxLength: 500 })
+    stack: fc.string({ minLength: 10, maxLength: 500 }),
   }),
   fc.record({
     type: fc.constant('RangeError'),
     message: fc.string({ minLength: 1, maxLength: 100 }),
-    stack: fc.string({ minLength: 10, maxLength: 500 })
+    stack: fc.string({ minLength: 10, maxLength: 500 }),
   })
 );
 
@@ -105,8 +105,8 @@ const contextGenerator = fc.record({
   timestamp: fc.date(),
   additionalData: fc.record({
     url: fc.webUrl(),
-    userAgent: fc.string({ minLength: 10, maxLength: 200 })
-  })
+    userAgent: fc.string({ minLength: 10, maxLength: 200 }),
+  }),
 });
 
 describe('Unexpected Error Logging Property Tests', () => {
@@ -149,7 +149,7 @@ describe('Unexpected Error Logging Property Tests', () => {
             );
 
             expect(storedLogs.length).toBeGreaterThan(0);
-            
+
             const latestLog = storedLogs[storedLogs.length - 1];
             expect(latestLog).toMatchObject({
               errorId: expect.stringMatching(/^[a-z]+-\d+-[a-z0-9]+$/),
@@ -160,7 +160,7 @@ describe('Unexpected Error Logging Property Tests', () => {
               timestamp: expect.any(String),
               stack: errorData.stack,
               url: expect.any(String),
-              userAgent: expect.any(String)
+              userAgent: expect.any(String),
             });
           }
         ),
@@ -170,34 +170,31 @@ describe('Unexpected Error Logging Property Tests', () => {
 
     it('should display user-friendly messages while hiding technical details', () => {
       fc.assert(
-        fc.property(
-          unexpectedErrorGenerator,
-          (errorData) => {
-            // Create an unexpected error with technical details
-            const error = new Error(errorData.message);
-            error.stack = errorData.stack;
+        fc.property(unexpectedErrorGenerator, (errorData) => {
+          // Create an unexpected error with technical details
+          const error = new Error(errorData.message);
+          error.stack = errorData.stack;
 
-            const classifiedError = classifyError(error);
-            const userFriendlyMessage = getUserFriendlyMessage(classifiedError);
+          const classifiedError = classifyError(error);
+          const userFriendlyMessage = getUserFriendlyMessage(classifiedError);
 
-            // Property: User-friendly message should not expose technical details
-            expect(userFriendlyMessage).not.toContain(errorData.stack);
-            expect(userFriendlyMessage).not.toContain('TypeError');
-            expect(userFriendlyMessage).not.toContain('ReferenceError');
-            expect(userFriendlyMessage).not.toContain('SyntaxError');
-            expect(userFriendlyMessage).not.toContain('RangeError');
-            expect(userFriendlyMessage).not.toMatch(/at\s+\w+\s+\(/); // Stack trace pattern
+          // Property: User-friendly message should not expose technical details
+          expect(userFriendlyMessage).not.toContain(errorData.stack);
+          expect(userFriendlyMessage).not.toContain('TypeError');
+          expect(userFriendlyMessage).not.toContain('ReferenceError');
+          expect(userFriendlyMessage).not.toContain('SyntaxError');
+          expect(userFriendlyMessage).not.toContain('RangeError');
+          expect(userFriendlyMessage).not.toMatch(/at\s+\w+\s+\(/); // Stack trace pattern
 
-            // Property: Should provide generic but helpful message
-            expect(userFriendlyMessage.length).toBeGreaterThan(10);
-            expect(userFriendlyMessage.toLowerCase()).toMatch(
-              /unexpected|error|try.*again|refresh/
-            );
+          // Property: Should provide generic but helpful message
+          expect(userFriendlyMessage.length).toBeGreaterThan(10);
+          expect(userFriendlyMessage.toLowerCase()).toMatch(
+            /unexpected|error|try.*again|refresh/
+          );
 
-            // Should be user-friendly and actionable
-            expect(userFriendlyMessage).toMatch(/[.!]/); // Should end with punctuation
-          }
-        ),
+          // Should be user-friendly and actionable
+          expect(userFriendlyMessage).toMatch(/[.!]/); // Should end with punctuation
+        }),
         { numRuns: 100 }
       );
     });
@@ -209,17 +206,17 @@ describe('Unexpected Error Logging Property Tests', () => {
             fc.record({
               errorType: fc.constant(ErrorType.UNKNOWN),
               expectedSeverity: fc.constant(ErrorSeverity.MEDIUM),
-              shouldLogError: fc.constant(true)
+              shouldLogError: fc.constant(true),
             }),
             fc.record({
               errorType: fc.constant(ErrorType.CLIENT),
               expectedSeverity: fc.constant(ErrorSeverity.MEDIUM),
-              shouldLogError: fc.constant(true)
+              shouldLogError: fc.constant(true),
             }),
             fc.record({
               errorType: fc.constant(ErrorType.SERVER),
               expectedSeverity: fc.constant(ErrorSeverity.HIGH),
-              shouldLogError: fc.constant(true)
+              shouldLogError: fc.constant(true),
             })
           ),
           fc.string({ minLength: 1, maxLength: 100 }),
@@ -255,18 +252,18 @@ describe('Unexpected Error Logging Property Tests', () => {
             const logCalls = [
               ...consoleErrorSpy.mock.calls,
               ...consoleWarnSpy.mock.calls,
-              ...consoleInfoSpy.mock.calls
+              ...consoleInfoSpy.mock.calls,
             ];
 
             expect(logCalls.length).toBeGreaterThan(0);
-            
+
             const logCall = logCalls[0];
             expect(logCall[1]).toMatchObject({
               errorId: expect.stringMatching(/^[a-z]+-\d+-[a-z0-9]+$/),
               type: errorConfig.errorType,
               severity: errorConfig.expectedSeverity,
               message: errorMessage,
-              context: 'test-context'
+              context: 'test-context',
             });
           }
         ),
@@ -312,33 +309,30 @@ describe('Unexpected Error Logging Property Tests', () => {
 
     it('should handle logging failures gracefully', () => {
       fc.assert(
-        fc.property(
-          unexpectedErrorGenerator,
-          (errorData) => {
-            // Mock localStorage to throw an error
-            const originalSetItem = localStorageMock.setItem;
-            localStorageMock.setItem = jest.fn().mockImplementation(() => {
-              throw new Error('Storage quota exceeded');
-            });
+        fc.property(unexpectedErrorGenerator, (errorData) => {
+          // Mock localStorage to throw an error
+          const originalSetItem = localStorageMock.setItem;
+          localStorageMock.setItem = jest.fn().mockImplementation(() => {
+            throw new Error('Storage quota exceeded');
+          });
 
-            const error = new Error(errorData.message);
-            const classifiedError = classifyError(error);
+          const error = new Error(errorData.message);
+          const classifiedError = classifyError(error);
 
-            // Property: Should not throw when logging fails
-            expect(() => {
-              logError(classifiedError, 'test-context');
-            }).not.toThrow();
+          // Property: Should not throw when logging fails
+          expect(() => {
+            logError(classifiedError, 'test-context');
+          }).not.toThrow();
 
-            // Should still log to console even if localStorage fails
-            expect(consoleWarnSpy).toHaveBeenCalledWith(
-              'Failed to store error log:',
-              expect.any(Error)
-            );
+          // Should still log to console even if localStorage fails
+          expect(consoleWarnSpy).toHaveBeenCalledWith(
+            'Failed to store error log:',
+            expect.any(Error)
+          );
 
-            // Restore original setItem
-            localStorageMock.setItem = originalSetItem;
-          }
-        ),
+          // Restore original setItem
+          localStorageMock.setItem = originalSetItem;
+        }),
         { numRuns: 100 }
       );
     });
@@ -351,7 +345,7 @@ describe('Unexpected Error Logging Property Tests', () => {
           (errorData, context) => {
             const error = new Error(errorData.message);
             const classifiedError = classifyError(error);
-            
+
             // Add additional context to the error
             const errorWithContext = new AppError(
               errorData.message,
@@ -362,7 +356,7 @@ describe('Unexpected Error Logging Property Tests', () => {
                 action: context.action,
                 userId: context.userId,
                 sessionId: context.sessionId,
-                additionalData: context.additionalData
+                additionalData: context.additionalData,
               }
             );
 
@@ -379,7 +373,7 @@ describe('Unexpected Error Logging Property Tests', () => {
               action: context.action,
               userId: context.userId,
               sessionId: context.sessionId,
-              additionalData: context.additionalData
+              additionalData: context.additionalData,
             });
 
             expect(latestLog.context).toBe(context.component);
@@ -392,10 +386,10 @@ describe('Unexpected Error Logging Property Tests', () => {
     it('should generate unique error IDs for tracking', () => {
       fc.assert(
         fc.property(
-          fc.array(
-            fc.string({ minLength: 1, maxLength: 50 }),
-            { minLength: 10, maxLength: 20 }
-          ),
+          fc.array(fc.string({ minLength: 1, maxLength: 50 }), {
+            minLength: 10,
+            maxLength: 20,
+          }),
           (errorMessages) => {
             localStorageMock.clear();
             const errorIds: string[] = [];
@@ -423,29 +417,26 @@ describe('Unexpected Error Logging Property Tests', () => {
 
     it('should preserve error stack traces for debugging while hiding from users', () => {
       fc.assert(
-        fc.property(
-          unexpectedErrorGenerator,
-          (errorData) => {
-            const error = new Error(errorData.message);
-            error.stack = errorData.stack;
+        fc.property(unexpectedErrorGenerator, (errorData) => {
+          const error = new Error(errorData.message);
+          error.stack = errorData.stack;
 
-            const classifiedError = classifyError(error);
-            logError(classifiedError, 'test-context');
+          const classifiedError = classifyError(error);
+          logError(classifiedError, 'test-context');
 
-            // Property: Stack trace should be preserved in logs for debugging
-            const storedLogs = JSON.parse(
-              localStorageMock.getItem('docfiscal-error-logs') || '[]'
-            );
+          // Property: Stack trace should be preserved in logs for debugging
+          const storedLogs = JSON.parse(
+            localStorageMock.getItem('docfiscal-error-logs') || '[]'
+          );
 
-            const latestLog = storedLogs[storedLogs.length - 1];
-            expect(latestLog.stack).toBe(errorData.stack);
+          const latestLog = storedLogs[storedLogs.length - 1];
+          expect(latestLog.stack).toBe(errorData.stack);
 
-            // Property: But user-friendly message should not contain stack trace
-            const userFriendlyMessage = getUserFriendlyMessage(classifiedError);
-            expect(userFriendlyMessage).not.toContain(errorData.stack);
-            expect(userFriendlyMessage).not.toMatch(/at\s+\w+\s+\(/);
-          }
-        ),
+          // Property: But user-friendly message should not contain stack trace
+          const userFriendlyMessage = getUserFriendlyMessage(classifiedError);
+          expect(userFriendlyMessage).not.toContain(errorData.stack);
+          expect(userFriendlyMessage).not.toMatch(/at\s+\w+\s+\(/);
+        }),
         { numRuns: 100 }
       );
     });

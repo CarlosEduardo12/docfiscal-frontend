@@ -204,9 +204,7 @@ describe('Critical Error Scenarios', () => {
             }}
           >
             <input name="email" type="email" />
-            <div data-testid="error-display">
-              {JSON.stringify(errors)}
-            </div>
+            <div data-testid="error-display">{JSON.stringify(errors)}</div>
           </FormValidator>
         );
       };
@@ -231,7 +229,7 @@ describe('Critical Error Scenarios', () => {
             const data: any = { name: 'test' };
             data.self = data;
             setFormData(data);
-            
+
             // Try to stringify and catch the error
             JSON.stringify(data);
           } catch (err) {
@@ -244,9 +242,7 @@ describe('Critical Error Scenarios', () => {
             <button onClick={handleSubmit} data-testid="submit-btn">
               Submit
             </button>
-            <div data-testid="error-display">
-              {error}
-            </div>
+            <div data-testid="error-display">{error}</div>
           </div>
         );
       };
@@ -257,7 +253,9 @@ describe('Critical Error Scenarios', () => {
       fireEvent.click(submitBtn);
 
       // Should handle circular reference without crashing
-      expect(screen.getByTestId('error-display')).toHaveTextContent('Circular reference detected');
+      expect(screen.getByTestId('error-display')).toHaveTextContent(
+        'Circular reference detected'
+      );
     });
 
     it('should handle extremely long input values', () => {
@@ -352,14 +350,14 @@ describe('Critical Error Scenarios', () => {
       // Simple validation logic for corrupted files
       const validateFile = (file: any) => {
         const errors: string[] = [];
-        
+
         if (!file || typeof file.size !== 'number' || file.size === null) {
           errors.push('Arquivo corrompido ou inválido');
         }
-        
+
         return {
           isValid: errors.length === 0,
-          errors
+          errors,
         };
       };
 
@@ -376,14 +374,14 @@ describe('Critical Error Scenarios', () => {
       // Simple validation logic for file types
       const validateFile = (file: File) => {
         const errors: string[] = [];
-        
+
         if (!['application/pdf'].includes(file.type)) {
           errors.push('Apenas arquivos PDF são permitidos');
         }
-        
+
         return {
           isValid: errors.length === 0,
-          errors
+          errors,
         };
       };
 
@@ -400,14 +398,14 @@ describe('Critical Error Scenarios', () => {
       // Simple validation logic for empty files
       const validateFile = (file: File) => {
         const errors: string[] = [];
-        
+
         if (file.size === 0) {
           errors.push('Arquivo está vazio ou corrompido');
         }
-        
+
         return {
           isValid: errors.length === 0,
-          errors
+          errors,
         };
       };
 
@@ -426,7 +424,7 @@ describe('Critical Error Scenarios', () => {
       const validateFile = (file: File) => {
         return {
           isValid: true,
-          errors: []
+          errors: [],
         };
       };
 
@@ -575,9 +573,7 @@ describe('Critical Error Scenarios', () => {
     });
 
     it('should handle token refresh during network failure', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(
-        new Error('Network error')
-      );
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       const tokenManager = new AuthTokenManager();
       const result = await tokenManager.refreshToken();
@@ -672,8 +668,10 @@ describe('Critical Error Scenarios', () => {
     });
 
     it('should handle errors with special characters in stack traces', () => {
-      const specialError = new Error('Error with 🚀 emoji and special chars !@#$%');
-      
+      const specialError = new Error(
+        'Error with 🚀 emoji and special chars !@#$%'
+      );
+
       const classified = classifyError(specialError);
       expect(classified).toBeInstanceOf(AppError);
       expect(classified.message).toContain('🚀');
@@ -755,8 +753,9 @@ describe('Critical Error Scenarios', () => {
     });
 
     it('should handle rapid successive error reports', () => {
-      const errors = Array.from({ length: 100 }, (_, i) => 
-        new Error(`Rapid error ${i}`)
+      const errors = Array.from(
+        { length: 100 },
+        (_, i) => new Error(`Rapid error ${i}`)
       );
 
       errors.forEach((error) => {

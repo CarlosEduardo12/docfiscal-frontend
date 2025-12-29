@@ -19,7 +19,7 @@ export default function ForceRefreshOrderPage() {
 
   const checkOrderStatus = async () => {
     if (!orderId) return;
-    
+
     setLoading(true);
     try {
       const response = await apiClient.getOrder(orderId);
@@ -27,19 +27,20 @@ export default function ForceRefreshOrderPage() {
         type: 'order',
         success: response.success,
         data: response.data,
-        error: response.success ? null : response.message
+        error: response.success ? null : response.message,
       });
 
       // Invalidar cache
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(orderId) });
-      
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.orders.byId(orderId),
+      });
     } catch (error: any) {
       setResult({
         type: 'order',
         success: false,
         error: error.message,
-        data: null
+        data: null,
       });
     } finally {
       setLoading(false);
@@ -48,7 +49,7 @@ export default function ForceRefreshOrderPage() {
 
   const checkPaymentStatus = async () => {
     if (!paymentId) return;
-    
+
     setLoading(true);
     try {
       const response = await apiClient.getPaymentStatus(paymentId);
@@ -56,15 +57,14 @@ export default function ForceRefreshOrderPage() {
         type: 'payment',
         success: response.success,
         data: response.data,
-        error: response.success ? null : response.message
+        error: response.success ? null : response.message,
       });
-      
     } catch (error: any) {
       setResult({
         type: 'payment',
         success: false,
         error: error.message,
-        data: null
+        data: null,
       });
     } finally {
       setLoading(false);
@@ -76,30 +76,29 @@ export default function ForceRefreshOrderPage() {
     try {
       // Invalidar todas as queries de pedidos
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-      
+
       // Buscar pedidos atualizados
       if (user?.id) {
         const response = await apiClient.getUserOrders(user.id, {
           page: 1,
           limit: 50,
-          sort_by: 'created_at',
-          sort_order: 'desc',
+          sort: 'created_at',
+          order: 'desc',
         });
-        
+
         setResult({
           type: 'all_orders',
           success: response.success,
           data: response.data,
-          error: response.success ? null : response.message
+          error: response.success ? null : response.message,
         });
       }
-      
     } catch (error: any) {
       setResult({
         type: 'all_orders',
         success: false,
         error: error.message,
-        data: null
+        data: null,
       });
     } finally {
       setLoading(false);
@@ -114,7 +113,6 @@ export default function ForceRefreshOrderPage() {
             <CardTitle>🔄 Forçar Atualização de Pedidos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            
             {/* Verificar pedido específico */}
             <div className="space-y-4">
               <h3 className="font-semibold">📋 Verificar Pedido Específico</h3>
@@ -125,7 +123,7 @@ export default function ForceRefreshOrderPage() {
                   onChange={(e) => setOrderId(e.target.value)}
                   className="flex-1"
                 />
-                <Button 
+                <Button
                   onClick={checkOrderStatus}
                   disabled={loading || !orderId}
                 >
@@ -136,7 +134,9 @@ export default function ForceRefreshOrderPage() {
 
             {/* Verificar pagamento específico */}
             <div className="space-y-4">
-              <h3 className="font-semibold">💳 Verificar Pagamento Específico</h3>
+              <h3 className="font-semibold">
+                💳 Verificar Pagamento Específico
+              </h3>
               <div className="flex gap-2">
                 <Input
                   placeholder="Payment ID"
@@ -144,7 +144,7 @@ export default function ForceRefreshOrderPage() {
                   onChange={(e) => setPaymentId(e.target.value)}
                   className="flex-1"
                 />
-                <Button 
+                <Button
                   onClick={checkPaymentStatus}
                   disabled={loading || !paymentId}
                 >
@@ -156,12 +156,14 @@ export default function ForceRefreshOrderPage() {
             {/* Atualizar todos os pedidos */}
             <div className="space-y-4">
               <h3 className="font-semibold">🔄 Atualizar Todos os Pedidos</h3>
-              <Button 
+              <Button
                 onClick={forceRefreshAllOrders}
                 disabled={loading || !user}
                 className="w-full"
               >
-                {loading ? '🔄 Atualizando...' : '🔄 Forçar Atualização Completa'}
+                {loading
+                  ? '🔄 Atualizando...'
+                  : '🔄 Forçar Atualização Completa'}
               </Button>
             </div>
 
@@ -172,7 +174,13 @@ export default function ForceRefreshOrderPage() {
                 {result.success ? (
                   <div className="bg-green-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-green-800 mb-2">
-                      ✅ {result.type === 'order' ? 'Pedido' : result.type === 'payment' ? 'Pagamento' : 'Pedidos'} Atualizado
+                      ✅{' '}
+                      {result.type === 'order'
+                        ? 'Pedido'
+                        : result.type === 'payment'
+                          ? 'Pagamento'
+                          : 'Pedidos'}{' '}
+                      Atualizado
                     </h4>
                     <pre className="bg-white p-3 rounded text-xs overflow-auto max-h-96">
                       {JSON.stringify(result.data, null, 2)}
@@ -182,7 +190,9 @@ export default function ForceRefreshOrderPage() {
                   <div className="bg-red-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-red-800 mb-2">❌ Erro</h4>
                     <div className="text-sm text-red-700">
-                      <div><strong>Erro:</strong> {result.error}</div>
+                      <div>
+                        <strong>Erro:</strong> {result.error}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -193,10 +203,22 @@ export default function ForceRefreshOrderPage() {
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-800 mb-2">📋 Como Usar</h3>
               <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-                <li><strong>Para verificar um pedido específico:</strong> Cole o Order ID e clique em "Verificar Pedido"</li>
-                <li><strong>Para verificar um pagamento:</strong> Cole o Payment ID e clique em "Verificar Pagamento"</li>
-                <li><strong>Para atualizar tudo:</strong> Clique em "Forçar Atualização Completa"</li>
-                <li><strong>Encontrar IDs:</strong> Vá para o Dashboard ou console do navegador</li>
+                <li>
+                  <strong>Para verificar um pedido específico:</strong> Cole o
+                  Order ID e clique em &quot;Verificar Pedido&quot;
+                </li>
+                <li>
+                  <strong>Para verificar um pagamento:</strong> Cole o Payment
+                  ID e clique em &quot;Verificar Pagamento&quot;
+                </li>
+                <li>
+                  <strong>Para atualizar tudo:</strong> Clique em &quot;Forçar
+                  Atualização Completa&quot;
+                </li>
+                <li>
+                  <strong>Encontrar IDs:</strong> Vá para o Dashboard ou console
+                  do navegador
+                </li>
               </ol>
             </div>
 
@@ -204,13 +226,40 @@ export default function ForceRefreshOrderPage() {
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-semibold mb-2">🔗 Links Úteis</h3>
               <div className="space-y-2 text-sm">
-                <div><a href="/dashboard" className="text-blue-600 hover:underline">📊 Dashboard</a></div>
-                <div><a href="/test-payment-urls" className="text-blue-600 hover:underline">🧪 Teste de URLs</a></div>
-                <div><a href="/debug-payment" className="text-blue-600 hover:underline">🔧 Debug Payment</a></div>
-                <div><a href="/test-api-connection" className="text-blue-600 hover:underline">🔌 Teste API</a></div>
+                <div>
+                  <a
+                    href="/dashboard"
+                    className="text-blue-600 hover:underline"
+                  >
+                    📊 Dashboard
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/test-payment-urls"
+                    className="text-blue-600 hover:underline"
+                  >
+                    🧪 Teste de URLs
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/debug-payment"
+                    className="text-blue-600 hover:underline"
+                  >
+                    🔧 Debug Payment
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="/test-api-connection"
+                    className="text-blue-600 hover:underline"
+                  >
+                    🔌 Teste API
+                  </a>
+                </div>
               </div>
             </div>
-
           </CardContent>
         </Card>
       </div>

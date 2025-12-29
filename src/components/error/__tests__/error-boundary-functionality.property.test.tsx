@@ -131,9 +131,11 @@ describe('Error Boundary Functionality Property Tests', () => {
             expect(
               screen.queryByTestId('success-component')
             ).not.toBeInTheDocument();
-            
+
             // Should display user-friendly error message
-            expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+            expect(
+              screen.getByText('Something went wrong')
+            ).toBeInTheDocument();
             expect(
               screen.getByText(/We encountered an unexpected error/)
             ).toBeInTheDocument();
@@ -190,7 +192,9 @@ describe('Error Boundary Functionality Property Tests', () => {
       fc.assert(
         fc.property(
           errorMessageGenerator,
-          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          fc
+            .string({ minLength: 1, maxLength: 50 })
+            .filter((s) => s.trim().length > 0),
           (errorMessage, workingComponentText) => {
             // Clean up any previous renders
             cleanup();
@@ -213,11 +217,15 @@ describe('Error Boundary Functionality Property Tests', () => {
 
             // Property: Error in one boundary should not affect other boundaries
             // First boundary should show error
-            expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+            expect(
+              screen.getByText('Something went wrong')
+            ).toBeInTheDocument();
 
             // Second boundary should still render its children
             expect(screen.getByTestId(uniqueTestId)).toBeInTheDocument();
-            expect(screen.getByText(workingComponentText.trim())).toBeInTheDocument();
+            expect(
+              screen.getByText(workingComponentText.trim())
+            ).toBeInTheDocument();
 
             // Clean up after this iteration
             cleanup();
@@ -270,7 +278,9 @@ describe('Error Boundary Functionality Property Tests', () => {
     it('should render children normally when no errors occur', () => {
       fc.assert(
         fc.property(
-          fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+          fc
+            .string({ minLength: 1, maxLength: 50 })
+            .filter((s) => s.trim().length > 0),
           (testContent) => {
             // Clean up any previous renders
             cleanup();
@@ -303,37 +313,34 @@ describe('Error Boundary Functionality Property Tests', () => {
 
     it('should handle retry functionality correctly', () => {
       fc.assert(
-        fc.property(
-          errorMessageGenerator,
-          (errorMessage) => {
-            // Clean up any previous renders
-            cleanup();
+        fc.property(errorMessageGenerator, (errorMessage) => {
+          // Clean up any previous renders
+          cleanup();
 
-            render(
-              <ErrorBoundary>
-                <ErrorThrowingComponent
-                  shouldThrow={true}
-                  errorMessage={errorMessage}
-                />
-              </ErrorBoundary>
-            );
+          render(
+            <ErrorBoundary>
+              <ErrorThrowingComponent
+                shouldThrow={true}
+                errorMessage={errorMessage}
+              />
+            </ErrorBoundary>
+          );
 
-            // Property: Retry button should be functional
-            const retryButton = screen.getAllByText(/Try Again/)[0];
-            expect(retryButton).toBeInTheDocument();
+          // Property: Retry button should be functional
+          const retryButton = screen.getAllByText(/Try Again/)[0];
+          expect(retryButton).toBeInTheDocument();
 
-            // Should be clickable (not disabled)
-            expect(retryButton).not.toBeDisabled();
+          // Should be clickable (not disabled)
+          expect(retryButton).not.toBeDisabled();
 
-            // Click should not throw an error
-            expect(() => {
-              fireEvent.click(retryButton);
-            }).not.toThrow();
+          // Click should not throw an error
+          expect(() => {
+            fireEvent.click(retryButton);
+          }).not.toThrow();
 
-            // Clean up after this iteration
-            cleanup();
-          }
-        ),
+          // Clean up after this iteration
+          cleanup();
+        }),
         { numRuns: 100 }
       );
     });

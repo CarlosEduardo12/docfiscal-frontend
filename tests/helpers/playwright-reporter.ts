@@ -230,7 +230,7 @@ export class DocFiscalE2EReporter implements Reporter {
   /**
    * Called when the reporter is being closed
    */
-  onExit(): void {
+  async onExit(): Promise<void> {
     console.log('👋 DocFiscal E2E Reporter finished');
   }
 }

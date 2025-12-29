@@ -1,15 +1,20 @@
 /**
  * Property-Based Tests for Optimistic Updates
- * 
+ *
  * **Feature: frontend-issues-resolution, Property 32: Optimistic updates handle rollbacks**
  * **Validates: Requirements 8.5**
- * 
- * Tests that when users perform actions that modify data, the state management 
+ *
+ * Tests that when users perform actions that modify data, the state management
  * system optimistically updates UI while handling potential rollbacks on failure.
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import * as fc from 'fast-check';
 import React from 'react';
 
@@ -30,15 +35,26 @@ const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 // Test wrapper component
 const createWrapper = (queryClient: QueryClient) => {
-  return ({ children }: { children: React.ReactNode }) => 
+  const TestWrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
+  TestWrapper.displayName = 'TestWrapper';
+  return TestWrapper;
 };
 
 // Order data generator
 const orderDataArb = fc.record({
-  id: fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
-  filename: fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
-  status: fc.constantFrom('pending_payment', 'processing', 'completed', 'failed'),
+  id: fc
+    .string({ minLength: 1, maxLength: 50 })
+    .filter((s) => s.trim().length > 0),
+  filename: fc
+    .string({ minLength: 1, maxLength: 100 })
+    .filter((s) => s.trim().length > 0),
+  status: fc.constantFrom(
+    'pending_payment',
+    'processing',
+    'completed',
+    'failed'
+  ),
   created_at: fc.constant('2020-01-01T00:00:00.000Z'),
   updated_at: fc.constant('2020-01-01T00:00:00.000Z'),
   file_size: fc.integer({ min: 1, max: 100000000 }),
@@ -94,21 +110,29 @@ describe('Optimistic Updates Properties', () => {
           });
 
           // **Property: Optimistic updates should be immediately visible**
-          
+
           // Simulate optimistic update by directly updating cache
           const optimisticOrder = { ...initialOrder, status: newStatus };
-          
+
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), optimisticOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              optimisticOrder
+            );
           });
 
           // Wait for the cache update to propagate to the hook
-          await waitFor(() => {
-            expect(orderResult.current.data?.status).toBe(newStatus);
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              expect(orderResult.current.data?.status).toBe(newStatus);
+            },
+            { timeout: 1000 }
+          );
 
           expect(orderResult.current.data?.id).toBe(initialOrder.id);
-          expect(orderResult.current.data?.filename).toBe(initialOrder.filename);
+          expect(orderResult.current.data?.filename).toBe(
+            initialOrder.filename
+          );
         }
       ),
       { numRuns: 50 }
@@ -143,27 +167,41 @@ describe('Optimistic Updates Properties', () => {
           });
 
           // **Property: Optimistic updates should be rollback-able**
-          
+
           // Apply optimistic update
           const optimisticOrder = { ...initialOrder, status: optimisticStatus };
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), optimisticOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              optimisticOrder
+            );
           });
 
           // Verify optimistic update
-          await waitFor(() => {
-            expect(orderResult.current.data?.status).toBe(optimisticStatus);
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              expect(orderResult.current.data?.status).toBe(optimisticStatus);
+            },
+            { timeout: 1000 }
+          );
 
           // Rollback to original
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), initialOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              initialOrder
+            );
           });
 
           // Should be back to original state
-          await waitFor(() => {
-            expect(orderResult.current.data?.status).toBe(initialOrder.status);
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              expect(orderResult.current.data?.status).toBe(
+                initialOrder.status
+              );
+            },
+            { timeout: 1000 }
+          );
           expect(orderResult.current.data).toEqual(initialOrder);
         }
       ),
@@ -175,11 +213,16 @@ describe('Optimistic Updates Properties', () => {
     await fc.assert(
       fc.asyncProperty(
         orderDataArb,
-        fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
+        fc
+          .string({ minLength: 1, maxLength: 100 })
+          .filter((s) => s.trim().length > 0),
         fc.integer({ min: 1, max: 100000000 }),
         async (initialOrder, newFilename, newFileSize) => {
           // Skip if values are the same
-          if (initialOrder.filename === newFilename && initialOrder.file_size === newFileSize) {
+          if (
+            initialOrder.filename === newFilename &&
+            initialOrder.file_size === newFileSize
+          ) {
             return;
           }
 
@@ -201,36 +244,52 @@ describe('Optimistic Updates Properties', () => {
           });
 
           // **Property: Multiple optimistic updates should preserve data integrity**
-          
+
           // Apply optimistic updates to multiple fields
           const optimisticOrder = {
             ...initialOrder,
             filename: newFilename,
             file_size: newFileSize,
           };
-          
+
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), optimisticOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              optimisticOrder
+            );
           });
 
           // Verify optimistic updates
-          await waitFor(() => {
-            expect(orderResult.current.data?.filename).toBe(newFilename);
-            expect(orderResult.current.data?.file_size).toBe(newFileSize);
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              expect(orderResult.current.data?.filename).toBe(newFilename);
+              expect(orderResult.current.data?.file_size).toBe(newFileSize);
+            },
+            { timeout: 1000 }
+          );
           expect(orderResult.current.data?.id).toBe(initialOrder.id);
           expect(orderResult.current.data?.status).toBe(initialOrder.status);
 
           // Rollback to original
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), initialOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              initialOrder
+            );
           });
 
           // All fields should be restored correctly
-          await waitFor(() => {
-            expect(orderResult.current.data?.filename).toBe(initialOrder.filename);
-            expect(orderResult.current.data?.file_size).toBe(initialOrder.file_size);
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              expect(orderResult.current.data?.filename).toBe(
+                initialOrder.filename
+              );
+              expect(orderResult.current.data?.file_size).toBe(
+                initialOrder.file_size
+              );
+            },
+            { timeout: 1000 }
+          );
           expect(orderResult.current.data?.id).toBe(initialOrder.id);
           expect(orderResult.current.data?.status).toBe(initialOrder.status);
         }
@@ -258,7 +317,7 @@ describe('Optimistic Updates Properties', () => {
 
           // Create multiple components using the same order
           const results: Array<{ current: any }> = [];
-          
+
           for (let i = 0; i < componentCount; i++) {
             const { result } = renderHook(
               () => useOrderStatus(initialOrder.id),
@@ -269,30 +328,36 @@ describe('Optimistic Updates Properties', () => {
 
           // Wait for initial data in all components
           await waitFor(() => {
-            results.forEach(result => {
+            results.forEach((result) => {
               expect(result.current.data).toEqual(initialOrder);
             });
           });
 
           // **Property: Optimistic updates should work with concurrent component access**
-          
+
           const optimisticOrder = { ...initialOrder, status: newStatus };
-          
+
           act(() => {
-            queryClient.setQueryData(queryKeys.orders.byId(initialOrder.id), optimisticOrder);
+            queryClient.setQueryData(
+              queryKeys.orders.byId(initialOrder.id),
+              optimisticOrder
+            );
           });
 
           // All components should see the optimistic update
-          await waitFor(() => {
-            results.forEach(result => {
-              expect(result.current.data?.status).toBe(newStatus);
-              expect(result.current.data?.id).toBe(initialOrder.id);
-            });
-          }, { timeout: 1000 });
+          await waitFor(
+            () => {
+              results.forEach((result) => {
+                expect(result.current.data?.status).toBe(newStatus);
+                expect(result.current.data?.id).toBe(initialOrder.id);
+              });
+            },
+            { timeout: 1000 }
+          );
 
           // All components should have identical data
           const firstData = results[0].current.data;
-          results.forEach(result => {
+          results.forEach((result) => {
             expect(result.current.data).toEqual(firstData);
           });
         }
@@ -304,7 +369,9 @@ describe('Optimistic Updates Properties', () => {
   test('Mutation retry mechanisms work correctly', async () => {
     await fc.assert(
       fc.asyncProperty(
-        fc.string({ minLength: 1, maxLength: 50 }).filter(s => s.trim().length > 0),
+        fc
+          .string({ minLength: 1, maxLength: 50 })
+          .filter((s) => s.trim().length > 0),
         orderDataArb,
         async (orderId, expectedResult) => {
           // Setup mutation to succeed after retry
@@ -324,13 +391,18 @@ describe('Optimistic Updates Properties', () => {
                 mutationFn: async (id: string) => {
                   const response = await apiClient.retryOrder(id);
                   if (!response.success || !response.data) {
-                    throw new Error(response.message || 'Failed to retry order');
+                    throw new Error(
+                      response.message || 'Failed to retry order'
+                    );
                   }
                   return response.data;
                 },
                 onSuccess: (data) => {
                   // Update cache on success
-                  queryClient.setQueryData(queryKeys.orders.byId(orderId), data);
+                  queryClient.setQueryData(
+                    queryKeys.orders.byId(orderId),
+                    data
+                  );
                 },
               });
             },
@@ -338,10 +410,10 @@ describe('Optimistic Updates Properties', () => {
           );
 
           // **Property: Mutation retry mechanisms should work correctly**
-          
+
           let mutationResult: any = null;
           let mutationError: any = null;
-          
+
           // First attempt (will fail)
           act(() => {
             retryResult.current.mutate(orderId, {
@@ -364,7 +436,7 @@ describe('Optimistic Updates Properties', () => {
 
           // Reset for retry
           mutationError = null;
-          
+
           // Reset mutation state
           act(() => {
             retryResult.current.reset();

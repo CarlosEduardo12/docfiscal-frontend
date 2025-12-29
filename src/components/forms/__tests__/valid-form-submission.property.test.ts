@@ -27,7 +27,10 @@ const isValidFormData = (data: TestFormData): boolean => {
   }
 
   // Name validation (at least 2 chars, only letters/spaces/hyphens/apostrophes)
-  if (data.name.trim().length < 2 || !/^[a-zA-ZÀ-ÿ\s'-]+$/.test(data.name.trim())) {
+  if (
+    data.name.trim().length < 2 ||
+    !/^[a-zA-ZÀ-ÿ\s'-]+$/.test(data.name.trim())
+  ) {
     return false;
   }
 
@@ -40,13 +43,13 @@ const submitForm = (data: TestFormData) => {
     return {
       success: true,
       message: 'Form submitted successfully!',
-      data: data
+      data: data,
     };
   } else {
     return {
       success: false,
       message: 'Form validation failed',
-      errors: ['Invalid form data']
+      errors: ['Invalid form data'],
     };
   }
 };
@@ -54,13 +57,15 @@ const submitForm = (data: TestFormData) => {
 // Generators for valid test data
 const validEmailArbitrary = fc.emailAddress();
 
-const validPasswordArbitrary = fc.string({ minLength: 6, maxLength: 100 })
-  .filter(s => /[a-zA-Z]/.test(s)); // Must contain at least one letter
+const validPasswordArbitrary = fc
+  .string({ minLength: 6, maxLength: 100 })
+  .filter((s) => /[a-zA-Z]/.test(s)); // Must contain at least one letter
 
-const validNameArbitrary = fc.string({ minLength: 2, maxLength: 50 })
-  .map(s => s.replace(/[^a-zA-ZÀ-ÿ\s'-]/g, 'a')) // Replace invalid chars with 'a'
-  .filter(s => s.trim().length >= 2)
-  .map(s => s.trim());
+const validNameArbitrary = fc
+  .string({ minLength: 2, maxLength: 50 })
+  .map((s) => s.replace(/[^a-zA-ZÀ-ÿ\s'-]/g, 'a')) // Replace invalid chars with 'a'
+  .filter((s) => s.trim().length >= 2)
+  .map((s) => s.trim());
 
 describe('Valid Form Submission Properties', () => {
   /**
@@ -79,7 +84,7 @@ describe('Valid Form Submission Properties', () => {
         (validData) => {
           // Property: Valid form data should pass validation rules
           expect(isValidFormData(validData)).toBe(true);
-          
+
           // Verify individual validation rules
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           expect(emailRegex.test(validData.email)).toBe(true);
@@ -87,16 +92,18 @@ describe('Valid Form Submission Properties', () => {
           expect(/[a-zA-Z]/.test(validData.password)).toBe(true);
           expect(validData.name.trim().length).toBeGreaterThanOrEqual(2);
           expect(/^[a-zA-ZÀ-ÿ\s'-]+$/.test(validData.name.trim())).toBe(true);
-          
+
           // Property: Valid form data should enable successful submission
           const submissionResult = submitForm(validData);
-          
+
           expect(submissionResult.success).toBe(true);
           expect(submissionResult.message).toContain('successfully');
           expect(submissionResult.data).toEqual(validData);
-          
+
           // Property: Successful submission should provide confirmation
-          expect(submissionResult.message.toLowerCase()).toMatch(/success|submitted|complete/);
+          expect(submissionResult.message.toLowerCase()).toMatch(
+            /success|submitted|complete/
+          );
         }
       ),
       { numRuns: 100 }

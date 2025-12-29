@@ -3,15 +3,49 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { queryKeys } from '@/lib/react-query';
-import { PaymentStatusPoller, PaymentStatus } from '@/components/payment/PaymentStatusPoller';
-import { PaymentErrorHandler, PaymentError } from '@/components/payment/PaymentErrorHandler';
+
+export interface PaymentStatus {
+  id: string;
+  order_id: string;
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'expired';
+  amount: number;
+  currency: string;
+  payment_method: 'pix' | 'credit_card';
+  created_at: string;
+  completed_at?: string;
+  failure_reason?: string;
+  error_message?: string;
+}
+
+export interface PaymentError {
+  type:
+    | 'NETWORK_ERROR'
+    | 'VALIDATION_ERROR'
+    | 'PAYMENT_FAILED'
+    | 'EXPIRED'
+    | 'CANCELLED'
+    | 'UNKNOWN';
+  message: string;
+  details?: {
+    field_errors?: Record<string, string[]>;
+    retry_after?: number;
+    guidance?: string;
+  };
+}
 
 export interface PaymentFlowState {
-  status: 'idle' | 'initiating' | 'processing' | 'polling' | 'completed' | 'failed';
+  status:
+    | 'idle'
+    | 'initiating'
+    | 'processing'
+    | 'polling'
+    | 'completed'
+    | 'failed';
   paymentId?: string;
   orderId?: string;
   error?: PaymentError;
-  paymentUrl?: string;
+  checkoutUrl?: string;
+  qrCode?: string;
   isLoading: boolean;
 }
 
@@ -20,159 +54,244 @@ export interface UsePaymentFlowOptions {
   onError?: (error: PaymentError) => void;
   returnUrl?: string;
   cancelUrl?: string;
+  pollingInterval?: number;
+  maxPollingAttempts?: number;
 }
 
 export function usePaymentFlow(options: UsePaymentFlowOptions = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const pollerRef = useRef<PaymentStatusPoller | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingAttemptsRef = useRef(0);
+
+  const {
+    onSuccess,
+    onError,
+    returnUrl,
+    cancelUrl,
+    pollingInterval = 3000, // 3 seconds
+    maxPollingAttempts = 60, // 3 minutes total
+  } = options;
 
   const [state, setState] = useState<PaymentFlowState>({
     status: 'idle',
-    isLoading: false
+    isLoading: false,
   });
 
-  // Cleanup poller on unmount
+  const [isPolling, setIsPolling] = useState(false);
+
+  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollerRef.current) {
-        pollerRef.current.stopPolling();
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
       }
     };
   }, []);
 
-  const initiatePayment = useCallback(async (orderId: string) => {
-    setState(prev => ({ ...prev, status: 'initiating', isLoading: true, error: undefined }));
-
-    try {
-      // First validate order status
-      const orderResponse = await apiClient.getOrder(orderId);
-      
-      if (!orderResponse.success || !orderResponse.data) {
-        throw new Error('Order not found');
-      }
-
-      if (orderResponse.data.status !== 'pending_payment') {
-        throw new Error(`Cannot initiate payment for order with status: ${orderResponse.data.status}`);
-      }
-
-      // Initiate payment
-      const paymentResponse = await apiClient.initiatePayment(orderId, {
-        return_url: options.returnUrl || `${window.location.origin}/payment/success`,
-        cancel_url: options.cancelUrl || `${window.location.origin}/payment/cancel`
-      });
-
-      if (!paymentResponse.success || !paymentResponse.data) {
-        throw new Error(paymentResponse.error || 'Failed to create payment');
-      }
-
-      const { payment_id, payment_url, order_id } = paymentResponse.data;
-
-      setState(prev => ({
-        ...prev,
-        status: 'processing',
-        paymentId: payment_id,
-        orderId: order_id,
-        paymentUrl: payment_url,
-        isLoading: false
-      }));
-
-      // Open payment URL in new window/tab
-      if (payment_url) {
-        window.open(payment_url, '_blank', 'noopener,noreferrer');
-      }
-
-      return { paymentId: payment_id, paymentUrl: payment_url, orderId: order_id };
-
-    } catch (error) {
-      const paymentError: PaymentError = {
-        type: 'UNKNOWN',
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
-
-      setState(prev => ({
+  const handleError = useCallback(
+    (error: PaymentError) => {
+      setState((prev) => ({
         ...prev,
         status: 'failed',
-        error: paymentError,
-        isLoading: false
+        error,
+        isLoading: false,
+      }));
+      onError?.(error);
+    },
+    [onError]
+  );
+
+  const initiatePayment = useCallback(
+    async (orderId: string) => {
+      setState((prev) => ({
+        ...prev,
+        status: 'initiating',
+        isLoading: true,
+        error: undefined,
       }));
 
-      options.onError?.(paymentError);
-      throw error;
-    }
-  }, [options.returnUrl, options.cancelUrl, options.onError]);
+      try {
+        // First validate order status
+        const orderResponse = await apiClient.getOrder(orderId);
 
-  const startStatusPolling = useCallback((paymentId: string) => {
-    if (pollerRef.current) {
-      pollerRef.current.stopPolling();
-    }
-
-    setState(prev => ({ ...prev, status: 'polling' }));
-
-    pollerRef.current = new PaymentStatusPoller({
-      paymentId,
-      onStatusChange: (status: PaymentStatus) => {
-        console.log('Payment status update:', status);
-
-        if (status.status === 'paid') {
-          // Payment completed successfully
-          setState(prev => ({
-            ...prev,
-            status: 'completed',
-            isLoading: false
-          }));
-
-          // Invalidate relevant queries
-          queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-          if (status.order_id) {
-            queryClient.invalidateQueries({ queryKey: queryKeys.orders.byId(status.order_id) });
-          }
-          queryClient.invalidateQueries({ queryKey: queryKeys.payments.byId(paymentId) });
-
-          options.onSuccess?.(paymentId, status.order_id);
-
-        } else if (['failed', 'cancelled', 'expired'].includes(status.status)) {
-          // Payment failed
-          const errorType = status.status.toUpperCase() as PaymentError['type'];
-          const paymentError: PaymentError = {
-            type: errorType,
-            message: status.error_message || `Payment ${status.status}`
-          };
-
-          setState(prev => ({
-            ...prev,
-            status: 'failed',
-            error: paymentError,
-            isLoading: false
-          }));
-
-          options.onError?.(paymentError);
+        if (!orderResponse.success || !orderResponse.data) {
+          throw new Error('Order not found');
         }
-      },
-      onError: (error: Error) => {
-        const paymentError: PaymentError = {
-          type: 'NETWORK_ERROR',
-          message: error.message
-        };
 
-        setState(prev => ({
+        if (orderResponse.data.status !== 'pending_payment') {
+          throw new Error(
+            `Cannot initiate payment for order with status: ${orderResponse.data.status}`
+          );
+        }
+
+        // Initiate payment using new endpoint format
+        const paymentResponse = await apiClient.initiatePayment(orderId, {
+          return_url: returnUrl || `${window.location.origin}/payment/success`,
+          cancel_url: cancelUrl || `${window.location.origin}/payment/cancel`,
+        });
+
+        if (!paymentResponse.success || !paymentResponse.data) {
+          const errorMessage =
+            paymentResponse.message || 'Failed to create payment';
+          throw new Error(errorMessage);
+        }
+
+        // Handle new response format with checkout_url and qr_code
+        const { payment_id, checkout_url, qr_code, order_id } =
+          paymentResponse.data;
+
+        setState((prev) => ({
           ...prev,
-          status: 'failed',
-          error: paymentError,
-          isLoading: false
+          status: 'processing',
+          paymentId: payment_id,
+          orderId: order_id,
+          checkoutUrl: checkout_url,
+          qrCode: qr_code,
+          isLoading: false,
         }));
 
-        options.onError?.(paymentError);
-      }
-    });
+        // Open checkout URL in new window/tab if available
+        if (checkout_url) {
+          window.open(checkout_url, '_blank', 'noopener,noreferrer');
+        }
 
-    pollerRef.current.startPolling();
-  }, [queryClient, options.onSuccess, options.onError]);
+        return {
+          paymentId: payment_id,
+          checkoutUrl: checkout_url,
+          qrCode: qr_code,
+          orderId: order_id,
+        };
+      } catch (error) {
+        const paymentError: PaymentError = {
+          type: 'UNKNOWN',
+          message:
+            error instanceof Error ? error.message : 'Unknown error occurred',
+        };
+
+        handleError(paymentError);
+        throw error;
+      }
+    },
+    [returnUrl, cancelUrl, handleError]
+  );
+
+  const startStatusPolling = useCallback(
+    (paymentId: string) => {
+      // Clear any existing polling
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+
+      setState((prev) => ({ ...prev, status: 'polling' }));
+      setIsPolling(true);
+      pollingAttemptsRef.current = 0;
+
+      const pollPaymentStatus = async () => {
+        try {
+          pollingAttemptsRef.current += 1;
+
+          // Check if we've exceeded max attempts
+          if (pollingAttemptsRef.current >= maxPollingAttempts) {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+            setIsPolling(false);
+
+            const timeoutError: PaymentError = {
+              type: 'UNKNOWN',
+              message: 'Payment status polling timed out',
+            };
+            handleError(timeoutError);
+            return;
+          }
+
+          // Use new payment status endpoint (without /status suffix)
+          const response = await apiClient.getPaymentStatus(paymentId);
+
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to get payment status');
+          }
+
+          const paymentStatus: PaymentStatus = response.data;
+
+          if (paymentStatus.status === 'paid') {
+            // Stop polling first
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+            setIsPolling(false);
+
+            // Payment completed successfully
+            setState((prev) => ({
+              ...prev,
+              status: 'completed',
+              isLoading: false,
+            }));
+
+            // Invalidate relevant queries
+            queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+            if (paymentStatus.order_id) {
+              queryClient.invalidateQueries({
+                queryKey: queryKeys.orders.byId(paymentStatus.order_id),
+              });
+            }
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.payments.byId(paymentId),
+            });
+
+            onSuccess?.(paymentId, paymentStatus.order_id);
+          } else if (
+            ['failed', 'cancelled', 'expired'].includes(paymentStatus.status)
+          ) {
+            // Stop polling first
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
+            }
+            setIsPolling(false);
+
+            // Payment failed
+            const errorType =
+              paymentStatus.status.toUpperCase() as PaymentError['type'];
+            const paymentError: PaymentError = {
+              type: errorType,
+              message:
+                paymentStatus.failure_reason ||
+                paymentStatus.error_message ||
+                `Payment ${paymentStatus.status}`,
+            };
+
+            handleError(paymentError);
+          }
+          // If status is still 'pending', continue polling
+        } catch (error) {
+          console.error('Payment status polling error:', error);
+
+          // Don't stop polling on network errors, just log and continue
+          // Only stop on max attempts reached
+        }
+      };
+
+      // Start polling immediately, then at intervals
+      pollPaymentStatus();
+      pollingIntervalRef.current = setInterval(
+        pollPaymentStatus,
+        pollingInterval
+      );
+    },
+    [maxPollingAttempts, pollingInterval, queryClient, onSuccess, handleError]
+  );
 
   const stopPolling = useCallback(() => {
-    if (pollerRef.current) {
-      pollerRef.current.stopPolling();
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
     }
+    setIsPolling(false);
+    pollingAttemptsRef.current = 0;
   }, []);
 
   const retryPayment = useCallback(async () => {
@@ -188,19 +307,60 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}) {
       return null;
     }
 
-    return PaymentErrorHandler.handlePaymentError(state.error);
+    // Return user-friendly error messages based on error type
+    switch (state.error.type) {
+      case 'NETWORK_ERROR':
+        return {
+          title: 'Connection Error',
+          message:
+            'Unable to connect to payment service. Please check your internet connection and try again.',
+          canRetry: true,
+        };
+      case 'VALIDATION_ERROR':
+        return {
+          title: 'Validation Error',
+          message: state.error.message,
+          canRetry: false,
+        };
+      case 'PAYMENT_FAILED':
+        return {
+          title: 'Payment Failed',
+          message:
+            state.error.message ||
+            'Payment could not be processed. Please try again or use a different payment method.',
+          canRetry: true,
+        };
+      case 'EXPIRED':
+        return {
+          title: 'Payment Expired',
+          message:
+            'The payment session has expired. Please start a new payment.',
+          canRetry: true,
+        };
+      case 'CANCELLED':
+        return {
+          title: 'Payment Cancelled',
+          message: 'The payment was cancelled. You can try again if needed.',
+          canRetry: true,
+        };
+      default:
+        return {
+          title: 'Payment Error',
+          message:
+            state.error.message ||
+            'An unexpected error occurred. Please try again.',
+          canRetry: true,
+        };
+    }
   }, [state.error]);
 
   const reset = useCallback(() => {
-    if (pollerRef.current) {
-      pollerRef.current.stopPolling();
-    }
-
+    stopPolling();
     setState({
       status: 'idle',
-      isLoading: false
+      isLoading: false,
     });
-  }, []);
+  }, [stopPolling]);
 
   return {
     state,
@@ -211,8 +371,9 @@ export function usePaymentFlow(options: UsePaymentFlowOptions = {}) {
     getErrorResponse,
     reset,
     // Computed values
-    isPolling: pollerRef.current?.isActive() || false,
-    currentInterval: pollerRef.current?.getCurrentInterval() || 0,
-    attempts: pollerRef.current?.getAttempts() || 0
+    isPolling,
+    currentInterval: pollingInterval,
+    attempts: pollingAttemptsRef.current,
+    maxAttempts: maxPollingAttempts,
   };
 }

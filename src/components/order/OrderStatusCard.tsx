@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CheckCircle,
@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '../ui/badge';
+import { DownloadErrorDialog } from '../download/DownloadErrorDialog';
+import { useDownloadWithRetry } from '@/hooks/useDownloadWithRetry';
 import type { OrderStatusCardProps, OrderStatus } from '@/types';
 
 const getStatusConfig = (status: OrderStatus) => {
@@ -89,38 +91,116 @@ export function OrderStatusCard({
   const router = useRouter();
   const statusConfig = getStatusConfig(order.status);
   const StatusIcon = statusConfig.icon;
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+
+  const {
+    download,
+    retryDownload,
+    resetRetryState,
+    isLoading: isDownloading,
+    isRetrying,
+    error: downloadError,
+    canRetry,
+    getErrorMessage,
+    getRetryOptions,
+  } = useDownloadWithRetry();
 
   const handlePaymentClick = () => {
-    if (order.paymentUrl) {
+    // Use new checkout_url field first, fallback to legacy paymentUrl
+    const paymentUrl = order.checkout_url || order.paymentUrl;
+    if (paymentUrl) {
       // Redirect to external payment URL
-      window.open(order.paymentUrl, '_blank');
+      window.open(paymentUrl, '_blank');
     } else {
       onPaymentClick();
     }
   };
 
-  const handleDownloadClick = () => {
-    if (order.downloadUrl) {
+  const handleDownloadClick = async () => {
+    // Use new download_url field first, fallback to legacy downloadUrl
+    const downloadUrl = order.download_url || order.downloadUrl;
+    if (downloadUrl) {
       // Direct download
-      window.open(order.downloadUrl, '_blank');
+      window.open(downloadUrl, '_blank');
     } else {
-      onDownloadClick();
+      try {
+        await download(order.id);
+      } catch (error) {
+        // Show error dialog for download failures
+        setShowErrorDialog(true);
+      }
     }
   };
 
-  const formatDate = (date: Date) => {
+  const handleRetryDownload = async () => {
+    try {
+      await retryDownload(order.id);
+      setShowErrorDialog(false);
+    } catch (error) {
+      // Error dialog will remain open with updated error info
+    }
+  };
+
+  const handleGoToHistory = () => {
+    router.push('/dashboard');
+  };
+
+  const handleCloseErrorDialog = () => {
+    setShowErrorDialog(false);
+    resetRetryState();
+  };
+
+  const formatDate = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-    }).format(date);
+    }).format(dateObj);
   };
 
   const formatFileSize = (bytes: number) => {
     const mb = bytes / (1024 * 1024);
     return `${mb.toFixed(2)} MB`;
+  };
+
+  // Helper function to get file size from either new or legacy field
+  const getFileSize = () => {
+    return order.file_size || order.originalFileSize || 0;
+  };
+
+  // Helper function to get creation date from either new or legacy field
+  const getCreatedDate = () => {
+    // Handle legacy createdAt field (could be Date or string)
+    if (order.createdAt) {
+      return order.createdAt instanceof Date
+        ? order.createdAt
+        : new Date(order.createdAt);
+    }
+    // Handle new API created_at field (string)
+    return new Date(order.created_at);
+  };
+
+  // Helper function to get completion date from either new or legacy field
+  const getCompletedDate = () => {
+    // Handle legacy completedAt field (could be Date or string)
+    if (order.completedAt) {
+      return order.completedAt instanceof Date
+        ? order.completedAt
+        : new Date(order.completedAt);
+    }
+    // Handle new API processing_completed_at field (string)
+    if (order.processing_completed_at) {
+      return new Date(order.processing_completed_at);
+    }
+    return null;
+  };
+
+  // Helper function to get error message from either new or legacy field
+  const getOrderErrorMessage = () => {
+    return order.error_message || order.errorMessage;
   };
 
   return (
@@ -170,31 +250,36 @@ export function OrderStatusCard({
             </div>
             <div>
               <span className="text-muted-foreground">Size:</span>
-              <p>{formatFileSize(order.originalFileSize)}</p>
+              <p>{formatFileSize(getFileSize())}</p>
             </div>
             <div className="sm:col-span-2">
               <span className="text-muted-foreground">Created:</span>
-              <p>{formatDate(order.createdAt)}</p>
+              <p>{formatDate(getCreatedDate())}</p>
             </div>
           </div>
 
-          {order.completedAt && (
-            <div className="text-sm">
-              <span className="text-muted-foreground">Completed:</span>
-              <p>{formatDate(order.completedAt)}</p>
-            </div>
-          )}
+          {(() => {
+            const completedDate = getCompletedDate();
+            return (
+              completedDate && (
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Completed:</span>
+                  <p>{formatDate(completedDate)}</p>
+                </div>
+              )
+            );
+          })()}
         </div>
 
         {/* Error Message */}
-        {order.status === 'failed' && order.errorMessage && (
+        {order.status === 'failed' && getOrderErrorMessage() && (
           <div
             className="p-3 bg-red-100 border border-red-200 rounded-md"
             role="alert"
             aria-live="assertive"
           >
             <p className="text-sm text-red-700">
-              <strong>Error:</strong> {order.errorMessage}
+              <strong>Error:</strong> {getOrderErrorMessage()}
             </p>
           </div>
         )}
@@ -223,11 +308,11 @@ export function OrderStatusCard({
           {order.status === 'completed' && (
             <Button
               onClick={handleDownloadClick}
-              disabled={isLoading}
+              disabled={isDownloading || isRetrying}
               className="w-full sm:flex-1"
               aria-describedby="download-description"
             >
-              {isLoading ? (
+              {isDownloading || isRetrying ? (
                 <Loader2
                   className="h-4 w-4 mr-2 animate-spin"
                   aria-hidden="true"
@@ -235,7 +320,7 @@ export function OrderStatusCard({
               ) : (
                 <Download className="h-4 w-4 mr-2" aria-hidden="true" />
               )}
-              Download CSV
+              {isRetrying ? 'Retrying...' : 'Download CSV'}
             </Button>
           )}
 
@@ -263,6 +348,17 @@ export function OrderStatusCard({
           </div>
         )}
       </CardContent>
+
+      {/* Download Error Dialog */}
+      <DownloadErrorDialog
+        isOpen={showErrorDialog}
+        onClose={handleCloseErrorDialog}
+        errorMessage={getErrorMessage()}
+        retryOptions={getRetryOptions()}
+        onRetry={handleRetryDownload}
+        onGoToHistory={handleGoToHistory}
+        isRetrying={isRetrying}
+      />
     </Card>
   );
 }

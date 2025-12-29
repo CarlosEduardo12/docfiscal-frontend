@@ -50,10 +50,13 @@ export function useFileUploadWithRetry(
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(null);
+  const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(
+    null
+  );
   const [retryCount, setRetryCount] = useState(0);
-  const [abortController, setAbortController] = useState<AbortController | null>(null);
-  
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
+
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const reset = useCallback(() => {
@@ -64,7 +67,7 @@ export function useFileUploadWithRetry(
     setUploadResponse(null);
     setRetryCount(0);
     setAbortController(null);
-    
+
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
       retryTimeoutRef.current = null;
@@ -106,10 +109,13 @@ export function useFileUploadWithRetry(
     [onProgress]
   );
 
-  const calculateRetryDelay = useCallback((attempt: number): number => {
-    const exponentialDelay = baseRetryDelay * Math.pow(2, attempt);
-    return Math.min(exponentialDelay, maxRetryDelay);
-  }, [baseRetryDelay, maxRetryDelay]);
+  const calculateRetryDelay = useCallback(
+    (attempt: number): number => {
+      const exponentialDelay = baseRetryDelay * Math.pow(2, attempt);
+      return Math.min(exponentialDelay, maxRetryDelay);
+    },
+    [baseRetryDelay, maxRetryDelay]
+  );
 
   const performUpload = useCallback(
     async (file: File): Promise<UploadResponse> => {
@@ -158,13 +164,15 @@ export function useFileUploadWithRetry(
       } catch (uploadError) {
         const errorMessage =
           uploadError instanceof Error ? uploadError.message : 'Upload failed';
-        
+
         // Check if we should retry
         if (currentRetryCount < maxRetries && isRetryableError(uploadError)) {
           const retryDelay = calculateRetryDelay(currentRetryCount);
-          
-          setError(`Upload failed. Retrying in ${Math.ceil(retryDelay / 1000)}s... (Attempt ${currentRetryCount + 1}/${maxRetries})`);
-          
+
+          setError(
+            `Upload failed. Retrying in ${Math.ceil(retryDelay / 1000)}s... (Attempt ${currentRetryCount + 1}/${maxRetries})`
+          );
+
           // Schedule retry with exponential backoff
           retryTimeoutRef.current = setTimeout(async () => {
             await uploadFileWithRetry(file, currentRetryCount + 1);
@@ -180,7 +188,14 @@ export function useFileUploadWithRetry(
         setIsUploading(false);
       }
     },
-    [validateFileInput, performUpload, onSuccess, onError, maxRetries, calculateRetryDelay]
+    [
+      validateFileInput,
+      performUpload,
+      onSuccess,
+      onError,
+      maxRetries,
+      calculateRetryDelay,
+    ]
   );
 
   const isRetryableError = useCallback((error: any): boolean => {
@@ -205,7 +220,7 @@ export function useFileUploadWithRetry(
       // Reset previous state
       setUploadResponse(null);
       setRetryCount(0);
-      
+
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
@@ -220,12 +235,12 @@ export function useFileUploadWithRetry(
     if (abortController) {
       abortController.abort();
     }
-    
+
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
       retryTimeoutRef.current = null;
     }
-    
+
     setIsUploading(false);
     setProgress(0);
     setError('Upload cancelled');

@@ -102,11 +102,11 @@ describe('Disabled Interaction Cues Properties', () => {
             expect(result.current.isDisabled).toBe(true);
             expect(result.current.visualCue).toBe('loading');
             expect(result.current.reason).toBe(loadingReason);
-            
+
             // Should have loading-specific CSS classes
             expect(result.current.cssClasses).toContain('animate-pulse');
             expect(result.current.cssClasses).toContain('disabled');
-            
+
             // UI props should indicate loading state
             expect(result.current.uiProps.disabled).toBe(true);
             expect(result.current.uiProps['data-visual-cue']).toBe('loading');
@@ -114,7 +114,7 @@ describe('Disabled Interaction Cues Properties', () => {
             // Should be enabled
             expect(result.current.isDisabled).toBe(false);
             expect(result.current.visualCue).toBeUndefined();
-            
+
             // Should have enabled CSS classes
             expect(result.current.cssClasses).toContain('cursor-pointer');
             expect(result.current.cssClasses).not.toContain('disabled');
@@ -145,12 +145,12 @@ describe('Disabled Interaction Cues Properties', () => {
             expect(result.current.isDisabled).toBe(true);
             expect(result.current.visualCue).toBe('error');
             expect(result.current.reason).toBe(errorReason);
-            
+
             // Should have error-specific CSS classes
             expect(result.current.cssClasses).toContain('border-red-300');
             expect(result.current.cssClasses).toContain('text-red-600');
             expect(result.current.cssClasses).toContain('disabled');
-            
+
             // UI props should indicate error state
             expect(result.current.uiProps.disabled).toBe(true);
             expect(result.current.uiProps['data-visual-cue']).toBe('error');
@@ -244,7 +244,7 @@ describe('Disabled Interaction Cues Properties', () => {
             expect(uiProps['aria-label']).toBe(tooltip); // tooltip takes precedence
             expect(uiProps.title).toBe(tooltip);
             expect(uiProps['data-reason']).toBe(reason);
-            
+
             // Labels should be non-empty strings
             expect(typeof uiProps['aria-label']).toBe('string');
             expect(uiProps['aria-label']!.length).toBeGreaterThan(0);

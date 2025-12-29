@@ -49,7 +49,7 @@ export class FileUploadValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
@@ -61,7 +61,7 @@ export class FileUploadValidator {
       // Read first few bytes to check PDF header
       const arrayBuffer = await file.slice(0, 8).arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
-      const header = String.fromCharCode(...uint8Array);
+      const header = String.fromCharCode.apply(null, Array.from(uint8Array));
 
       // Check for PDF magic number
       return header.startsWith('%PDF-');
@@ -97,14 +97,14 @@ export class FileUploadValidator {
    * Validates multiple files at once
    */
   validateFiles(files: File[]): ValidationResult[] {
-    return files.map(file => this.validateFile(file));
+    return files.map((file) => this.validateFile(file));
   }
 
   /**
    * Checks if all files in array are valid
    */
   areAllFilesValid(files: File[]): boolean {
-    return this.validateFiles(files).every(result => result.isValid);
+    return this.validateFiles(files).every((result) => result.isValid);
   }
 
   /**
@@ -118,13 +118,16 @@ export class FileUploadValidator {
     totalWarnings: number;
   } {
     const results = this.validateFiles(files);
-    
+
     return {
       totalFiles: files.length,
-      validFiles: results.filter(r => r.isValid).length,
-      invalidFiles: results.filter(r => !r.isValid).length,
+      validFiles: results.filter((r) => r.isValid).length,
+      invalidFiles: results.filter((r) => !r.isValid).length,
       totalErrors: results.reduce((sum, r) => sum + r.errors.length, 0),
-      totalWarnings: results.reduce((sum, r) => sum + (r.warnings?.length || 0), 0)
+      totalWarnings: results.reduce(
+        (sum, r) => sum + (r.warnings?.length || 0),
+        0
+      ),
     };
   }
 }

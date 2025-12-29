@@ -10,14 +10,14 @@ import React from 'react';
 import { render, screen, act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { 
+import {
   StatusNotification,
   StatusNotificationManager,
   ImmediateStatusNotification,
   useStatusNotifications,
   createStatusChangeNotification,
   generateStatusChangeMessage,
-  type StatusChangeNotification
+  type StatusChangeNotification,
 } from '@/components/ui/status-notifications';
 import type { OrderStatus } from '@/types';
 
@@ -32,36 +32,43 @@ const orderStatusGenerator = fc.oneof(
 
 const orderIdGenerator = fc.string({ minLength: 8, maxLength: 32 });
 
-const statusTransitionGenerator = fc.record({
-  orderId: orderIdGenerator,
-  previousStatus: orderStatusGenerator,
-  newStatus: orderStatusGenerator
-}).filter(({ previousStatus, newStatus }) => previousStatus !== newStatus);
+const statusTransitionGenerator = fc
+  .record({
+    orderId: orderIdGenerator,
+    previousStatus: orderStatusGenerator,
+    newStatus: orderStatusGenerator,
+  })
+  .filter(({ previousStatus, newStatus }) => previousStatus !== newStatus);
 
-const notificationGenerator = fc.record({
-  id: fc.string({ minLength: 10, maxLength: 50 }),
-  orderId: orderIdGenerator,
-  previousStatus: orderStatusGenerator,
-  newStatus: orderStatusGenerator,
-  timestamp: fc.date(),
-  message: fc.string({ minLength: 10, maxLength: 200 }),
-  type: fc.oneof(
-    fc.constant('success' as const),
-    fc.constant('warning' as const),
-    fc.constant('error' as const),
-    fc.constant('info' as const)
-  ),
-  read: fc.boolean(),
-  persistent: fc.boolean()
-}).filter(({ previousStatus, newStatus }) => previousStatus !== newStatus);
+const notificationGenerator = fc
+  .record({
+    id: fc.string({ minLength: 10, maxLength: 50 }),
+    orderId: orderIdGenerator,
+    previousStatus: orderStatusGenerator,
+    newStatus: orderStatusGenerator,
+    timestamp: fc.date(),
+    message: fc.string({ minLength: 10, maxLength: 200 }),
+    type: fc.oneof(
+      fc.constant('success' as const),
+      fc.constant('warning' as const),
+      fc.constant('error' as const),
+      fc.constant('info' as const)
+    ),
+    read: fc.boolean(),
+    persistent: fc.boolean(),
+  })
+  .filter(({ previousStatus, newStatus }) => previousStatus !== newStatus);
 
-const notificationArrayGenerator = fc.array(notificationGenerator, { minLength: 0, maxLength: 10 });
+const notificationArrayGenerator = fc.array(notificationGenerator, {
+  minLength: 0,
+  maxLength: 10,
+});
 
 // Test component wrapper for hooks
-function TestNotificationHook({ 
-  onNotificationAdded 
-}: { 
-  onNotificationAdded?: (id: string) => void 
+function TestNotificationHook({
+  onNotificationAdded,
+}: {
+  onNotificationAdded?: (id: string) => void;
 }) {
   const {
     notifications,
@@ -69,7 +76,7 @@ function TestNotificationHook({
     dismissNotification,
     markAsRead,
     clearAll,
-    getUnreadCount
+    getUnreadCount,
   } = useStatusNotifications();
 
   React.useEffect(() => {
@@ -82,7 +89,7 @@ function TestNotificationHook({
     <div data-testid="notification-hook">
       <div data-testid="notification-count">{notifications.length}</div>
       <div data-testid="unread-count">{getUnreadCount()}</div>
-      <button 
+      <button
         data-testid="add-notification"
         onClick={() => {
           // Generate unique order ID to avoid key conflicts
@@ -92,22 +99,22 @@ function TestNotificationHook({
       >
         Add Notification
       </button>
-      <button 
-        data-testid="clear-all"
-        onClick={clearAll}
-      >
+      <button data-testid="clear-all" onClick={clearAll}>
         Clear All
       </button>
       {notifications.map((notification) => (
-        <div key={notification.id} data-testid={`notification-${notification.id}`}>
+        <div
+          key={notification.id}
+          data-testid={`notification-${notification.id}`}
+        >
           <span data-testid="notification-message">{notification.message}</span>
-          <button 
+          <button
             data-testid={`dismiss-${notification.id}`}
             onClick={() => dismissNotification(notification.id)}
           >
             Dismiss
           </button>
-          <button 
+          <button
             data-testid={`mark-read-${notification.id}`}
             onClick={() => markAsRead(notification.id)}
           >
@@ -138,7 +145,7 @@ describe('Status Change Notifications Properties', () => {
    * For any status change, the system should immediately create and display
    * a notification with appropriate messaging and visual feedback
    */
-  
+
   it('should create immediate notifications for all status transitions', () => {
     fc.assert(
       fc.property(statusTransitionGenerator, (transition) => {
@@ -148,7 +155,7 @@ describe('Status Change Notifications Properties', () => {
           transition.previousStatus,
           transition.newStatus
         );
-        
+
         // Assert: Verify notification structure
         expect(notification.id).toBeTruthy();
         expect(notification.orderId).toBe(transition.orderId);
@@ -156,14 +163,19 @@ describe('Status Change Notifications Properties', () => {
         expect(notification.newStatus).toBe(transition.newStatus);
         expect(notification.timestamp).toBeInstanceOf(Date);
         expect(notification.message).toBeTruthy();
-        expect(['success', 'warning', 'error', 'info']).toContain(notification.type);
+        expect(['success', 'warning', 'error', 'info']).toContain(
+          notification.type
+        );
         expect(notification.read).toBe(false);
-        
+
         // Verify message contains order ID reference
         expect(notification.message).toContain(transition.orderId.slice(-8));
-        
+
         // Verify persistent flag for critical statuses
-        if (notification.type === 'error' || transition.newStatus === 'completed') {
+        if (
+          notification.type === 'error' ||
+          transition.newStatus === 'completed'
+        ) {
           expect(notification.persistent).toBe(true);
         }
       }),
@@ -180,15 +192,15 @@ describe('Status Change Notifications Properties', () => {
           transition.newStatus,
           transition.orderId
         );
-        
+
         // Assert: Verify message properties
         expect(message).toBeTruthy();
         expect(message.length).toBeGreaterThan(10);
         expect(['success', 'warning', 'error', 'info']).toContain(type);
-        
+
         // Verify message contains order reference
         expect(message).toContain(transition.orderId.slice(-8));
-        
+
         // Verify message type matches transition based on actual component mappings
         const transitionKey = `${transition.previousStatus}->${transition.newStatus}`;
         const knownTransitions = {
@@ -197,10 +209,12 @@ describe('Status Change Notifications Properties', () => {
           'processing->completed': 'success',
           'processing->failed': 'error',
           'pending_payment->failed': 'error',
-          'paid->failed': 'error'
+          'paid->failed': 'error',
         };
-        
-        const expectedType = knownTransitions[transitionKey as keyof typeof knownTransitions] || 'info';
+
+        const expectedType =
+          knownTransitions[transitionKey as keyof typeof knownTransitions] ||
+          'info';
         expect(type).toBe(expectedType);
       }),
       { numRuns: 100 }
@@ -213,38 +227,42 @@ describe('Status Change Notifications Properties', () => {
         // Arrange & Act: Render individual notification in isolated container
         const { container, unmount } = render(
           <div data-testid="notification-container">
-            <StatusNotification 
+            <StatusNotification
               notification={notification}
               onDismiss={jest.fn()}
               onMarkAsRead={jest.fn()}
             />
           </div>
         );
-        
+
         try {
           // Assert: Verify immediate visual feedback
           const alertElement = container.querySelector('[role="alert"]');
           expect(alertElement).toBeTruthy();
           expect(alertElement?.getAttribute('aria-live')).toBe('polite');
           expect(alertElement?.getAttribute('aria-atomic')).toBe('true');
-          
+
           // Verify notification content using container queries to avoid conflicts
           const statusText = container.querySelector('.text-sm.font-medium');
           expect(statusText?.textContent).toBe('Status Atualizado');
-          
+
           const messageText = container.querySelector('.text-sm.mt-1');
           expect(messageText?.textContent).toBe(notification.message);
-          
+
           // Verify status transition display
           const statusBadge = container.querySelector('.text-xs');
-          expect(statusBadge?.textContent?.trim()).toContain(`${notification.previousStatus} → ${notification.newStatus}`);
-          
+          expect(statusBadge?.textContent?.trim()).toContain(
+            `${notification.previousStatus} → ${notification.newStatus}`
+          );
+
           // Verify timestamp display
           const timestamp = notification.timestamp.toLocaleTimeString();
           expect(container.textContent).toContain(timestamp);
-          
+
           // Verify dismiss button
-          const dismissButton = container.querySelector('[aria-label="Dispensar notificação"]');
+          const dismissButton = container.querySelector(
+            '[aria-label="Dispensar notificação"]'
+          );
           expect(dismissButton).toBeTruthy();
         } finally {
           // Clean up this test's render
@@ -262,7 +280,7 @@ describe('Status Change Notifications Properties', () => {
         const mockDismiss = jest.fn();
         const mockMarkAsRead = jest.fn();
         const mockClearAll = jest.fn();
-        
+
         const { container, unmount } = render(
           <div data-testid="manager-container">
             <StatusNotificationManager
@@ -274,35 +292,38 @@ describe('Status Change Notifications Properties', () => {
             />
           </div>
         );
-        
+
         try {
           if (notifications.length === 0) {
             // Should not render anything for empty notifications
-            const managerContent = container.querySelector('[data-testid="manager-container"]');
+            const managerContent = container.querySelector(
+              '[data-testid="manager-container"]'
+            );
             expect(managerContent?.children.length).toBe(0);
             return;
           }
-          
+
           // Assert: Verify manager structure using container queries
           const headerText = container.querySelector('h3.text-sm.font-medium');
           expect(headerText?.textContent).toBe('Notificações de Status');
-          
+
           // Verify unread count display
-          const unreadCount = notifications.filter(n => !n.read).length;
+          const unreadCount = notifications.filter((n) => !n.read).length;
           if (unreadCount > 0) {
             const badgeElement = container.querySelector('.text-xs');
             expect(badgeElement?.textContent).toBe(unreadCount.toString());
           }
-          
+
           // Verify clear all button
           const clearButton = container.querySelector('button');
           expect(clearButton?.textContent?.trim()).toBe('Limpar Todas');
-          
+
           // Verify visible notifications (max 5)
           const visibleCount = Math.min(notifications.length, 5);
-          const notificationElements = container.querySelectorAll('[role="alert"]');
+          const notificationElements =
+            container.querySelectorAll('[role="alert"]');
           expect(notificationElements.length).toBe(visibleCount);
-          
+
           // Verify overflow indicator
           if (notifications.length > 5) {
             const overflowText = `+${notifications.length - 5} notificações adicionais`;
@@ -322,9 +343,9 @@ describe('Status Change Notifications Properties', () => {
       fc.property(statusTransitionGenerator, (transition) => {
         // Arrange: Mock timers for auto-dismiss testing
         jest.useFakeTimers();
-        
+
         const mockDismiss = jest.fn();
-        
+
         // Act: Render immediate notification in isolated container
         const { container, unmount } = render(
           <div data-testid="immediate-container">
@@ -337,40 +358,42 @@ describe('Status Change Notifications Properties', () => {
             />
           </div>
         );
-        
+
         try {
           // Assert: Verify immediate display
           const alertElement = container.querySelector('[role="alert"]');
           expect(alertElement).toBeTruthy();
           expect(alertElement?.getAttribute('aria-live')).toBe('assertive');
           expect(alertElement?.getAttribute('aria-atomic')).toBe('true');
-          
+
           // Verify positioning for immediate attention
           expect(alertElement?.className).toContain('fixed');
           expect(alertElement?.className).toContain('top-4');
           expect(alertElement?.className).toContain('right-4');
           expect(alertElement?.className).toContain('z-50');
-          
+
           // Verify content using container queries
           const statusText = container.querySelector('.text-sm.font-medium');
           expect(statusText?.textContent).toBe('Status Atualizado');
-          
+
           // Verify close button
-          const closeButton = container.querySelector('[aria-label="Fechar notificação"]');
+          const closeButton = container.querySelector(
+            '[aria-label="Fechar notificação"]'
+          );
           expect(closeButton).toBeTruthy();
-          
+
           // Test auto-dismiss - advance timers to trigger state change
           act(() => {
             jest.advanceTimersByTime(1000);
           });
-          
+
           // After duration, the component should start dismiss process
           // The component uses internal state to control visibility
           // We can verify the dismiss callback will be called after animation
           act(() => {
             jest.advanceTimersByTime(300); // Animation duration
           });
-          
+
           // The component should have triggered onDismiss
           expect(mockDismiss).toHaveBeenCalled();
         } finally {
@@ -390,25 +413,27 @@ describe('Status Change Notifications Properties', () => {
         const user = userEvent.setup();
         const mockDismiss = jest.fn();
         const mockMarkAsRead = jest.fn();
-        
+
         // Act: Render notification with interactions in isolated container
         const { container, unmount } = render(
           <div data-testid="interaction-container">
-            <StatusNotification 
+            <StatusNotification
               notification={notification}
               onDismiss={mockDismiss}
               onMarkAsRead={mockMarkAsRead}
             />
           </div>
         );
-        
+
         try {
           // Assert: Test dismiss interaction
-          const dismissButton = container.querySelector('[aria-label="Dispensar notificação"]');
+          const dismissButton = container.querySelector(
+            '[aria-label="Dispensar notificação"]'
+          );
           expect(dismissButton).toBeTruthy();
-          
+
           await user.click(dismissButton!);
-          
+
           // Should call dismiss immediately
           expect(mockDismiss).toHaveBeenCalledWith(notification.id);
         } finally {
@@ -425,37 +450,47 @@ describe('Status Change Notifications Properties', () => {
       fc.property(fc.integer({ min: 1, max: 5 }), (addCount) => {
         // Arrange: Setup hook test component in isolated container
         let notificationId: string | undefined;
-        
+
         const { getByTestId, unmount } = render(
           <div data-testid="hook-container">
-            <TestNotificationHook 
-              onNotificationAdded={(id) => { notificationId = id; }}
+            <TestNotificationHook
+              onNotificationAdded={(id) => {
+                notificationId = id;
+              }}
             />
           </div>
         );
-        
+
         try {
           // Act: Add notifications
           for (let i = 0; i < addCount; i++) {
             act(() => {
               // Use container-specific queries to avoid conflicts
               const container = getByTestId('hook-container');
-              const addButton = container.querySelector('[data-testid="add-notification"]') as HTMLButtonElement;
+              const addButton = container.querySelector(
+                '[data-testid="add-notification"]'
+              ) as HTMLButtonElement;
               addButton.click();
             });
           }
-          
+
           // Assert: Verify immediate state updates
-          expect(getByTestId('notification-count').textContent).toBe(addCount.toString());
-          expect(getByTestId('unread-count').textContent).toBe(addCount.toString());
-          
+          expect(getByTestId('notification-count').textContent).toBe(
+            addCount.toString()
+          );
+          expect(getByTestId('unread-count').textContent).toBe(
+            addCount.toString()
+          );
+
           // Test clear all
           act(() => {
             const container = getByTestId('hook-container');
-            const clearButton = container.querySelector('[data-testid="clear-all"]') as HTMLButtonElement;
+            const clearButton = container.querySelector(
+              '[data-testid="clear-all"]'
+            ) as HTMLButtonElement;
             clearButton.click();
           });
-          
+
           expect(getByTestId('notification-count').textContent).toBe('0');
           expect(getByTestId('unread-count').textContent).toBe('0');
         } finally {
@@ -473,19 +508,19 @@ describe('Status Change Notifications Properties', () => {
         // Arrange & Act: Render notification in isolated container
         const { container, unmount } = render(
           <div data-testid="styling-container">
-            <StatusNotification 
+            <StatusNotification
               notification={notification}
               onDismiss={jest.fn()}
               onMarkAsRead={jest.fn()}
             />
           </div>
         );
-        
+
         try {
           // Assert: Verify consistent styling based on type
           const alertElement = container.querySelector('[role="alert"]');
           expect(alertElement).toBeTruthy();
-          
+
           // Verify type-specific styling
           switch (notification.type) {
             case 'success':
@@ -509,7 +544,7 @@ describe('Status Change Notifications Properties', () => {
               expect(alertElement?.className).toContain('text-blue-800');
               break;
           }
-          
+
           // Verify unread notification highlighting
           if (!notification.read) {
             expect(alertElement?.className).toContain('ring-2');

@@ -6,6 +6,7 @@
 
 import { render, screen } from '@testing-library/react';
 import * as fc from 'fast-check';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UploadArea } from '@/components/upload/UploadArea';
 import { OrderStatusCard } from '@/components/order/OrderStatusCard';
 import { OrderHistoryTable } from '@/components/order/OrderHistoryTable';
@@ -35,6 +36,26 @@ jest.mock('@/hooks/useFileUpload', () => ({
     reset: jest.fn(),
   }),
 }));
+
+// Helper function to render components with QueryClient provider
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>
+  );
+};
 
 // Helper function to check if element has proper focus indicators
 const hasFocusIndicators = (element: HTMLElement): boolean => {
@@ -182,15 +203,15 @@ describe('Accessibility Features Property Tests', () => {
   test('OrderStatusCard component has proper accessibility attributes', () => {
     const mockOrder: Order = {
       id: 'test-order-12345678',
-      userId: 'user-123',
+      user_id: 'user-123',
       filename: 'test-document.pdf',
-      originalFileSize: 1024 * 1024,
+      file_size: 1024 * 1024,
       status: 'completed',
-      createdAt: new Date('2023-01-01'),
-      updatedAt: new Date('2023-01-01'),
+      created_at: '2023-01-01T00:00:00.000Z',
+      updated_at: '2023-01-01T00:00:00.000Z',
     };
 
-    const { container } = render(
+    const { container } = renderWithQueryClient(
       <OrderStatusCard
         order={mockOrder}
         onPaymentClick={jest.fn()}
@@ -213,21 +234,21 @@ describe('Accessibility Features Property Tests', () => {
     const mockOrders: Order[] = [
       {
         id: 'order-1',
-        userId: 'user-1',
+        user_id: 'user-1',
         filename: 'document1.pdf',
-        originalFileSize: 1024 * 1024,
+        file_size: 1024 * 1024,
         status: 'completed',
-        createdAt: new Date('2023-01-01'),
-        updatedAt: new Date('2023-01-01'),
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
       },
       {
         id: 'order-2',
-        userId: 'user-1',
+        user_id: 'user-1',
         filename: 'document2.pdf',
-        originalFileSize: 2 * 1024 * 1024,
+        file_size: 2 * 1024 * 1024,
         status: 'processing',
-        createdAt: new Date('2023-01-02'),
-        updatedAt: new Date('2023-01-02'),
+        created_at: '2023-01-02T00:00:00.000Z',
+        updated_at: '2023-01-02T00:00:00.000Z',
       },
     ];
 

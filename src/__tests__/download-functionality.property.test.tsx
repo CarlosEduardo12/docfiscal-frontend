@@ -1,6 +1,7 @@
 /**
- * **Feature: docfiscal-frontend, Property 7: Download functionality works for completed orders**
- * **Validates: Requirements 3.3**
+ * Property-based tests for download functionality
+ * **Feature: api-endpoints-update, Property 35-38: Download functionality properties**
+ * **Validates: Requirements 10.1, 10.2, 10.3, 10.4**
  */
 
 import * as fc from 'fast-check';
@@ -24,77 +25,80 @@ describe('Download Functionality Property Tests', () => {
     cleanup();
   });
 
-  // Generator for completed orders
+  // Generator for completed orders using new API format
   const completedOrderArb = fc.integer({ min: 0 }).chain((index) =>
     fc.record({
       id: fc.constant(`download-order-${index}-${Date.now()}`),
-      userId: fc.constant('download-user-123'),
+      user_id: fc.constant('download-user-123'),
       filename: fc
         .string({ minLength: 1, maxLength: 50 })
         .map((name) => name.trim() || 'document')
         .map((name) => `${name}.pdf`),
-      originalFileSize: fc.integer({ min: 1, max: 10000000 }),
+      file_size: fc.integer({ min: 1, max: 10000000 }),
       status: fc.constant('completed' as OrderStatus),
-      paymentId: fc.option(fc.constant(`payment-${index}`)),
-      paymentUrl: fc.option(fc.webUrl()),
-      downloadUrl: fc.option(fc.webUrl()),
-      errorMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
-      createdAt: fc.date({
+      created_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      updatedAt: fc.date({
+      }).map(d => d.toISOString()),
+      updated_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      completedAt: fc.option(
+      }).map(d => d.toISOString()),
+      processing_completed_at: fc.option(
         fc.date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        })
+        }).map(d => d.toISOString())
+      ),
+      download_url: fc.option(fc.webUrl()),
+      error_message: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
+      expires_at: fc.option(
+        fc.date({
+          min: new Date('2024-01-01T00:00:00.000Z'),
+          max: new Date('2025-12-31T23:59:59.999Z'),
+        }).map(d => d.toISOString())
       ),
     })
   ) as fc.Arbitrary<Order>;
 
-  // Generator for non-completed orders
+  // Generator for non-completed orders using new API format
   const nonCompletedOrderArb = fc.integer({ min: 0 }).chain((index) =>
     fc.record({
       id: fc.constant(`non-download-order-${index}-${Date.now()}`),
-      userId: fc.constant('download-user-123'),
+      user_id: fc.constant('download-user-123'),
       filename: fc
         .string({ minLength: 1, maxLength: 50 })
         .map((name) => name.trim() || 'document')
         .map((name) => `${name}.pdf`),
-      originalFileSize: fc.integer({ min: 1, max: 10000000 }),
+      file_size: fc.integer({ min: 1, max: 10000000 }),
       status: fc.constantFrom(
         'pending_payment',
         'paid',
         'processing',
         'failed'
       ) as fc.Arbitrary<OrderStatus>,
-      paymentId: fc.option(fc.constant(`payment-${index}`)),
-      paymentUrl: fc.option(fc.webUrl()),
-      downloadUrl: fc.option(fc.webUrl()),
-      errorMessage: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
-      createdAt: fc.date({
+      created_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      updatedAt: fc.date({
+      }).map(d => d.toISOString()),
+      updated_at: fc.date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2024-12-31T23:59:59.999Z'),
-      }),
-      completedAt: fc.option(
+      }).map(d => d.toISOString()),
+      processing_completed_at: fc.option(
         fc.date({
           min: new Date('2020-01-01T00:00:00.000Z'),
           max: new Date('2024-12-31T23:59:59.999Z'),
-        })
+        }).map(d => d.toISOString())
       ),
+      checkout_url: fc.option(fc.webUrl()),
+      download_url: fc.option(fc.webUrl()),
+      error_message: fc.option(fc.string({ minLength: 1, maxLength: 100 })),
     })
   ) as fc.Arbitrary<Order>;
 
-  describe('Property 7: Download functionality works for completed orders', () => {
-    it('should provide download buttons only for completed orders', async () => {
+  describe('Property 35-38: Download functionality properties', () => {
+    it('Property 35: Download link expiration handling - should provide download buttons only for completed orders', async () => {
       await fc.assert(
         fc.property(
           fc.record({
@@ -158,7 +162,7 @@ describe('Download Functionality Property Tests', () => {
       );
     });
 
-    it('should call onDownload with correct order ID when download button is clicked', async () => {
+    it('Property 36: Download header processing - should call onDownload with correct order ID when download button is clicked', async () => {
       await fc.assert(
         fc.property(
           fc.array(completedOrderArb, { minLength: 1, maxLength: 2 }),
@@ -205,7 +209,7 @@ describe('Download Functionality Property Tests', () => {
       );
     });
 
-    it('should not provide download functionality for non-completed orders', async () => {
+    it('Property 37: Download error messaging - should not provide download functionality for non-completed orders', async () => {
       await fc.assert(
         fc.property(
           fc.array(nonCompletedOrderArb, { minLength: 1, maxLength: 3 }),
@@ -251,7 +255,7 @@ describe('Download Functionality Property Tests', () => {
       );
     });
 
-    it('should handle mixed order statuses correctly', async () => {
+    it('Property 38: Download retry options - should handle mixed order statuses correctly', async () => {
       await fc.assert(
         fc.property(
           fc.record({
@@ -259,26 +263,24 @@ describe('Download Functionality Property Tests', () => {
             nonCompletedCount: fc.integer({ min: 1, max: 2 }),
           }),
           ({ completedCount, nonCompletedCount }) => {
-            // Create completed orders
+            // Create completed orders using new API format
             const completedOrders = Array.from(
               { length: completedCount },
               (_, index) => ({
                 id: `mixed-completed-${index}-${Date.now()}`,
-                userId: 'mixed-user-123',
+                user_id: 'mixed-user-123',
                 filename: `completed-file-${index}.pdf`,
-                originalFileSize: 1024 * (index + 1),
+                file_size: 1024 * (index + 1),
                 status: 'completed' as OrderStatus,
-                paymentId: null,
-                paymentUrl: null,
-                downloadUrl: null,
-                errorMessage: null,
-                createdAt: new Date('2024-01-01T00:00:00.000Z'),
-                updatedAt: new Date('2024-01-01T00:00:00.000Z'),
-                completedAt: new Date('2024-01-01T00:00:00.000Z'),
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                processing_completed_at: '2024-01-01T00:00:00.000Z',
+                download_url: `https://api.docfiscal.com/orders/mixed-completed-${index}/download`,
+                error_message: undefined,
               })
             );
 
-            // Create non-completed orders
+            // Create non-completed orders using new API format
             const nonCompletedStatuses: OrderStatus[] = [
               'pending_payment',
               'paid',
@@ -289,18 +291,17 @@ describe('Download Functionality Property Tests', () => {
               { length: nonCompletedCount },
               (_, index) => ({
                 id: `mixed-non-completed-${index}-${Date.now()}`,
-                userId: 'mixed-user-123',
+                user_id: 'mixed-user-123',
                 filename: `non-completed-file-${index}.pdf`,
-                originalFileSize: 1024 * (index + 1),
+                file_size: 1024 * (index + 1),
                 status:
                   nonCompletedStatuses[index % nonCompletedStatuses.length],
-                paymentId: null,
-                paymentUrl: null,
-                downloadUrl: null,
-                errorMessage: null,
-                createdAt: new Date('2024-01-01T00:00:00.000Z'),
-                updatedAt: new Date('2024-01-01T00:00:00.000Z'),
-                completedAt: null,
+                created_at: '2024-01-01T00:00:00.000Z',
+                updated_at: '2024-01-01T00:00:00.000Z',
+                processing_completed_at: undefined,
+                checkout_url: index % 2 === 0 ? `https://payment.provider.com/checkout/${index}` : undefined,
+                download_url: undefined,
+                error_message: index % 3 === 0 ? `Error processing file ${index}` : undefined,
               })
             );
 

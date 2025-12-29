@@ -8,11 +8,11 @@ import { describe, it, expect, afterEach } from '@jest/globals';
 import fc from 'fast-check';
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
-import { 
-  StatusIndicator, 
-  CompactStatusIndicator, 
+import {
+  StatusIndicator,
+  CompactStatusIndicator,
   StatusProgress,
-  getStatusConfig 
+  getStatusConfig,
 } from '@/components/ui/status-indicator';
 import type { OrderStatus } from '@/types';
 
@@ -34,7 +34,7 @@ const sizeGenerator = fc.oneof(
 const booleanOptionsGenerator = fc.record({
   showDescription: fc.boolean(),
   showIcon: fc.boolean(),
-  showBadge: fc.boolean()
+  showBadge: fc.boolean(),
 });
 
 describe('Status Indicator Consistency Properties', () => {
@@ -45,16 +45,16 @@ describe('Status Indicator Consistency Properties', () => {
 
   /**
    * Property 34: Order statuses use consistent visual indicators
-   * For any order status display, the system should use consistent visual indicators 
+   * For any order status display, the system should use consistent visual indicators
    * with clear labels and descriptions of what each status means
    */
-  
+
   it('should use consistent visual indicators for all order statuses', () => {
     fc.assert(
       fc.property(orderStatusGenerator, (status) => {
         // Arrange: Get status configuration
         const config = getStatusConfig(status);
-        
+
         // Act & Assert: Verify consistent configuration structure
         expect(config).toBeDefined();
         expect(config.icon).toBeDefined();
@@ -65,21 +65,23 @@ describe('Status Indicator Consistency Properties', () => {
         expect(config.borderColor).toBeDefined();
         expect(config.badgeVariant).toBeDefined();
         expect(config.iconColor).toBeDefined();
-        
+
         // Verify label is not empty
         expect(config.label.trim().length).toBeGreaterThan(0);
-        
+
         // Verify description is meaningful
         expect(config.description.trim().length).toBeGreaterThan(0);
-        
+
         // Verify color classes follow consistent pattern
         expect(config.color).toMatch(/^text-\w+-\d+$/);
         expect(config.bgColor).toMatch(/^bg-\w+-\d+$/);
         expect(config.borderColor).toMatch(/^border-\w+-\d+$/);
         expect(config.iconColor).toMatch(/^text-\w+-\d+$/);
-        
+
         // Verify badge variant is valid
-        expect(['default', 'secondary', 'destructive', 'outline']).toContain(config.badgeVariant);
+        expect(['default', 'secondary', 'destructive', 'outline']).toContain(
+          config.badgeVariant
+        );
       }),
       { numRuns: 100 }
     );
@@ -95,40 +97,42 @@ describe('Status Indicator Consistency Properties', () => {
           // Arrange & Act: Render status indicator with isolated container
           const { container, unmount } = render(
             <div data-testid={`status-test-${status}-${Date.now()}`}>
-              <StatusIndicator 
-                status={status} 
-                size={size}
-                {...options}
-              />
+              <StatusIndicator status={status} size={size} {...options} />
             </div>
           );
-          
+
           try {
             // Assert: Verify consistent structure
             const statusElement = container.querySelector('[role="status"]');
             expect(statusElement).toBeTruthy();
-            expect(statusElement?.getAttribute('aria-label')).toContain('Status:');
-            
+            expect(statusElement?.getAttribute('aria-label')).toContain(
+              'Status:'
+            );
+
             const config = getStatusConfig(status);
-            
+
             // Verify label is present within this specific container
-            const hasLabel = Array.from(container.querySelectorAll('*'))
-              .some(el => el.textContent?.includes(config.label));
+            const hasLabel = Array.from(container.querySelectorAll('*')).some(
+              (el) => el.textContent?.includes(config.label)
+            );
             expect(hasLabel).toBe(true);
-            
+
             // Verify icon presence based on showIcon option
             if (options.showIcon) {
-              const iconElement = container.querySelector('[aria-hidden="true"]');
+              const iconElement = container.querySelector(
+                '[aria-hidden="true"]'
+              );
               expect(iconElement).toBeTruthy();
             }
-            
+
             // Verify description presence based on showDescription option
             if (options.showDescription) {
-              const hasDescription = Array.from(container.querySelectorAll('*'))
-                .some(el => el.textContent?.includes(config.description));
+              const hasDescription = Array.from(
+                container.querySelectorAll('*')
+              ).some((el) => el.textContent?.includes(config.description));
               expect(hasDescription).toBe(true);
             }
-            
+
             // Verify badge presence based on showBadge option
             if (options.showBadge) {
               const badgeElement = container.querySelector('.inline-flex');
@@ -153,25 +157,28 @@ describe('Status Indicator Consistency Properties', () => {
             <CompactStatusIndicator status={status} />
           </div>
         );
-        
+
         try {
           // Assert: Verify consistent compact structure
           const statusElement = container.querySelector('[role="status"]');
           expect(statusElement).toBeTruthy();
-          expect(statusElement?.getAttribute('aria-label')).toContain('Status:');
-          
+          expect(statusElement?.getAttribute('aria-label')).toContain(
+            'Status:'
+          );
+
           // Verify icon is present
           const iconElement = container.querySelector('[aria-hidden="true"]');
           expect(iconElement).toBeTruthy();
-          
+
           // Verify badge is present
           const badgeElement = container.querySelector('.inline-flex');
           expect(badgeElement).toBeTruthy();
-          
+
           const config = getStatusConfig(status);
           // Use container-specific query to avoid conflicts
-          const labelInContainer = Array.from(container.querySelectorAll('*'))
-            .some(el => el.textContent?.includes(config.label));
+          const labelInContainer = Array.from(
+            container.querySelectorAll('*')
+          ).some((el) => el.textContent?.includes(config.label));
           expect(labelInContainer).toBe(true);
         } finally {
           unmount();
@@ -190,30 +197,38 @@ describe('Status Indicator Consistency Properties', () => {
             <StatusProgress currentStatus={currentStatus} />
           </div>
         );
-        
+
         try {
           // Assert: Verify progress structure
           expect(container.firstChild).toBeTruthy();
-          
+
           if (currentStatus === 'failed') {
             // Failed status should show error indicator
-            const errorText = Array.from(container.querySelectorAll('*'))
-              .some(el => el.textContent?.includes('Processamento Falhou') || 
-                         el.textContent?.includes('Erro') ||
-                         el.textContent?.includes('Falhou'));
+            const errorText = Array.from(container.querySelectorAll('*')).some(
+              (el) =>
+                el.textContent?.includes('Processamento Falhou') ||
+                el.textContent?.includes('Erro') ||
+                el.textContent?.includes('Falhou')
+            );
             expect(errorText).toBe(true);
           } else {
             // Normal statuses should show progress steps
-            const allStatuses = ['pending_payment', 'paid', 'processing', 'completed'];
-            
+            const allStatuses = [
+              'pending_payment',
+              'paid',
+              'processing',
+              'completed',
+            ];
+
             // Verify status labels are present in container
             allStatuses.forEach((status) => {
               const config = getStatusConfig(status as OrderStatus);
-              const labelInContainer = Array.from(container.querySelectorAll('*'))
-                .some(el => el.textContent?.includes(config.label));
+              const labelInContainer = Array.from(
+                container.querySelectorAll('*')
+              ).some((el) => el.textContent?.includes(config.label));
               expect(labelInContainer).toBe(true);
             });
-            
+
             // Verify icons are present
             const icons = container.querySelectorAll('[aria-hidden="true"]');
             expect(icons.length).toBeGreaterThanOrEqual(1);
@@ -231,30 +246,33 @@ describe('Status Indicator Consistency Properties', () => {
       fc.property(orderStatusGenerator, (status) => {
         // Arrange: Get status config
         const config = getStatusConfig(status);
-        
+
         // Act: Render different status components with isolated containers
-        const { container: standardContainer, unmount: unmountStandard } = render(
-          <div data-testid={`mapping-standard-${status}-${Date.now()}`}>
-            <StatusIndicator status={status} />
-          </div>
-        );
+        const { container: standardContainer, unmount: unmountStandard } =
+          render(
+            <div data-testid={`mapping-standard-${status}-${Date.now()}`}>
+              <StatusIndicator status={status} />
+            </div>
+          );
         const { container: compactContainer, unmount: unmountCompact } = render(
           <div data-testid={`mapping-compact-${status}-${Date.now()}`}>
             <CompactStatusIndicator status={status} />
           </div>
         );
-        
+
         try {
           // Assert: Verify consistent labeling across components
-          const standardHasLabel = Array.from(standardContainer.querySelectorAll('*'))
-            .some(el => el.textContent?.includes(config.label));
-          
-          const compactHasLabel = Array.from(compactContainer.querySelectorAll('*'))
-            .some(el => el.textContent?.includes(config.label));
-          
+          const standardHasLabel = Array.from(
+            standardContainer.querySelectorAll('*')
+          ).some((el) => el.textContent?.includes(config.label));
+
+          const compactHasLabel = Array.from(
+            compactContainer.querySelectorAll('*')
+          ).some((el) => el.textContent?.includes(config.label));
+
           expect(standardHasLabel).toBe(true);
           expect(compactHasLabel).toBe(true);
-          
+
           // Verify same status produces same configuration
           const config2 = getStatusConfig(status);
           expect(config).toEqual(config2);
@@ -276,12 +294,12 @@ describe('Status Indicator Consistency Properties', () => {
             <StatusIndicator status={status} />
           </div>
         );
-        
+
         try {
           // Assert: Verify animation behavior
           const config = getStatusConfig(status);
           const animatedElements = container.querySelectorAll('.animate-spin');
-          
+
           if (config.animated) {
             expect(animatedElements.length).toBeGreaterThan(0);
           } else {
@@ -301,14 +319,14 @@ describe('Status Indicator Consistency Properties', () => {
       fc.property(orderStatusGenerator, (status) => {
         // Arrange: Get status configuration
         const config = getStatusConfig(status);
-        
+
         // Act & Assert: Verify description quality
         expect(config.description).toBeDefined();
         expect(config.description.trim().length).toBeGreaterThan(5);
-        
+
         // Verify description contains meaningful information (more flexible check)
         const description = config.description.toLowerCase();
-        const hasMeaningfulContent = 
+        const hasMeaningfulContent =
           description.includes('clique') ||
           description.includes('aguarde') ||
           description.includes('pronto') ||
@@ -323,7 +341,7 @@ describe('Status Indicator Consistency Properties', () => {
           description.includes('convertido') ||
           description.includes('pago') ||
           description.includes('pendente');
-        
+
         expect(hasMeaningfulContent).toBe(true);
       }),
       { numRuns: 50 }

@@ -18,7 +18,11 @@ export interface BreadcrumbProps {
   showHome?: boolean;
 }
 
-export function Breadcrumb({ items, className, showHome = true }: BreadcrumbProps) {
+export function Breadcrumb({
+  items,
+  className,
+  showHome = true,
+}: BreadcrumbProps) {
   return (
     <nav
       className={cn('flex items-center space-x-1 text-sm', className)}
@@ -35,14 +39,17 @@ export function Breadcrumb({ items, className, showHome = true }: BreadcrumbProp
             <Home className="h-4 w-4" />
           </Link>
           {items.length > 0 && (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <ChevronRight
+              className="h-4 w-4 text-muted-foreground"
+              aria-hidden="true"
+            />
           )}
         </>
       )}
-      
+
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
-        
+
         return (
           <React.Fragment key={`${item.label}-${index}`}>
             {item.href && !item.active ? (
@@ -68,9 +75,12 @@ export function Breadcrumb({ items, className, showHome = true }: BreadcrumbProp
                 {item.label}
               </span>
             )}
-            
+
             {!isLast && (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <ChevronRight
+                className="h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
             )}
           </React.Fragment>
         );
@@ -86,35 +96,51 @@ export interface ProcessBreadcrumbProps {
   className?: string;
 }
 
-export function UploadProcessBreadcrumb({ currentStep, totalSteps = 4, className }: ProcessBreadcrumbProps) {
+export function UploadProcessBreadcrumb({
+  currentStep,
+  totalSteps = 4,
+  className,
+}: ProcessBreadcrumbProps) {
   const steps = [
-    { label: 'Upload File', completed: currentStep > 1, active: currentStep === 1 },
+    {
+      label: 'Upload File',
+      completed: currentStep > 1,
+      active: currentStep === 1,
+    },
     { label: 'Payment', completed: currentStep > 2, active: currentStep === 2 },
-    { label: 'Processing', completed: currentStep > 3, active: currentStep === 3 },
-    { label: 'Download', completed: currentStep > 4, active: currentStep === 4 }
+    {
+      label: 'Processing',
+      completed: currentStep > 3,
+      active: currentStep === 3,
+    },
+    {
+      label: 'Download',
+      completed: currentStep > 4,
+      active: currentStep === 4,
+    },
   ];
 
-  return (
-    <Breadcrumb
-      items={steps}
-      className={className}
-      showHome={false}
-    />
-  );
+  return <Breadcrumb items={steps} className={className} showHome={false} />;
 }
 
-export function PaymentProcessBreadcrumb({ currentStep, totalSteps = 3, className }: ProcessBreadcrumbProps) {
+export function PaymentProcessBreadcrumb({
+  currentStep,
+  totalSteps = 3,
+  className,
+}: ProcessBreadcrumbProps) {
   const steps = [
-    { label: 'Order Review', completed: currentStep > 1, active: currentStep === 1 },
+    {
+      label: 'Order Review',
+      completed: currentStep > 1,
+      active: currentStep === 1,
+    },
     { label: 'Payment', completed: currentStep > 2, active: currentStep === 2 },
-    { label: 'Confirmation', completed: currentStep > 3, active: currentStep === 3 }
+    {
+      label: 'Confirmation',
+      completed: currentStep > 3,
+      active: currentStep === 3,
+    },
   ];
 
-  return (
-    <Breadcrumb
-      items={steps}
-      className={className}
-      showHome={false}
-    />
-  );
+  return <Breadcrumb items={steps} className={className} showHome={false} />;
 }

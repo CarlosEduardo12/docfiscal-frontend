@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OrderStatusCard } from '@/components/order/OrderStatusCard';
 import type { Order } from '@/types';
 
@@ -21,14 +22,37 @@ Object.defineProperty(window, 'open', {
 // Mock order data for testing
 const createMockOrder = (overrides: Partial<Order> = {}): Order => ({
   id: 'order-123',
-  userId: 'user-456',
+  user_id: 'user-456',
   filename: 'test-document.pdf',
-  originalFileSize: 1024 * 1024, // 1MB
+  file_size: 1024 * 1024, // 1MB
   status: 'pending_payment',
+  created_at: '2024-01-01T10:00:00Z',
+  updated_at: '2024-01-01T10:00:00Z',
+  // Legacy fields for backward compatibility
+  originalFileSize: 1024 * 1024,
   createdAt: new Date('2024-01-01T10:00:00Z'),
-  updatedAt: new Date('2024-01-01T10:00:00Z'),
   ...overrides,
 });
+
+// Helper function to render components with QueryClient provider
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+      mutations: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {component}
+    </QueryClientProvider>
+  );
+};
 
 describe('OrderStatusCard Component', () => {
   const mockOnPaymentClick = jest.fn();
@@ -42,10 +66,10 @@ describe('OrderStatusCard Component', () => {
   it('renders pending payment status correctly', () => {
     const order = createMockOrder({
       status: 'pending_payment',
-      paymentUrl: 'https://mercadopago.com/payment/123',
+      checkout_url: 'https://mercadopago.com/payment/123',
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -66,7 +90,7 @@ describe('OrderStatusCard Component', () => {
   it('renders processing status with loading indicator', () => {
     const order = createMockOrder({ status: 'processing' });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -84,11 +108,11 @@ describe('OrderStatusCard Component', () => {
   it('renders completed status with download button', () => {
     const order = createMockOrder({
       status: 'completed',
-      downloadUrl: 'https://api.docfiscal.com/download/123',
-      completedAt: new Date('2024-01-01T10:05:00Z'),
+      download_url: 'https://api.docfiscal.com/download/123',
+      processing_completed_at: '2024-01-01T10:05:00Z',
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -108,10 +132,10 @@ describe('OrderStatusCard Component', () => {
   it('renders failed status with error message', () => {
     const order = createMockOrder({
       status: 'failed',
-      errorMessage: 'Unable to process the PDF file',
+      error_message: 'Unable to process the PDF file',
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -129,13 +153,13 @@ describe('OrderStatusCard Component', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls onPaymentClick when pay button is clicked and no paymentUrl', () => {
+  it('calls onPaymentClick when pay button is clicked and no checkout_url', () => {
     const order = createMockOrder({
       status: 'pending_payment',
-      paymentUrl: undefined, // No URL, so callback should be called
+      checkout_url: undefined, // No URL, so callback should be called
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -149,14 +173,14 @@ describe('OrderStatusCard Component', () => {
     expect(mockOnPaymentClick).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onDownloadClick when download button is clicked and no downloadUrl', () => {
+  it('calls onDownloadClick when download button is clicked and no download_url', () => {
     const order = createMockOrder({
       status: 'completed',
-      downloadUrl: undefined, // No URL, so callback should be called
-      completedAt: new Date('2024-01-01T10:05:00Z'),
+      download_url: undefined, // No URL, so callback should be called
+      processing_completed_at: '2024-01-01T10:05:00Z',
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -174,10 +198,10 @@ describe('OrderStatusCard Component', () => {
 
   it('displays order creation date', () => {
     const order = createMockOrder({
-      createdAt: new Date('2024-01-15T14:30:00Z'),
+      created_at: '2024-01-15T14:30:00Z',
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -191,10 +215,10 @@ describe('OrderStatusCard Component', () => {
 
   it('displays file size information', () => {
     const order = createMockOrder({
-      originalFileSize: 2.5 * 1024 * 1024, // 2.5MB
+      file_size: 2.5 * 1024 * 1024, // 2.5MB
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -208,7 +232,7 @@ describe('OrderStatusCard Component', () => {
   it('handles paid status correctly', () => {
     const order = createMockOrder({ status: 'paid' });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -223,7 +247,7 @@ describe('OrderStatusCard Component', () => {
   it('shows order ID for reference', () => {
     const order = createMockOrder({ id: 'ORD-12345' });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -237,10 +261,10 @@ describe('OrderStatusCard Component', () => {
   it('handles missing optional fields gracefully', () => {
     const order = createMockOrder({
       status: 'failed',
-      errorMessage: undefined, // Missing error message
+      error_message: undefined, // Missing error message
     });
 
-    render(
+    renderWithQueryClient(
       <OrderStatusCard
         order={order}
         onPaymentClick={mockOnPaymentClick}
@@ -250,6 +274,93 @@ describe('OrderStatusCard Component', () => {
 
     expect(screen.getByText('Failed')).toBeInTheDocument();
     expect(screen.getByText(/processing failed/i)).toBeInTheDocument();
-    // Should not crash when errorMessage is undefined
+    // Should not crash when error_message is undefined
+  });
+
+  it('handles new checkout_url format correctly', () => {
+    const order = createMockOrder({
+      status: 'pending_payment',
+      checkout_url: 'https://payment.provider.com/checkout/abc123',
+    });
+
+    renderWithQueryClient(
+      <OrderStatusCard
+        order={order}
+        onPaymentClick={mockOnPaymentClick}
+        onDownloadClick={mockOnDownloadClick}
+      />
+    );
+
+    const payButton = screen.getByRole('button', { name: /complete payment/i });
+    fireEvent.click(payButton);
+
+    // Should not call the callback since checkout_url is provided
+    expect(mockOnPaymentClick).not.toHaveBeenCalled();
+  });
+
+  it('handles new download_url format correctly', () => {
+    const order = createMockOrder({
+      status: 'completed',
+      download_url: 'https://api.docfiscal.com/orders/123/download',
+      processing_completed_at: '2024-01-01T10:05:00Z',
+    });
+
+    renderWithQueryClient(
+      <OrderStatusCard
+        order={order}
+        onPaymentClick={mockOnPaymentClick}
+        onDownloadClick={mockOnDownloadClick}
+      />
+    );
+
+    const downloadButton = screen.getByRole('button', {
+      name: /download csv/i,
+    });
+    fireEvent.click(downloadButton);
+
+    // Should not call the callback since download_url is provided
+    expect(mockOnDownloadClick).not.toHaveBeenCalled();
+  });
+
+  it('handles backward compatibility with legacy fields', () => {
+    const order = createMockOrder({
+      status: 'pending_payment',
+      paymentUrl: 'https://legacy.payment.com/pay/123', // Legacy field
+      checkout_url: undefined, // New field not present
+    });
+
+    renderWithQueryClient(
+      <OrderStatusCard
+        order={order}
+        onPaymentClick={mockOnPaymentClick}
+        onDownloadClick={mockOnDownloadClick}
+      />
+    );
+
+    const payButton = screen.getByRole('button', { name: /complete payment/i });
+    fireEvent.click(payButton);
+
+    // Should not call the callback since legacy paymentUrl is provided
+    expect(mockOnPaymentClick).not.toHaveBeenCalled();
+  });
+
+  it('handles string date format correctly', () => {
+    const order = createMockOrder({
+      created_at: '2024-02-20T15:45:30Z',
+      processing_completed_at: '2024-02-20T16:00:00Z',
+      status: 'completed',
+    });
+
+    renderWithQueryClient(
+      <OrderStatusCard
+        order={order}
+        onPaymentClick={mockOnPaymentClick}
+        onDownloadClick={mockOnDownloadClick}
+      />
+    );
+
+    // Should display both creation and completion dates
+    expect(screen.getByText(/february|feb/i)).toBeInTheDocument();
+    expect(screen.getByText(/completed:/i)).toBeInTheDocument();
   });
 });
