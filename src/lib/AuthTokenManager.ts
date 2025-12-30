@@ -33,11 +33,11 @@ export class AuthTokenManager {
    */
   storeTokens(tokens: AuthTokens): void {
     const startTime = Date.now();
-    
+
     try {
       if (typeof window === 'undefined') {
         console.warn('Cannot store tokens: window is undefined');
-        
+
         // Log token storage failure
         authLogger.logTokenOperation({
           operation: 'store',
@@ -46,14 +46,14 @@ export class AuthTokenManager {
           reason: 'window_undefined',
           duration: Date.now() - startTime,
         });
-        
+
         return;
       }
 
       // Validate token format before storing
       if (!this.isValidTokenFormat(tokens.accessToken)) {
         console.error('❌ Invalid access token format, cannot store');
-        
+
         // Log token storage failure
         authLogger.logTokenOperation({
           operation: 'store',
@@ -62,13 +62,13 @@ export class AuthTokenManager {
           reason: 'invalid_access_token_format',
           duration: Date.now() - startTime,
         });
-        
+
         return;
       }
 
       if (!this.isValidTokenFormat(tokens.refreshToken)) {
         console.error('❌ Invalid refresh token format, cannot store');
-        
+
         // Log token storage failure
         authLogger.logTokenOperation({
           operation: 'store',
@@ -77,13 +77,13 @@ export class AuthTokenManager {
           reason: 'invalid_refresh_token_format',
           duration: Date.now() - startTime,
         });
-        
+
         return;
       }
 
       if (!tokens.expiresAt || !(tokens.expiresAt instanceof Date)) {
         console.error('❌ Invalid expiration date, cannot store tokens');
-        
+
         // Log token storage failure
         authLogger.logTokenOperation({
           operation: 'store',
@@ -92,7 +92,7 @@ export class AuthTokenManager {
           reason: 'invalid_expiration_date',
           duration: Date.now() - startTime,
         });
-        
+
         return;
       }
 
@@ -140,7 +140,7 @@ export class AuthTokenManager {
         secureStorage: useSecureStorage,
         encrypted: useSecureStorage && secureStorage.isEncryptionEnabled(),
       });
-      
+
       // Log successful token storage
       authLogger.logTokenOperation({
         operation: 'store',
@@ -152,7 +152,7 @@ export class AuthTokenManager {
       });
     } catch (error) {
       console.error('❌ Failed to store tokens:', error);
-      
+
       // Log token storage failure
       authLogger.logTokenOperation({
         operation: 'store',
@@ -161,7 +161,7 @@ export class AuthTokenManager {
         reason: error instanceof Error ? error.message : 'storage_error',
         duration: Date.now() - startTime,
       });
-      
+
       // Gracefully handle storage errors - don't throw, just log
       // This ensures the application doesn't crash on localStorage quota exceeded
     }
@@ -173,7 +173,7 @@ export class AuthTokenManager {
    */
   getStoredTokens(): AuthTokens {
     const startTime = Date.now();
-    
+
     try {
       if (typeof window === 'undefined') {
         // Log token retrieval failure
@@ -184,7 +184,7 @@ export class AuthTokenManager {
           reason: 'window_undefined',
           duration: Date.now() - startTime,
         });
-        
+
         return {
           accessToken: null as any,
           refreshToken: null as any,
@@ -202,7 +202,9 @@ export class AuthTokenManager {
 
       if (useSecureStorage) {
         accessToken = secureStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
-        refreshToken = secureStorage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
+        refreshToken = secureStorage.getItem(
+          AuthTokenManager.REFRESH_TOKEN_KEY
+        );
         expiresAtStr = secureStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
       } else {
         accessToken = localStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
@@ -227,7 +229,7 @@ export class AuthTokenManager {
           reason: 'tokens_not_found_or_empty',
           duration: Date.now() - startTime,
         });
-        
+
         return {
           accessToken: null as any,
           refreshToken: null as any,
@@ -240,7 +242,7 @@ export class AuthTokenManager {
         refreshToken,
         expiresAt: new Date(expiresAtStr),
       };
-      
+
       // Log successful token retrieval
       authLogger.logTokenOperation({
         operation: 'retrieve',
@@ -254,7 +256,7 @@ export class AuthTokenManager {
       return tokens;
     } catch (error) {
       console.error('❌ Failed to retrieve tokens:', error);
-      
+
       // Log token retrieval failure
       authLogger.logTokenOperation({
         operation: 'retrieve',
@@ -263,7 +265,7 @@ export class AuthTokenManager {
         reason: error instanceof Error ? error.message : 'retrieval_error',
         duration: Date.now() - startTime,
       });
-      
+
       // Return null values on any error (including localStorage access errors)
       return {
         accessToken: null as any,
@@ -279,13 +281,16 @@ export class AuthTokenManager {
    */
   async getValidToken(): Promise<string | null> {
     const startTime = Date.now();
-    
+
     // First check for corrupted tokens
     const corruption = this.detectCorruptedTokens();
     if (corruption.hasCorrupted) {
-      console.log('❌ Detected corrupted tokens, cleaning up:', corruption.details);
+      console.log(
+        '❌ Detected corrupted tokens, cleaning up:',
+        corruption.details
+      );
       this.cleanupInvalidTokens('corrupted_tokens_detected');
-      
+
       // Log token validation failure due to corruption
       authLogger.logTokenValidation(
         'access',
@@ -293,7 +298,7 @@ export class AuthTokenManager {
         undefined,
         Date.now() - startTime
       );
-      
+
       return null;
     }
 
@@ -301,7 +306,7 @@ export class AuthTokenManager {
 
     if (!tokens.accessToken) {
       console.log('ℹ️ No access token found in storage');
-      
+
       // Log token validation failure (no token)
       authLogger.logTokenValidation(
         'access',
@@ -309,20 +314,20 @@ export class AuthTokenManager {
         undefined,
         Date.now() - startTime
       );
-      
+
       return null;
     }
 
     // Check if token is expired or about to expire
     const isExpired = this.isTokenExpired(tokens.accessToken);
     const shouldRefresh = this.shouldRefreshToken(tokens.expiresAt);
-    
+
     console.log('🔍 Token validation:', {
       hasAccessToken: !!tokens.accessToken,
       hasRefreshToken: !!tokens.refreshToken,
       isExpired,
       shouldRefresh,
-      expiresAt: tokens.expiresAt?.toISOString()
+      expiresAt: tokens.expiresAt?.toISOString(),
     });
 
     if (isExpired || shouldRefresh) {
@@ -334,7 +339,9 @@ export class AuthTokenManager {
         isExpired ? 'expired' : 'valid',
         {
           expiresAt: tokens.expiresAt?.toISOString(),
-          timeUntilExpiry: tokens.expiresAt ? tokens.expiresAt.getTime() - Date.now() : undefined,
+          timeUntilExpiry: tokens.expiresAt
+            ? tokens.expiresAt.getTime() - Date.now()
+            : undefined,
           shouldRefresh,
         },
         Date.now() - startTime
@@ -359,19 +366,21 @@ export class AuthTokenManager {
     }
 
     console.log('✅ Using existing valid token');
-    
+
     // Log successful token validation
     authLogger.logTokenValidation(
       'access',
       'valid',
       {
         expiresAt: tokens.expiresAt?.toISOString(),
-        timeUntilExpiry: tokens.expiresAt ? tokens.expiresAt.getTime() - Date.now() : undefined,
+        timeUntilExpiry: tokens.expiresAt
+          ? tokens.expiresAt.getTime() - Date.now()
+          : undefined,
         shouldRefresh: false,
       },
       Date.now() - startTime
     );
-    
+
     return tokens.accessToken;
   }
 
@@ -382,13 +391,13 @@ export class AuthTokenManager {
   async refreshToken(): Promise<TokenRefreshResult> {
     const startTime = Date.now();
     let response: Response | undefined;
-    
+
     try {
       const tokens = this.getStoredTokens();
 
       if (!tokens.refreshToken) {
         console.log('❌ No refresh token available for refresh');
-        
+
         // Log token refresh failure
         authLogger.logTokenRefresh(
           'failure',
@@ -397,7 +406,7 @@ export class AuthTokenManager {
           undefined,
           Date.now() - startTime
         );
-        
+
         return {
           success: false,
           error: 'no_refresh_token',
@@ -408,7 +417,7 @@ export class AuthTokenManager {
       if (!this.isValidTokenFormat(tokens.refreshToken)) {
         console.log('❌ Invalid refresh token format');
         this.cleanupInvalidTokens('invalid_refresh_token_format');
-        
+
         // Log token refresh failure
         authLogger.logTokenRefresh(
           'failure',
@@ -417,7 +426,7 @@ export class AuthTokenManager {
           undefined,
           Date.now() - startTime
         );
-        
+
         return {
           success: false,
           error: 'invalid_refresh_token_format',
@@ -429,7 +438,7 @@ export class AuthTokenManager {
       // Use environment-aware API URL
       const envConfig = environmentConfig.getConfig();
       const API_BASE_URL = envConfig.apiUrl;
-      
+
       response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
@@ -443,11 +452,11 @@ export class AuthTokenManager {
       if (!response.ok) {
         const errorText = await response.text();
         console.log('❌ Token refresh HTTP error:', response.status, errorText);
-        
+
         // Handle specific HTTP status codes
         if (response.status === 401) {
           this.cleanupInvalidTokens('refresh_token_expired');
-          
+
           // Log token refresh failure
           authLogger.logTokenRefresh(
             'failure',
@@ -456,14 +465,14 @@ export class AuthTokenManager {
             undefined,
             Date.now() - startTime
           );
-          
+
           return {
             success: false,
             error: 'refresh_token_expired',
           };
         } else if (response.status === 403) {
           this.cleanupInvalidTokens('refresh_token_invalid');
-          
+
           // Log token refresh failure
           authLogger.logTokenRefresh(
             'failure',
@@ -472,7 +481,7 @@ export class AuthTokenManager {
             undefined,
             Date.now() - startTime
           );
-          
+
           return {
             success: false,
             error: 'refresh_token_invalid',
@@ -486,17 +495,19 @@ export class AuthTokenManager {
             undefined,
             Date.now() - startTime
           );
-          
+
           return {
             success: false,
             error: 'server_error',
           };
         }
-        
-        const httpError = new Error(`Token refresh failed: ${response.status} ${errorText}`);
+
+        const httpError = new Error(
+          `Token refresh failed: ${response.status} ${errorText}`
+        );
         const appError = ErrorHandler.classifyError(httpError, response);
         ErrorHandler.logError(appError, 'TOKEN_REFRESH');
-        
+
         // Log token refresh failure
         authLogger.logTokenRefresh(
           'failure',
@@ -505,7 +516,7 @@ export class AuthTokenManager {
           httpError,
           Date.now() - startTime
         );
-        
+
         return {
           success: false,
           error: appError.code,
@@ -541,7 +552,7 @@ export class AuthTokenManager {
         this.storeTokens(newTokens);
 
         console.log('✅ Token refresh successful');
-        
+
         // Log successful token refresh
         authLogger.logTokenRefresh(
           'success',
@@ -550,7 +561,7 @@ export class AuthTokenManager {
           undefined,
           Date.now() - startTime
         );
-        
+
         return {
           success: true,
           tokens: newTokens,
@@ -558,12 +569,12 @@ export class AuthTokenManager {
       } else {
         const errorMsg = data.error || 'Token refresh failed';
         console.log('❌ Token refresh failed:', errorMsg);
-        
+
         // Clear tokens if the server says they're invalid
         if (errorMsg.includes('invalid') || errorMsg.includes('expired')) {
           this.cleanupInvalidTokens(`server_reported: ${errorMsg}`);
         }
-        
+
         // Log token refresh failure
         authLogger.logTokenRefresh(
           'failure',
@@ -572,7 +583,7 @@ export class AuthTokenManager {
           undefined,
           Date.now() - startTime
         );
-        
+
         return {
           success: false,
           error: errorMsg,
@@ -580,11 +591,11 @@ export class AuthTokenManager {
       }
     } catch (error) {
       console.error('❌ Token refresh error:', error);
-      
+
       // Classify the error using our error handler
       const appError = ErrorHandler.classifyError(error, response);
       ErrorHandler.logError(appError, 'TOKEN_REFRESH');
-      
+
       // Log token refresh failure
       authLogger.logTokenRefresh(
         'failure',
@@ -593,7 +604,7 @@ export class AuthTokenManager {
         error instanceof Error ? error : new Error('Token refresh error'),
         Date.now() - startTime
       );
-      
+
       return {
         success: false,
         error: appError.code,
@@ -621,11 +632,11 @@ export class AuthTokenManager {
       }
 
       const isExpired = tokens.expiresAt.getTime() <= Date.now();
-      
+
       if (isExpired) {
         console.log('⏰ Token has expired:', {
           expiresAt: tokens.expiresAt.toISOString(),
-          now: new Date().toISOString()
+          now: new Date().toISOString(),
         });
       }
 
@@ -646,16 +657,22 @@ export class AuthTokenManager {
 
     // Basic JWT format check (3 parts separated by dots)
     const parts = token.split('.');
-    if (parts.length !== 3 || !parts.every(part => part.length > 0)) {
+    if (parts.length !== 3 || !parts.every((part) => part.length > 0)) {
       return false;
     }
 
     // Check for obviously malformed tokens (like repeated characters)
     const [header, payload, signature] = parts;
-    
+
     // Reject tokens that are clearly test/mock data (repeated characters)
-    if (this.isRepeatedPattern(header) || this.isRepeatedPattern(payload) || this.isRepeatedPattern(signature)) {
-      console.log('❌ Token appears to be test/mock data with repeated patterns');
+    if (
+      this.isRepeatedPattern(header) ||
+      this.isRepeatedPattern(payload) ||
+      this.isRepeatedPattern(signature)
+    ) {
+      console.log(
+        '❌ Token appears to be test/mock data with repeated patterns'
+      );
       return false;
     }
 
@@ -670,7 +687,7 @@ export class AuthTokenManager {
       // Add padding if needed for base64 decoding
       const headerDecoded = this.safeBase64Decode(header);
       const payloadDecoded = this.safeBase64Decode(payload);
-      
+
       if (!headerDecoded || !payloadDecoded) {
         console.log('❌ Failed to decode JWT base64 parts');
         return false;
@@ -678,25 +695,25 @@ export class AuthTokenManager {
 
       const headerObj = JSON.parse(headerDecoded);
       const payloadObj = JSON.parse(payloadDecoded);
-      
+
       // Check for required JWT fields
       if (!headerObj.typ || !headerObj.alg) {
         console.log('❌ Invalid JWT header structure');
         return false;
       }
-      
+
       if (!payloadObj.exp || !payloadObj.iat) {
         console.log('❌ Invalid JWT payload structure - missing exp or iat');
         return false;
       }
-      
+
       // Check if token is structurally expired (basic check)
       const now = Math.floor(Date.now() / 1000);
       if (payloadObj.exp < now) {
         console.log('❌ Token is structurally expired');
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.log('❌ Failed to decode JWT structure:', error);
@@ -709,26 +726,30 @@ export class AuthTokenManager {
    */
   private isRepeatedPattern(str: string): boolean {
     if (str.length < 4) return false;
-    
+
     // Check if string is mostly the same character repeated
     const firstChar = str[0];
-    const sameCharCount = str.split('').filter(c => c === firstChar).length;
+    const sameCharCount = str.split('').filter((c) => c === firstChar).length;
     const threshold = Math.floor(str.length * 0.8); // 80% same character
-    
+
     if (sameCharCount >= threshold) {
       return true;
     }
-    
+
     // Check for simple repeated patterns like "abcabc" or "aaabaaab"
-    for (let patternLength = 1; patternLength <= Math.floor(str.length / 3); patternLength++) {
+    for (
+      let patternLength = 1;
+      patternLength <= Math.floor(str.length / 3);
+      patternLength++
+    ) {
       const pattern = str.substring(0, patternLength);
       const repeated = pattern.repeat(Math.floor(str.length / patternLength));
-      
+
       if (str.startsWith(repeated) && repeated.length >= str.length * 0.7) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -739,12 +760,12 @@ export class AuthTokenManager {
     try {
       // Convert URL-safe base64 to regular base64
       let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-      
+
       // Add padding if needed
       while (base64.length % 4) {
         base64 += '=';
       }
-      
+
       return atob(base64);
     } catch (error) {
       return null;
@@ -763,9 +784,15 @@ export class AuthTokenManager {
         return { hasCorrupted: false, details: [] };
       }
 
-      const accessToken = localStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
-      const refreshToken = localStorage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
-      const expiresAtStr = localStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+      const accessToken = localStorage.getItem(
+        AuthTokenManager.ACCESS_TOKEN_KEY
+      );
+      const refreshToken = localStorage.getItem(
+        AuthTokenManager.REFRESH_TOKEN_KEY
+      );
+      const expiresAtStr = localStorage.getItem(
+        AuthTokenManager.EXPIRES_AT_KEY
+      );
 
       // Check access token
       if (accessToken) {
@@ -813,7 +840,10 @@ export class AuthTokenManager {
       const hasRefresh = refreshToken && refreshToken.trim() !== '';
       const hasExpiry = expiresAtStr && expiresAtStr.trim() !== '';
 
-      if ((hasAccess || hasRefresh || hasExpiry) && !(hasAccess && hasRefresh && hasExpiry)) {
+      if (
+        (hasAccess || hasRefresh || hasExpiry) &&
+        !(hasAccess && hasRefresh && hasExpiry)
+      ) {
         details.push('Incomplete token set - some tokens missing');
         hasCorrupted = true;
       }
@@ -830,15 +860,15 @@ export class AuthTokenManager {
    */
   cleanupInvalidTokens(reason: string): void {
     console.log('🧹 Cleaning up invalid tokens, reason:', reason);
-    
+
     // Detect corruption before cleanup for logging
     const corruption = this.detectCorruptedTokens();
     if (corruption.hasCorrupted) {
       console.log('🚨 Detected corrupted tokens:', corruption.details);
     }
-    
+
     this.clearTokens();
-    
+
     // Log cleanup completion
     console.log('✅ Invalid tokens cleaned up successfully');
   }
@@ -861,11 +891,11 @@ export class AuthTokenManager {
    */
   clearTokens(): void {
     const startTime = Date.now();
-    
+
     try {
       if (typeof window === 'undefined') {
         console.warn('Cannot clear tokens: window is undefined');
-        
+
         // Log token clear failure
         authLogger.logTokenOperation({
           operation: 'clear',
@@ -874,7 +904,7 @@ export class AuthTokenManager {
           reason: 'window_undefined',
           duration: Date.now() - startTime,
         });
-        
+
         return;
       }
 
@@ -902,7 +932,7 @@ export class AuthTokenManager {
       if (hadTokens) {
         console.log('✅ Tokens cleared successfully from both storage types');
       }
-      
+
       // Log successful token clear
       authLogger.logTokenOperation({
         operation: 'clear',
@@ -913,7 +943,7 @@ export class AuthTokenManager {
       });
     } catch (error) {
       console.error('❌ Failed to clear tokens:', error);
-      
+
       // Log token clear failure
       authLogger.logTokenOperation({
         operation: 'clear',
@@ -922,7 +952,7 @@ export class AuthTokenManager {
         reason: error instanceof Error ? error.message : 'clear_error',
         duration: Date.now() - startTime,
       });
-      
+
       // Don't throw - clearing should always succeed
     }
   }
@@ -936,9 +966,13 @@ export class AuthTokenManager {
         return false;
       }
 
-      const accessToken = localStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
-      const refreshToken = localStorage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
-      
+      const accessToken = localStorage.getItem(
+        AuthTokenManager.ACCESS_TOKEN_KEY
+      );
+      const refreshToken = localStorage.getItem(
+        AuthTokenManager.REFRESH_TOKEN_KEY
+      );
+
       return !!(accessToken && refreshToken);
     } catch (error) {
       return false;
@@ -982,19 +1016,29 @@ export class AuthTokenManager {
       const oldAccessToken = localStorage.getItem('access_token');
       const oldRefreshToken = localStorage.getItem('refresh_token');
 
-      if (oldAccessToken && oldRefreshToken && 
-          oldAccessToken.trim() !== '' && oldRefreshToken.trim() !== '') {
+      if (
+        oldAccessToken &&
+        oldRefreshToken &&
+        oldAccessToken.trim() !== '' &&
+        oldRefreshToken.trim() !== ''
+      ) {
         console.log('🔄 Migrating tokens from old keys to new keys...');
-        
+
         // Store with new keys directly (bypass validation for migration)
         localStorage.setItem(AuthTokenManager.ACCESS_TOKEN_KEY, oldAccessToken);
-        localStorage.setItem(AuthTokenManager.REFRESH_TOKEN_KEY, oldRefreshToken);
-        localStorage.setItem(AuthTokenManager.EXPIRES_AT_KEY, new Date(Date.now() + 3600 * 1000).toISOString());
-        
+        localStorage.setItem(
+          AuthTokenManager.REFRESH_TOKEN_KEY,
+          oldRefreshToken
+        );
+        localStorage.setItem(
+          AuthTokenManager.EXPIRES_AT_KEY,
+          new Date(Date.now() + 3600 * 1000).toISOString()
+        );
+
         // Remove old keys
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        
+
         console.log('✅ Token migration completed');
       }
     } catch (error) {
@@ -1009,31 +1053,34 @@ export class AuthTokenManager {
   async initialize(): Promise<boolean> {
     try {
       console.log('🔄 Initializing AuthTokenManager...');
-      
+
       // First, migrate any old tokens
       this.migrateOldTokens();
-      
+
       // Check for corrupted tokens before proceeding
       const corruption = this.detectCorruptedTokens();
       if (corruption.hasCorrupted) {
-        console.log('🚨 Detected corrupted tokens during initialization:', corruption.details);
+        console.log(
+          '🚨 Detected corrupted tokens during initialization:',
+          corruption.details
+        );
         this.cleanupInvalidTokens('corrupted_tokens_on_init');
         return false;
       }
-      
+
       // Check if we have stored tokens
       const storedTokens = this.getStoredTokens();
-      
+
       if (!storedTokens.accessToken || !storedTokens.refreshToken) {
         console.log('ℹ️ No stored tokens found');
         return false;
       }
-      
+
       console.log('📋 Found stored tokens, validating...');
-      
+
       // Check if tokens are valid or can be refreshed
       const validToken = await this.getValidToken();
-      
+
       if (validToken) {
         console.log('✅ Valid session restored from stored tokens');
         return true;

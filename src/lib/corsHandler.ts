@@ -34,29 +34,34 @@ export class CorsHandler {
    */
   static getProductionCorsConfig(): CorsProductionConfig {
     const envConfig = environmentConfig.getConfig();
-    
+
     // Define allowed origins based on environment
     const allowedOrigins = [];
-    
+
     if (envConfig.isProduction) {
       // Production origins
       if (envConfig.frontendUrl) {
         allowedOrigins.push(envConfig.frontendUrl);
-        
+
         try {
           // Add common production domain variations
           const frontendDomain = new URL(envConfig.frontendUrl);
           allowedOrigins.push(`https://${frontendDomain.hostname}`);
           allowedOrigins.push(`https://www.${frontendDomain.hostname}`);
         } catch (error) {
-          console.warn('⚠️ Invalid frontend URL for CORS configuration:', envConfig.frontendUrl);
+          console.warn(
+            '⚠️ Invalid frontend URL for CORS configuration:',
+            envConfig.frontendUrl
+          );
         }
       }
-      
+
       // Add any additional production domains from environment
       const additionalOrigins = process.env.NEXT_PUBLIC_ADDITIONAL_ORIGINS;
       if (additionalOrigins) {
-        allowedOrigins.push(...additionalOrigins.split(',').map(o => o.trim()));
+        allowedOrigins.push(
+          ...additionalOrigins.split(',').map((o) => o.trim())
+        );
       }
     } else {
       // Development origins
@@ -69,7 +74,7 @@ export class CorsHandler {
     }
 
     return {
-      allowedOrigins: [...new Set(allowedOrigins)], // Remove duplicates
+      allowedOrigins: Array.from(new Set(allowedOrigins)), // Remove duplicates
       allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
       allowedHeaders: [
         'Content-Type',
@@ -118,16 +123,25 @@ export class CorsHandler {
         }
 
         // Check for localhost in production
-        if (apiUrl.hostname === 'localhost' || apiUrl.hostname === '127.0.0.1') {
+        if (
+          apiUrl.hostname === 'localhost' ||
+          apiUrl.hostname === '127.0.0.1'
+        ) {
           errors.push('API cannot use localhost in production');
         }
 
-        if (frontendUrl.hostname === 'localhost' || frontendUrl.hostname === '127.0.0.1') {
+        if (
+          frontendUrl.hostname === 'localhost' ||
+          frontendUrl.hostname === '127.0.0.1'
+        ) {
           errors.push('Frontend cannot use localhost in production');
         }
 
         // Check for proper domain configuration
-        if (apiUrl.hostname.includes('railway.app') && !frontendUrl.hostname.includes('.')) {
+        if (
+          apiUrl.hostname.includes('railway.app') &&
+          !frontendUrl.hostname.includes('.')
+        ) {
           warnings.push('Using Railway API with non-domain frontend URL');
         }
 
@@ -154,23 +168,25 @@ export class CorsHandler {
    */
   static detectCorsIssue(error: any, response?: Response): boolean {
     // Direct CORS error messages
-    if (error.message && (
-      error.message.includes('CORS') ||
-      error.message.includes('Cross-Origin') ||
-      error.message.includes('Access-Control-Allow-Origin') ||
-      error.message.includes('has been blocked by CORS policy') ||
-      error.message.includes('preflight') ||
-      error.message.includes('Origin is not allowed')
-    )) {
+    if (
+      error.message &&
+      (error.message.includes('CORS') ||
+        error.message.includes('Cross-Origin') ||
+        error.message.includes('Access-Control-Allow-Origin') ||
+        error.message.includes('has been blocked by CORS policy') ||
+        error.message.includes('preflight') ||
+        error.message.includes('Origin is not allowed'))
+    ) {
       return true;
     }
 
     // Network errors that might be CORS-related
-    if (error.name === 'TypeError' && (
-      error.message.includes('Failed to fetch') ||
-      error.message.includes('Network request failed') ||
-      error.message.includes('Load failed')
-    )) {
+    if (
+      error.name === 'TypeError' &&
+      (error.message.includes('Failed to fetch') ||
+        error.message.includes('Network request failed') ||
+        error.message.includes('Load failed'))
+    ) {
       return true; // Could be CORS or network
     }
 
@@ -180,7 +196,7 @@ export class CorsHandler {
       if (response.status === 0) {
         return true;
       }
-      
+
       // Opaque responses
       if (response.type === 'opaque') {
         return true;
@@ -210,7 +226,7 @@ export class CorsHandler {
     // Validate production configuration
     const validation = this.validateProductionCors(config);
     issues.push(...validation.errors);
-    recommendations.push(...validation.warnings.map(w => `Warning: ${w}`));
+    recommendations.push(...validation.warnings.map((w) => `Warning: ${w}`));
 
     // Check URL protocols
     const apiUrl = new URL(config.apiUrl);
@@ -218,19 +234,28 @@ export class CorsHandler {
 
     if (apiUrl.protocol !== frontendUrl.protocol) {
       issues.push('Protocol mismatch between frontend and API');
-      recommendations.push('Ensure both frontend and API use the same protocol (HTTP or HTTPS)');
+      recommendations.push(
+        'Ensure both frontend and API use the same protocol (HTTP or HTTPS)'
+      );
     }
 
     // Check for localhost vs production domains
     if (config.environment === 'production') {
       if (apiUrl.hostname === 'localhost' || apiUrl.hostname === '127.0.0.1') {
         issues.push('API URL uses localhost in production');
-        recommendations.push('Use production domain for API URL instead of localhost');
+        recommendations.push(
+          'Use production domain for API URL instead of localhost'
+        );
       }
-      
-      if (frontendUrl.hostname === 'localhost' || frontendUrl.hostname === '127.0.0.1') {
+
+      if (
+        frontendUrl.hostname === 'localhost' ||
+        frontendUrl.hostname === '127.0.0.1'
+      ) {
         issues.push('Frontend URL uses localhost in production');
-        recommendations.push('Use production domain for frontend URL instead of localhost');
+        recommendations.push(
+          'Use production domain for frontend URL instead of localhost'
+        );
       }
 
       // Check for proper SSL configuration
@@ -249,18 +274,25 @@ export class CorsHandler {
     if (config.environment === 'development') {
       if (apiUrl.port && frontendUrl.port && apiUrl.port === frontendUrl.port) {
         issues.push('API and frontend using same port');
-        recommendations.push('Use different ports for API and frontend in development');
+        recommendations.push(
+          'Use different ports for API and frontend in development'
+        );
       }
     }
 
     // Check for subdomain issues
     if (apiUrl.hostname !== frontendUrl.hostname) {
       const apiDomain = apiUrl.hostname.split('.').slice(-2).join('.');
-      const frontendDomain = frontendUrl.hostname.split('.').slice(-2).join('.');
-      
+      const frontendDomain = frontendUrl.hostname
+        .split('.')
+        .slice(-2)
+        .join('.');
+
       if (apiDomain !== frontendDomain && config.environment === 'production') {
         issues.push('API and frontend on different domains');
-        recommendations.push('Ensure CORS is properly configured for cross-domain requests');
+        recommendations.push(
+          'Ensure CORS is properly configured for cross-domain requests'
+        );
       }
     }
 
@@ -289,26 +321,42 @@ export class CorsHandler {
 
     // Only attempt fallbacks in production with preflight enabled
     if (!envConfig.isProduction || !corsConfig.preflightFallback) {
-      return { success: false, error: 'Fallback not enabled for this environment' };
+      return {
+        success: false,
+        error: 'Fallback not enabled for this environment',
+      };
     }
 
     const fallbackMethods = [
       // Try with explicit CORS mode
-      { mode: 'cors' as RequestMode, credentials: 'include' as RequestCredentials },
-      { mode: 'cors' as RequestMode, credentials: 'same-origin' as RequestCredentials },
-      { mode: 'cors' as RequestMode, credentials: 'omit' as RequestCredentials },
-      
+      {
+        mode: 'cors' as RequestMode,
+        credentials: 'include' as RequestCredentials,
+      },
+      {
+        mode: 'cors' as RequestMode,
+        credentials: 'same-origin' as RequestCredentials,
+      },
+      {
+        mode: 'cors' as RequestMode,
+        credentials: 'omit' as RequestCredentials,
+      },
+
       // Try without credentials
       { mode: 'cors' as RequestMode },
-      
+
       // Try with no-cors mode (limited functionality)
       { mode: 'no-cors' as RequestMode },
     ];
 
-    for (const [index, fallbackConfig] of fallbackMethods.entries()) {
+    for (let index = 0; index < fallbackMethods.length; index++) {
+      const fallbackConfig = fallbackMethods[index];
       try {
-        console.log(`🔄 Attempting CORS fallback method ${index + 1}:`, fallbackConfig);
-        
+        console.log(
+          `🔄 Attempting CORS fallback method ${index + 1}:`,
+          fallbackConfig
+        );
+
         const response = await fetch(url, {
           ...options,
           ...fallbackConfig,
@@ -347,25 +395,33 @@ export class CorsHandler {
 
     if (config.environment === 'production') {
       guidance.push('=== Production CORS Configuration ===');
-      
+
       if (validation.errors.length > 0) {
         guidance.push('CRITICAL ERRORS:');
-        validation.errors.forEach(error => guidance.push(`- ${error}`));
+        validation.errors.forEach((error) => guidance.push(`- ${error}`));
         guidance.push('');
       }
 
       if (validation.warnings.length > 0) {
         guidance.push('WARNINGS:');
-        validation.warnings.forEach(warning => guidance.push(`- ${warning}`));
+        validation.warnings.forEach((warning) => guidance.push(`- ${warning}`));
         guidance.push('');
       }
 
       const corsConfig = this.getProductionCorsConfig();
       guidance.push('Required Server Configuration:');
-      guidance.push(`- Access-Control-Allow-Origin: ${corsConfig.allowedOrigins.join(', ')}`);
-      guidance.push(`- Access-Control-Allow-Methods: ${corsConfig.allowedMethods.join(', ')}`);
-      guidance.push(`- Access-Control-Allow-Headers: ${corsConfig.allowedHeaders.join(', ')}`);
-      guidance.push(`- Access-Control-Allow-Credentials: ${corsConfig.allowCredentials}`);
+      guidance.push(
+        `- Access-Control-Allow-Origin: ${corsConfig.allowedOrigins.join(', ')}`
+      );
+      guidance.push(
+        `- Access-Control-Allow-Methods: ${corsConfig.allowedMethods.join(', ')}`
+      );
+      guidance.push(
+        `- Access-Control-Allow-Headers: ${corsConfig.allowedHeaders.join(', ')}`
+      );
+      guidance.push(
+        `- Access-Control-Allow-Credentials: ${corsConfig.allowCredentials}`
+      );
       guidance.push(`- Access-Control-Max-Age: ${corsConfig.maxAge}`);
       guidance.push('');
     }
@@ -385,7 +441,7 @@ export class CorsHandler {
    */
   static getCorsErrorMessage(config: CorsConfig): string {
     const diagnostic = this.diagnoseCorsIssues(config);
-    
+
     if (diagnostic.hasCorsIssue) {
       if (config.environment === 'production') {
         return `Erro de configuração CORS em produção detectado. ${diagnostic.issues.join('. ')}. Entre em contato com o administrador do sistema.`;
@@ -393,11 +449,11 @@ export class CorsHandler {
         return `Erro de configuração CORS detectado. ${diagnostic.issues.join('. ')}.`;
       }
     }
-    
+
     if (config.environment === 'production') {
       return 'Erro de CORS em produção. O servidor não está configurado para aceitar requisições desta origem. Entre em contato com o suporte técnico.';
     }
-    
+
     return 'Erro de CORS. O servidor não está configurado para aceitar requisições desta origem.';
   }
 
@@ -407,17 +463,17 @@ export class CorsHandler {
    */
   static getCorsGuidance(config: CorsConfig): string[] {
     const diagnostic = this.diagnoseCorsIssues(config);
-    
+
     if (config.environment === 'production') {
       return this.getProductionCorsGuidance(config);
     }
-    
+
     const baseGuidance = [
       'Entre em contato com o administrador do sistema',
       'Verifique se o servidor está configurado corretamente',
-      'Confirme se as URLs de frontend e API estão corretas'
+      'Confirme se as URLs de frontend e API estão corretas',
     ];
-    
+
     return [...diagnostic.recommendations, ...baseGuidance];
   }
 
@@ -442,7 +498,7 @@ export class CorsHandler {
       });
 
       const corsHeaders: Record<string, string> = {};
-      
+
       // Collect CORS-related headers
       const corsHeaderNames = [
         'access-control-allow-origin',
@@ -453,7 +509,7 @@ export class CorsHandler {
         'access-control-expose-headers',
       ];
 
-      corsHeaderNames.forEach(headerName => {
+      corsHeaderNames.forEach((headerName) => {
         const value = response.headers.get(headerName);
         if (value) {
           corsHeaders[headerName] = value;
@@ -467,10 +523,13 @@ export class CorsHandler {
         };
       } else {
         // Try fallback methods if initial request fails
-        const fallbackResult = await this.attemptCorsFallback(`${apiUrl}/health`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const fallbackResult = await this.attemptCorsFallback(
+          `${apiUrl}/health`,
+          {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
 
         return {
           success: fallbackResult.success,
@@ -482,14 +541,21 @@ export class CorsHandler {
       }
     } catch (error) {
       // Try fallback methods if initial request throws
-      const fallbackResult = await this.attemptCorsFallback(`${apiUrl}/health`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const fallbackResult = await this.attemptCorsFallback(
+        `${apiUrl}/health`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       return {
         success: fallbackResult.success,
-        error: fallbackResult.success ? undefined : (error instanceof Error ? error.message : 'Unknown error'),
+        error: fallbackResult.success
+          ? undefined
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error',
         fallbackAttempted: true,
         fallbackSuccess: fallbackResult.success,
       };
@@ -500,30 +566,33 @@ export class CorsHandler {
    * Generate CORS troubleshooting report
    * Enhanced with production-specific information
    */
-  static generateTroubleshootingReport(config: CorsConfig, error?: any): string {
+  static generateTroubleshootingReport(
+    config: CorsConfig,
+    error?: any
+  ): string {
     const diagnostic = this.diagnoseCorsIssues(config);
     const envConfig = environmentConfig.getConfig();
-    
+
     let report = '=== CORS Troubleshooting Report ===\n\n';
-    
+
     report += `Environment: ${config.environment}\n`;
     report += `API URL: ${config.apiUrl}\n`;
     report += `Frontend URL: ${config.frontendUrl}\n`;
     report += `HTTPS Enabled: ${envConfig.isHttps}\n`;
     report += `Secure Context: ${typeof window !== 'undefined' ? window.isSecureContext : 'N/A'}\n\n`;
-    
+
     if (error) {
       report += `Error Message: ${error.message || 'Unknown error'}\n`;
       report += `Error Type: ${error.name || 'Unknown'}\n\n`;
     }
-    
+
     if (diagnostic.hasCorsIssue) {
       report += 'Detected Issues:\n';
       diagnostic.issues.forEach((issue, index) => {
         report += `${index + 1}. ${issue}\n`;
       });
       report += '\n';
-      
+
       report += 'Recommendations:\n';
       diagnostic.recommendations.forEach((rec, index) => {
         report += `${index + 1}. ${rec}\n`;
@@ -541,21 +610,21 @@ export class CorsHandler {
       report += `Access-Control-Allow-Credentials: ${corsConfig.allowCredentials}\n`;
       report += `Access-Control-Max-Age: ${corsConfig.maxAge}\n\n`;
     }
-    
+
     report += 'Common Solutions:\n';
     report += '1. Ensure the API server includes proper CORS headers\n';
     report += '2. Check that the API allows the frontend domain\n';
     report += '3. Verify that the API allows the required HTTP methods\n';
     report += '4. Confirm that credentials are handled correctly if needed\n';
     report += '5. Check for protocol mismatches (HTTP vs HTTPS)\n';
-    
+
     if (config.environment === 'production') {
       report += '6. Verify SSL certificates are valid and trusted\n';
       report += '7. Check proxy or CDN CORS configuration\n';
       report += '8. Ensure preflight OPTIONS requests are handled\n';
       report += '9. Verify domain DNS configuration\n';
     }
-    
+
     return report;
   }
 
@@ -566,13 +635,13 @@ export class CorsHandler {
     console.group('🚫 CORS Error Detected');
     console.error('Error:', error);
     console.log('Configuration:', config);
-    
+
     const diagnostic = this.diagnoseCorsIssues(config);
     if (diagnostic.hasCorsIssue) {
       console.log('Issues:', diagnostic.issues);
       console.log('Recommendations:', diagnostic.recommendations);
     }
-    
+
     console.log('Troubleshooting Report:');
     console.log(this.generateTroubleshootingReport(config, error));
     console.groupEnd();

@@ -1,6 +1,6 @@
 /**
  * Secure Storage Module
- * 
+ *
  * Handles secure storage of sensitive data with HTTPS-specific configurations:
  * - Secure localStorage handling for HTTPS environments
  * - Security headers and configurations
@@ -38,7 +38,10 @@ class SecureStorageManager {
       this.initializeEncryption();
       this.validateStorageAccess();
     } catch (error) {
-      console.warn('⚠️ SecureStorage initialization failed, using defaults:', error);
+      console.warn(
+        '⚠️ SecureStorage initialization failed, using defaults:',
+        error
+      );
       this.config = {
         useSecureStorage: false,
         encryptionEnabled: false,
@@ -57,11 +60,11 @@ class SecureStorageManager {
    */
   private buildSecurityConfig(): StorageSecurityConfig {
     const envConfig = environmentConfig.getConfig();
-    
+
     return {
       useSecureStorage: envConfig.secureStorage,
       encryptionEnabled: envConfig.isProduction && envConfig.isHttps,
-      secureHeaders: this.getSecurityHeaders(envConfig),
+      secureHeaders: this.getSecurityHeadersForEnvironment(envConfig),
       storagePolicy: {
         maxAge: envConfig.isProduction ? 86400 : 3600, // 24h prod, 1h dev
         secure: envConfig.isHttps,
@@ -73,13 +76,16 @@ class SecureStorageManager {
   /**
    * Get security headers for HTTPS environments
    */
-  private getSecurityHeaders(envConfig: any): Record<string, string> {
+  private getSecurityHeadersForEnvironment(
+    envConfig: any
+  ): Record<string, string> {
     const headers: Record<string, string> = {};
 
     if (envConfig.isHttps) {
       // Strict Transport Security
-      headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload';
-      
+      headers['Strict-Transport-Security'] =
+        'max-age=31536000; includeSubDomains; preload';
+
       // Content Security Policy
       headers['Content-Security-Policy'] = [
         "default-src 'self'",
@@ -90,18 +96,19 @@ class SecureStorageManager {
         "font-src 'self' data:",
         "frame-ancestors 'none'",
       ].join('; ');
-      
+
       // X-Frame-Options
       headers['X-Frame-Options'] = 'DENY';
-      
+
       // X-Content-Type-Options
       headers['X-Content-Type-Options'] = 'nosniff';
-      
+
       // Referrer Policy
       headers['Referrer-Policy'] = 'strict-origin-when-cross-origin';
-      
+
       // Permissions Policy
-      headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()';
+      headers['Permissions-Policy'] =
+        'geolocation=(), microphone=(), camera=()';
     }
 
     if (envConfig.isProduction) {
@@ -162,7 +169,9 @@ class SecureStorageManager {
 
       // Check for secure context in production
       if (this.config.useSecureStorage && !window.isSecureContext) {
-        console.warn('⚠️ Not running in secure context (HTTPS) but secure storage is required');
+        console.warn(
+          '⚠️ Not running in secure context (HTTPS) but secure storage is required'
+        );
       }
 
       // Log security status
@@ -184,7 +193,11 @@ class SecureStorageManager {
   /**
    * Securely store data with optional encryption
    */
-  setItem(key: string, value: string, options: SecureStorageOptions = {}): void {
+  setItem(
+    key: string,
+    value: string,
+    options: SecureStorageOptions = {}
+  ): void {
     try {
       if (typeof window === 'undefined') {
         console.warn('Cannot store data: window is undefined');
@@ -255,7 +268,7 @@ class SecureStorageManager {
 
       // Check if data is too old (security measure)
       const maxAge = this.config.storagePolicy.maxAge * 1000;
-      if (secureData.timestamp && (Date.now() - secureData.timestamp) > maxAge) {
+      if (secureData.timestamp && Date.now() - secureData.timestamp > maxAge) {
         console.log('🕐 Secure data expired, removing:', key);
         this.removeItem(key);
         return null;
@@ -328,7 +341,9 @@ class SecureStorageManager {
       // In production, use Web Crypto API or a proper encryption library
       let encrypted = '';
       for (let i = 0; i < data.length; i++) {
-        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+        const keyChar = this.encryptionKey.charCodeAt(
+          i % this.encryptionKey.length
+        );
         const dataChar = data.charCodeAt(i);
         encrypted += String.fromCharCode(dataChar ^ keyChar);
       }
@@ -351,7 +366,9 @@ class SecureStorageManager {
       const encrypted = atob(encryptedData);
       let decrypted = '';
       for (let i = 0; i < encrypted.length; i++) {
-        const keyChar = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+        const keyChar = this.encryptionKey.charCodeAt(
+          i % this.encryptionKey.length
+        );
         const encryptedChar = encrypted.charCodeAt(i);
         decrypted += String.fromCharCode(encryptedChar ^ keyChar);
       }
@@ -373,11 +390,13 @@ class SecureStorageManager {
    * Get storage policy configuration
    */
   getStoragePolicy(): StorageSecurityConfig['storagePolicy'] {
-    return this.config?.storagePolicy ? { ...this.config.storagePolicy } : {
-      maxAge: 3600,
-      secure: false,
-      sameSite: 'lax',
-    };
+    return this.config?.storagePolicy
+      ? { ...this.config.storagePolicy }
+      : {
+          maxAge: 3600,
+          secure: false,
+          sameSite: 'lax',
+        };
   }
 
   /**
@@ -426,12 +445,16 @@ class SecureStorageManager {
     // Check encryption
     if (envConfig.isProduction && !this.config.encryptionEnabled) {
       warnings.push('Encryption disabled in production environment');
-      recommendations.push('Enable encryption for sensitive data in production');
+      recommendations.push(
+        'Enable encryption for sensitive data in production'
+      );
     }
 
     // Check storage policy
     if (this.config.storagePolicy.maxAge > 86400 && envConfig.isProduction) {
-      warnings.push('Storage max age is longer than recommended for production');
+      warnings.push(
+        'Storage max age is longer than recommended for production'
+      );
       recommendations.push('Consider shorter storage expiration times');
     }
 
@@ -450,17 +473,16 @@ export const secureStorage = new SecureStorageManager();
 export { SecureStorageManager };
 
 // Convenience functions
-export const setSecureItem = (key: string, value: string, options?: SecureStorageOptions) => 
-  secureStorage.setItem(key, value, options);
+export const setSecureItem = (
+  key: string,
+  value: string,
+  options?: SecureStorageOptions
+) => secureStorage.setItem(key, value, options);
 
-export const getSecureItem = (key: string) => 
-  secureStorage.getItem(key);
+export const getSecureItem = (key: string) => secureStorage.getItem(key);
 
-export const removeSecureItem = (key: string) => 
-  secureStorage.removeItem(key);
+export const removeSecureItem = (key: string) => secureStorage.removeItem(key);
 
-export const getSecurityHeaders = () => 
-  secureStorage.getSecurityHeaders();
+export const getSecurityHeaders = () => secureStorage.getSecurityHeaders();
 
-export const validateStorageSecurity = () => 
-  secureStorage.validateSecurity();
+export const validateStorageSecurity = () => secureStorage.validateSecurity();

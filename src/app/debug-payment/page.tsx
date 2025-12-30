@@ -31,9 +31,7 @@ export default function DebugPaymentPage() {
       addLog(
         `👤 Usuário autenticado: ${apiClient.isAuthenticated ? 'Sim' : 'Não'}`
       );
-      addLog(
-        `🔑 Token presente: ${apiClient.currentAccessToken ? 'Sim' : 'Não'}`
-      );
+      addLog('🔑 Verificando autenticação...');
 
       // Fazer a chamada da API
       const response = await apiClient.initiatePayment(orderId);

@@ -53,57 +53,78 @@ export class ErrorHandler {
           type: 'network',
           code: 'FETCH_FAILED',
           message: error.message,
-          userMessage: 'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.',
-          guidance: 'Verifique se você está conectado à internet e tente novamente.',
+          userMessage:
+            'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.',
+          guidance:
+            'Verifique se você está conectado à internet e tente novamente.',
           retryable: true,
         };
       }
-      
-      if (error.message && (error.message.includes('NetworkError') || error.message.includes('Failed to fetch'))) {
+
+      if (
+        error.message &&
+        (error.message.includes('NetworkError') ||
+          error.message.includes('Failed to fetch'))
+      ) {
         return {
           type: 'network',
           code: 'NETWORK_ERROR',
           message: error.message,
           userMessage: 'Erro de rede. Verifique sua conexão.',
-          guidance: 'Verifique sua conexão com a internet e tente novamente em alguns segundos.',
+          guidance:
+            'Verifique sua conexão com a internet e tente novamente em alguns segundos.',
           retryable: true,
         };
       }
     }
 
     // Check for timeout errors
-    if (error.name === 'AbortError' || (error.message && error.message.includes('timeout'))) {
+    if (
+      error.name === 'AbortError' ||
+      (error.message && error.message.includes('timeout'))
+    ) {
       return {
         type: 'network',
         code: 'TIMEOUT',
         message: error.message || 'Request timeout',
         userMessage: 'A conexão demorou muito para responder.',
-        guidance: 'O servidor pode estar sobrecarregado. Tente novamente em alguns minutos.',
+        guidance:
+          'O servidor pode estar sobrecarregado. Tente novamente em alguns minutos.',
         retryable: true,
         retryAfter: 30000, // 30 seconds
       };
     }
 
     // Check for DNS/connection errors
-    if (error.message && (error.message.includes('getaddrinfo') || error.message.includes('ENOTFOUND'))) {
+    if (
+      error.message &&
+      (error.message.includes('getaddrinfo') ||
+        error.message.includes('ENOTFOUND'))
+    ) {
       return {
         type: 'network',
         code: 'DNS_ERROR',
         message: error.message,
         userMessage: 'Não foi possível encontrar o servidor.',
-        guidance: 'Verifique sua conexão com a internet ou tente novamente mais tarde.',
+        guidance:
+          'Verifique sua conexão com a internet ou tente novamente mais tarde.',
         retryable: true,
       };
     }
 
     // Check for connection refused
-    if (error.message && (error.message.includes('ECONNREFUSED') || error.message.includes('Connection refused'))) {
+    if (
+      error.message &&
+      (error.message.includes('ECONNREFUSED') ||
+        error.message.includes('Connection refused'))
+    ) {
       return {
         type: 'network',
         code: 'CONNECTION_REFUSED',
         message: error.message,
         userMessage: 'O servidor não está disponível no momento.',
-        guidance: 'O servidor pode estar em manutenção. Tente novamente em alguns minutos.',
+        guidance:
+          'O servidor pode estar em manutenção. Tente novamente em alguns minutos.',
         retryable: true,
         retryAfter: 60000, // 1 minute
       };
@@ -117,16 +138,20 @@ export class ErrorHandler {
    */
   static detectCorsError(error: any, response?: Response): CorsError | null {
     // Check for CORS-related errors
-    if (error && error.message && (
-        error.message.includes('CORS') || 
+    if (
+      error &&
+      error.message &&
+      (error.message.includes('CORS') ||
         error.message.includes('Cross-Origin') ||
-        error.message.includes('Access-Control-Allow-Origin'))) {
+        error.message.includes('Access-Control-Allow-Origin'))
+    ) {
       return {
         type: 'cors',
         code: 'CORS_ERROR',
         message: error.message,
         userMessage: 'Erro de CORS - configuração de segurança.',
-        guidance: 'Este é um problema de configuração do servidor. Entre em contato com o suporte técnico.',
+        guidance:
+          'Este é um problema de configuração do servidor. Entre em contato com o suporte técnico.',
         retryable: false,
       };
     }
@@ -138,7 +163,8 @@ export class ErrorHandler {
         code: 'OPAQUE_RESPONSE',
         message: 'Received opaque response, likely CORS issue',
         userMessage: 'Erro de CORS - configuração de segurança.',
-        guidance: 'Problema de configuração do servidor. Entre em contato com o suporte.',
+        guidance:
+          'Problema de configuração do servidor. Entre em contato com o suporte.',
         retryable: false,
       };
     }
@@ -150,7 +176,8 @@ export class ErrorHandler {
         code: 'STATUS_ZERO',
         message: 'Response status 0, likely CORS or network issue',
         userMessage: 'Erro de CORS ou conexão.',
-        guidance: 'Pode ser um problema de rede ou configuração do servidor. Tente novamente ou entre em contato com o suporte.',
+        guidance:
+          'Pode ser um problema de rede ou configuração do servidor. Tente novamente ou entre em contato com o suporte.',
         retryable: true,
       };
     }
@@ -182,14 +209,20 @@ export class ErrorHandler {
         code: 'FORBIDDEN',
         message: 'Access forbidden',
         userMessage: 'Você não tem permissão para acessar este recurso.',
-        guidance: 'Entre em contato com o administrador se você acredita que deveria ter acesso.',
+        guidance:
+          'Entre em contato com o administrador se você acredita que deveria ter acesso.',
         shouldClearTokens: false,
         shouldRedirect: false,
       };
     }
 
     // Check for token-related errors
-    if (error && error.message && error.message.includes('token') && error.message.includes('invalid')) {
+    if (
+      error &&
+      error.message &&
+      error.message.includes('token') &&
+      error.message.includes('invalid')
+    ) {
       return {
         type: 'auth',
         code: 'INVALID_TOKEN',
@@ -202,7 +235,12 @@ export class ErrorHandler {
     }
 
     // Check for refresh token errors
-    if (error && error.message && error.message.includes('refresh') && error.message.includes('failed')) {
+    if (
+      error &&
+      error.message &&
+      error.message.includes('refresh') &&
+      error.message.includes('failed')
+    ) {
       return {
         type: 'auth',
         code: 'REFRESH_FAILED',
@@ -228,7 +266,8 @@ export class ErrorHandler {
         code: 'UNKNOWN_ERROR',
         message: 'No error information provided',
         userMessage: 'Ocorreu um erro inesperado.',
-        guidance: 'Tente novamente. Se o problema persistir, entre em contato com o suporte.',
+        guidance:
+          'Tente novamente. Se o problema persistir, entre em contato com o suporte.',
         retryable: true,
       };
     }
@@ -247,9 +286,14 @@ export class ErrorHandler {
     return {
       type: 'network',
       code: 'UNKNOWN_ERROR',
-      message: error.message || (typeof error.toString === 'function' ? error.toString() : 'Unknown error occurred'),
+      message:
+        error.message ||
+        (typeof error.toString === 'function'
+          ? error.toString()
+          : 'Unknown error occurred'),
       userMessage: 'Ocorreu um erro inesperado.',
-      guidance: 'Tente novamente. Se o problema persistir, entre em contato com o suporte.',
+      guidance:
+        'Tente novamente. Se o problema persistir, entre em contato com o suporte.',
       retryable: true,
     };
   }
@@ -268,7 +312,7 @@ export class ErrorHandler {
     if ('retryAfter' in error && error.retryAfter) {
       return error.retryAfter;
     }
-    
+
     // Default retry delays based on error type
     switch (error.code) {
       case 'TIMEOUT':
@@ -287,7 +331,7 @@ export class ErrorHandler {
    */
   static logError(error: AppError, context?: string): void {
     const logContext = context ? `[${context}]` : '';
-    
+
     // Log to console with appropriate level
     switch (error.type) {
       case 'network':
@@ -298,7 +342,7 @@ export class ErrorHandler {
           retryable: error.retryable,
         });
         break;
-        
+
       case 'cors':
         console.error(`🚫 ${logContext} CORS Error [${error.code}]:`, {
           message: error.message,
@@ -306,7 +350,7 @@ export class ErrorHandler {
           guidance: error.guidance,
         });
         break;
-        
+
       case 'auth':
         console.error(`🔐 ${logContext} Auth Error [${error.code}]:`, {
           message: error.message,
@@ -339,7 +383,17 @@ export class ErrorHandler {
   /**
    * Map error type to auth logger error type
    */
-  private static mapErrorTypeToAuthLogger(errorType: string): 'network' | 'validation' | 'authentication' | 'authorization' | 'cors' | 'server' | 'client' | 'unknown' {
+  private static mapErrorTypeToAuthLogger(
+    errorType: string
+  ):
+    | 'network'
+    | 'validation'
+    | 'authentication'
+    | 'authorization'
+    | 'cors'
+    | 'server'
+    | 'client'
+    | 'unknown' {
     switch (errorType) {
       case 'network':
         return 'network';

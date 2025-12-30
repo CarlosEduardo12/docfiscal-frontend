@@ -52,7 +52,15 @@ export interface SessionDetails {
 }
 
 export interface AuthErrorDetails {
-  errorType: 'network' | 'validation' | 'authentication' | 'authorization' | 'cors' | 'server' | 'client' | 'unknown';
+  errorType:
+    | 'network'
+    | 'validation'
+    | 'authentication'
+    | 'authorization'
+    | 'cors'
+    | 'server'
+    | 'client'
+    | 'unknown';
   errorCode: string;
   errorMessage: string;
   operation: string;
@@ -66,7 +74,11 @@ export interface RedirectDetails {
   from: string;
   to: string;
   reason: string;
-  method: 'router.push' | 'router.replace' | 'window.location' | 'safe_redirect';
+  method:
+    | 'router.push'
+    | 'router.replace'
+    | 'window.location'
+    | 'safe_redirect';
   timestamp: string;
   wasAuthenticated: boolean;
   preventedLoop?: boolean;
@@ -82,7 +94,7 @@ class AuthLogger {
     this.sessionId = this.generateSessionId();
     const envConfig = environmentConfig.getConfig();
     this.isEnabled = envConfig.isDevelopment || envConfig.enableAuthLogging;
-    
+
     if (this.isEnabled) {
       console.log('🔍 AuthLogger initialized with session ID:', this.sessionId);
     }
@@ -110,7 +122,8 @@ class AuthLogger {
       details: {
         ...details,
         environment: environmentConfig.getConfig().environment,
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
+        userAgent:
+          typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
       },
       sessionId: this.sessionId,
       requestId: this.generateRequestId(),
@@ -132,16 +145,20 @@ class AuthLogger {
     if (!this.isEnabled) return;
 
     this.logs.push(entry);
-    
+
     // Keep only the most recent logs
     if (this.logs.length > this.maxLogs) {
       this.logs = this.logs.slice(-this.maxLogs);
     }
 
     // Console logging with appropriate level
-    const logLevel = entry.status === 'failure' ? 'error' : 
-                    entry.status === 'warning' ? 'warn' : 'log';
-    
+    const logLevel =
+      entry.status === 'failure'
+        ? 'error'
+        : entry.status === 'warning'
+          ? 'warn'
+          : 'log';
+
     const logMessage = `[AUTH] ${entry.operation} - ${entry.status.toUpperCase()}`;
     const logData = {
       timestamp: entry.timestamp,
@@ -159,21 +176,24 @@ class AuthLogger {
    */
   logLoginAttempt(details: LoginAttemptDetails): void {
     const startTime = Date.now();
-    
-    this.addLog(this.createLogEntry(
-      'LOGIN_ATTEMPT',
-      details.result === 'success' ? 'success' : 'failure',
-      {
-        email: details.email,
-        userAgent: details.userAgent,
-        ipAddress: details.ipAddress || 'unknown',
-        failureReason: details.failureReason,
-        attemptTimestamp: details.timestamp,
-      },
-      details.result === 'failure' && details.failureReason ? 
-        new Error(details.failureReason) : undefined,
-      details.duration
-    ));
+
+    this.addLog(
+      this.createLogEntry(
+        'LOGIN_ATTEMPT',
+        details.result === 'success' ? 'success' : 'failure',
+        {
+          email: details.email,
+          userAgent: details.userAgent,
+          ipAddress: details.ipAddress || 'unknown',
+          failureReason: details.failureReason,
+          attemptTimestamp: details.timestamp,
+        },
+        details.result === 'failure' && details.failureReason
+          ? new Error(details.failureReason)
+          : undefined,
+        details.duration
+      )
+    );
 
     // Track login patterns for security
     if (details.result === 'failure') {
@@ -185,38 +205,43 @@ class AuthLogger {
    * Log token operations (store, retrieve, refresh, validate, clear)
    */
   logTokenOperation(details: TokenOperationDetails): void {
-    this.addLog(this.createLogEntry(
-      `TOKEN_${details.operation.toUpperCase()}`,
-      details.result === 'success' ? 'success' : 'failure',
-      {
-        tokenType: details.tokenType,
-        tokenLength: details.tokenLength,
-        expiresAt: details.expiresAt,
-        reason: details.reason,
-        operation: details.operation,
-      },
-      details.result === 'failure' && details.reason ? 
-        new Error(details.reason) : undefined,
-      details.duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        `TOKEN_${details.operation.toUpperCase()}`,
+        details.result === 'success' ? 'success' : 'failure',
+        {
+          tokenType: details.tokenType,
+          tokenLength: details.tokenLength,
+          expiresAt: details.expiresAt,
+          reason: details.reason,
+          operation: details.operation,
+        },
+        details.result === 'failure' && details.reason
+          ? new Error(details.reason)
+          : undefined,
+        details.duration
+      )
+    );
   }
 
   /**
    * Log session operations (initialize, restore, persist, destroy)
    */
   logSessionOperation(details: SessionDetails): void {
-    this.addLog(this.createLogEntry(
-      `SESSION_${details.operation.toUpperCase()}`,
-      details.result === 'success' ? 'success' : 'failure',
-      {
-        hasTokens: details.hasTokens,
-        tokensValid: details.tokensValid,
-        userProfile: details.userProfile,
-        operation: details.operation,
-      },
-      undefined,
-      details.duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        `SESSION_${details.operation.toUpperCase()}`,
+        details.result === 'success' ? 'success' : 'failure',
+        {
+          hasTokens: details.hasTokens,
+          tokensValid: details.tokensValid,
+          userProfile: details.userProfile,
+          operation: details.operation,
+        },
+        undefined,
+        details.duration
+      )
+    );
   }
 
   /**
@@ -228,17 +253,15 @@ class AuthLogger {
     reason: string,
     userId?: string
   ): void {
-    this.addLog(this.createLogEntry(
-      'AUTH_STATE_CHANGE',
-      'info',
-      {
+    this.addLog(
+      this.createLogEntry('AUTH_STATE_CHANGE', 'info', {
         fromState: from,
         toState: to,
         reason,
         userId,
         stateTransition: `${from} -> ${to}`,
-      }
-    ));
+      })
+    );
   }
 
   /**
@@ -250,16 +273,18 @@ class AuthLogger {
     error?: Error,
     duration?: number
   ): void {
-    this.addLog(this.createLogEntry(
-      'PROFILE_FETCH',
-      result === 'success' ? 'success' : 'failure',
-      {
-        userId,
-        hasUserId: !!userId,
-      },
-      error,
-      duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'PROFILE_FETCH',
+        result === 'success' ? 'success' : 'failure',
+        {
+          userId,
+          hasUserId: !!userId,
+        },
+        error,
+        duration
+      )
+    );
   }
 
   /**
@@ -272,17 +297,19 @@ class AuthLogger {
     error?: Error,
     duration?: number
   ): void {
-    this.addLog(this.createLogEntry(
-      'LOGOUT',
-      result === 'success' ? 'success' : 'failure',
-      {
-        reason,
-        userId,
-        hasUserId: !!userId,
-      },
-      error,
-      duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'LOGOUT',
+        result === 'success' ? 'success' : 'failure',
+        {
+          reason,
+          userId,
+          hasUserId: !!userId,
+        },
+        error,
+        duration
+      )
+    );
   }
 
   /**
@@ -294,16 +321,18 @@ class AuthLogger {
     error?: Error,
     duration?: number
   ): void {
-    this.addLog(this.createLogEntry(
-      'AUTH_INITIALIZATION',
-      result === 'success' ? 'success' : 'failure',
-      {
-        hasValidSession,
-        pageLoad: true,
-      },
-      error,
-      duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'AUTH_INITIALIZATION',
+        result === 'success' ? 'success' : 'failure',
+        {
+          hasValidSession,
+          pageLoad: true,
+        },
+        error,
+        duration
+      )
+    );
   }
 
   /**
@@ -319,21 +348,27 @@ class AuthLogger {
     },
     duration?: number
   ): void {
-    this.addLog(this.createLogEntry(
-      'TOKEN_VALIDATION',
-      result === 'valid' ? 'success' : 
-      result === 'expired' ? 'warning' : 'failure',
-      {
-        tokenType,
-        validationResult: result,
-        expiresAt: details?.expiresAt,
-        timeUntilExpiry: details?.timeUntilExpiry,
-        shouldRefresh: details?.shouldRefresh,
-      },
-      result === 'invalid' || result === 'corrupted' ? 
-        new Error(`Token ${result}`) : undefined,
-      duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'TOKEN_VALIDATION',
+        result === 'valid'
+          ? 'success'
+          : result === 'expired'
+            ? 'warning'
+            : 'failure',
+        {
+          tokenType,
+          validationResult: result,
+          expiresAt: details?.expiresAt,
+          timeUntilExpiry: details?.timeUntilExpiry,
+          shouldRefresh: details?.shouldRefresh,
+        },
+        result === 'invalid' || result === 'corrupted'
+          ? new Error(`Token ${result}`)
+          : undefined,
+        duration
+      )
+    );
   }
 
   /**
@@ -346,42 +381,42 @@ class AuthLogger {
     error?: Error,
     duration?: number
   ): void {
-    this.addLog(this.createLogEntry(
-      'TOKEN_REFRESH',
-      result === 'success' ? 'success' : 'failure',
-      {
-        reason,
-        newTokenLength,
-        refreshAttempt: true,
-      },
-      error,
-      duration
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'TOKEN_REFRESH',
+        result === 'success' ? 'success' : 'failure',
+        {
+          reason,
+          newTokenLength,
+          refreshAttempt: true,
+        },
+        error,
+        duration
+      )
+    );
   }
 
   /**
    * Track failed login patterns for security monitoring
    */
   private trackFailedLoginPattern(email: string): void {
-    const recentFailures = this.logs
-      .filter(log => 
-        log.operation === 'LOGIN_ATTEMPT' && 
+    const recentFailures = this.logs.filter(
+      (log) =>
+        log.operation === 'LOGIN_ATTEMPT' &&
         log.status === 'failure' &&
         log.details.email === email &&
         Date.now() - new Date(log.timestamp).getTime() < 15 * 60 * 1000 // Last 15 minutes
-      );
+    );
 
     if (recentFailures.length >= 3) {
-      this.addLog(this.createLogEntry(
-        'SECURITY_ALERT',
-        'warning',
-        {
+      this.addLog(
+        this.createLogEntry('SECURITY_ALERT', 'warning', {
           alertType: 'MULTIPLE_FAILED_LOGINS',
           email,
           failureCount: recentFailures.length,
           timeWindow: '15 minutes',
-        }
-      ));
+        })
+      );
     }
   }
 
@@ -402,28 +437,33 @@ class AuthLogger {
 
     if (filter) {
       if (filter.operation) {
-        filteredLogs = filteredLogs.filter(log => 
+        filteredLogs = filteredLogs.filter((log) =>
           log.operation.includes(filter.operation!.toUpperCase())
         );
       }
 
       if (filter.status) {
-        filteredLogs = filteredLogs.filter(log => log.status === filter.status);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.status === filter.status
+        );
       }
 
       if (filter.since) {
-        filteredLogs = filteredLogs.filter(log => 
-          new Date(log.timestamp) >= filter.since!
+        filteredLogs = filteredLogs.filter(
+          (log) => new Date(log.timestamp) >= filter.since!
         );
       }
 
       if (filter.userId) {
-        filteredLogs = filteredLogs.filter(log => log.userId === filter.userId);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.userId === filter.userId
+        );
       }
     }
 
-    return filteredLogs.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return filteredLogs.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
@@ -451,22 +491,33 @@ class AuthLogger {
       };
     }
 
-    const loginAttempts = this.logs.filter(log => log.operation === 'LOGIN_ATTEMPT');
-    const successfulLogins = loginAttempts.filter(log => log.status === 'success');
-    const failedLogins = loginAttempts.filter(log => log.status === 'failure');
-    const tokenRefreshes = this.logs.filter(log => log.operation === 'TOKEN_REFRESH');
-    const sessionRestores = this.logs.filter(log => 
-      log.operation === 'SESSION_RESTORE' && log.status === 'success'
+    const loginAttempts = this.logs.filter(
+      (log) => log.operation === 'LOGIN_ATTEMPT'
+    );
+    const successfulLogins = loginAttempts.filter(
+      (log) => log.status === 'success'
+    );
+    const failedLogins = loginAttempts.filter(
+      (log) => log.status === 'failure'
+    );
+    const tokenRefreshes = this.logs.filter(
+      (log) => log.operation === 'TOKEN_REFRESH'
+    );
+    const sessionRestores = this.logs.filter(
+      (log) => log.operation === 'SESSION_RESTORE' && log.status === 'success'
     );
 
-    const averageLoginDuration = successfulLogins.length > 0 ?
-      successfulLogins.reduce((sum, log) => sum + (log.duration || 0), 0) / successfulLogins.length :
-      0;
+    const averageLoginDuration =
+      successfulLogins.length > 0
+        ? successfulLogins.reduce((sum, log) => sum + (log.duration || 0), 0) /
+          successfulLogins.length
+        : 0;
 
     const recentErrors = this.logs
-      .filter(log => 
-        log.status === 'failure' &&
-        Date.now() - new Date(log.timestamp).getTime() < 60 * 60 * 1000 // Last hour
+      .filter(
+        (log) =>
+          log.status === 'failure' &&
+          Date.now() - new Date(log.timestamp).getTime() < 60 * 60 * 1000 // Last hour
       )
       .slice(-10); // Last 10 errors
 
@@ -513,20 +564,22 @@ class AuthLogger {
    * Log authentication errors with detailed information
    */
   logAuthError(details: AuthErrorDetails): void {
-    this.addLog(this.createLogEntry(
-      'AUTH_ERROR',
-      'failure',
-      {
-        errorType: details.errorType,
-        errorCode: details.errorCode,
-        operation: details.operation,
-        context: details.context,
-        httpStatus: details.httpStatus,
-        retryable: details.retryable,
-        errorClassification: this.classifyErrorSeverity(details),
-      },
-      new Error(details.errorMessage),
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'AUTH_ERROR',
+        'failure',
+        {
+          errorType: details.errorType,
+          errorCode: details.errorCode,
+          operation: details.operation,
+          context: details.context,
+          httpStatus: details.httpStatus,
+          retryable: details.retryable,
+          errorClassification: this.classifyErrorSeverity(details),
+        },
+        new Error(details.errorMessage)
+      )
+    );
 
     // Track error patterns for monitoring
     this.trackErrorPattern(details);
@@ -536,20 +589,22 @@ class AuthLogger {
    * Log redirect operations with source and destination tracking
    */
   logRedirect(details: RedirectDetails): void {
-    this.addLog(this.createLogEntry(
-      'REDIRECT',
-      details.preventedLoop ? 'warning' : 'info',
-      {
-        from: details.from,
-        to: details.to,
-        reason: details.reason,
-        method: details.method,
-        wasAuthenticated: details.wasAuthenticated,
-        preventedLoop: details.preventedLoop || false,
-        redirectTimestamp: details.timestamp,
-        pathChange: `${details.from} -> ${details.to}`,
-      }
-    ));
+    this.addLog(
+      this.createLogEntry(
+        'REDIRECT',
+        details.preventedLoop ? 'warning' : 'info',
+        {
+          from: details.from,
+          to: details.to,
+          reason: details.reason,
+          method: details.method,
+          wasAuthenticated: details.wasAuthenticated,
+          preventedLoop: details.preventedLoop || false,
+          redirectTimestamp: details.timestamp,
+          pathChange: `${details.from} -> ${details.to}`,
+        }
+      )
+    );
 
     // Track redirect patterns to detect loops
     this.trackRedirectPattern(details);
@@ -571,13 +626,18 @@ class AuthLogger {
   ): void {
     this.logAuthError({
       errorType: 'network',
-      errorCode: details?.offline ? 'OFFLINE' : details?.timeout ? 'TIMEOUT' : 'NETWORK_ERROR',
+      errorCode: details?.offline
+        ? 'OFFLINE'
+        : details?.timeout
+          ? 'TIMEOUT'
+          : 'NETWORK_ERROR',
       errorMessage: error.message,
       operation,
       context: {
         url: details?.url,
         method: details?.method,
-        isOnline: typeof navigator !== 'undefined' ? navigator.onLine : undefined,
+        isOnline:
+          typeof navigator !== 'undefined' ? navigator.onLine : undefined,
         connectionType: this.getConnectionType(),
       },
       stack: error.stack,
@@ -607,9 +667,14 @@ class AuthLogger {
       context: {
         url: details?.url,
         method: details?.method,
-        origin: details?.origin || (typeof window !== 'undefined' ? window.location.origin : undefined),
+        origin:
+          details?.origin ||
+          (typeof window !== 'undefined' ? window.location.origin : undefined),
         allowedOrigins: details?.allowedOrigins,
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+        userAgent:
+          typeof window !== 'undefined'
+            ? window.navigator.userAgent
+            : undefined,
       },
       stack: error.stack,
       retryable: false,
@@ -676,9 +741,14 @@ class AuthLogger {
   /**
    * Classify error severity for monitoring
    */
-  private classifyErrorSeverity(error: AuthErrorDetails): 'low' | 'medium' | 'high' | 'critical' {
+  private classifyErrorSeverity(
+    error: AuthErrorDetails
+  ): 'low' | 'medium' | 'high' | 'critical' {
     // Critical: Authentication failures, token corruption
-    if (error.errorType === 'authentication' || error.errorCode.includes('CORRUPTED')) {
+    if (
+      error.errorType === 'authentication' ||
+      error.errorCode.includes('CORRUPTED')
+    ) {
       return 'critical';
     }
 
@@ -700,25 +770,23 @@ class AuthLogger {
    * Track error patterns for security monitoring
    */
   private trackErrorPattern(error: AuthErrorDetails): void {
-    const recentErrors = this.logs
-      .filter(log => 
-        log.operation === 'AUTH_ERROR' && 
+    const recentErrors = this.logs.filter(
+      (log) =>
+        log.operation === 'AUTH_ERROR' &&
         log.details.errorType === error.errorType &&
         Date.now() - new Date(log.timestamp).getTime() < 10 * 60 * 1000 // Last 10 minutes
-      );
+    );
 
     if (recentErrors.length >= 5) {
-      this.addLog(this.createLogEntry(
-        'SECURITY_ALERT',
-        'warning',
-        {
+      this.addLog(
+        this.createLogEntry('SECURITY_ALERT', 'warning', {
           alertType: 'REPEATED_AUTH_ERRORS',
           errorType: error.errorType,
           errorCount: recentErrors.length,
           timeWindow: '10 minutes',
           pattern: 'high_error_frequency',
-        }
-      ));
+        })
+      );
     }
   }
 
@@ -726,44 +794,41 @@ class AuthLogger {
    * Track redirect patterns to detect loops
    */
   private trackRedirectPattern(redirect: RedirectDetails): void {
-    const recentRedirects = this.logs
-      .filter(log => 
+    const recentRedirects = this.logs.filter(
+      (log) =>
         log.operation === 'REDIRECT' &&
         Date.now() - new Date(log.timestamp).getTime() < 5 * 60 * 1000 // Last 5 minutes
-      );
+    );
 
     // Check for redirect loops
-    const samePathRedirects = recentRedirects.filter(log =>
-      log.details.from === redirect.from && log.details.to === redirect.to
+    const samePathRedirects = recentRedirects.filter(
+      (log) =>
+        log.details.from === redirect.from && log.details.to === redirect.to
     );
 
     if (samePathRedirects.length >= 3) {
-      this.addLog(this.createLogEntry(
-        'SECURITY_ALERT',
-        'warning',
-        {
+      this.addLog(
+        this.createLogEntry('SECURITY_ALERT', 'warning', {
           alertType: 'REDIRECT_LOOP_DETECTED',
           from: redirect.from,
           to: redirect.to,
           loopCount: samePathRedirects.length,
           timeWindow: '5 minutes',
           pattern: 'redirect_loop',
-        }
-      ));
+        })
+      );
     }
 
     // Check for excessive redirects
     if (recentRedirects.length >= 10) {
-      this.addLog(this.createLogEntry(
-        'SECURITY_ALERT',
-        'warning',
-        {
+      this.addLog(
+        this.createLogEntry('SECURITY_ALERT', 'warning', {
           alertType: 'EXCESSIVE_REDIRECTS',
           redirectCount: recentRedirects.length,
           timeWindow: '5 minutes',
           pattern: 'excessive_redirects',
-        }
-      ));
+        })
+      );
     }
   }
 
@@ -783,24 +848,22 @@ class AuthLogger {
    */
   setUserId(userId: string): void {
     // Update recent logs with user ID
-    const recentLogs = this.logs.filter(log => 
-      Date.now() - new Date(log.timestamp).getTime() < 5 * 60 * 1000 // Last 5 minutes
+    const recentLogs = this.logs.filter(
+      (log) => Date.now() - new Date(log.timestamp).getTime() < 5 * 60 * 1000 // Last 5 minutes
     );
 
-    recentLogs.forEach(log => {
+    recentLogs.forEach((log) => {
       if (!log.userId) {
         log.userId = userId;
       }
     });
 
-    this.addLog(this.createLogEntry(
-      'USER_ID_SET',
-      'info',
-      {
+    this.addLog(
+      this.createLogEntry('USER_ID_SET', 'info', {
         userId,
         updatedRecentLogs: recentLogs.length,
-      }
-    ));
+      })
+    );
   }
 
   /**
@@ -831,7 +894,7 @@ class AuthLogger {
       };
     }
 
-    const errorLogs = this.logs.filter(log => log.operation === 'AUTH_ERROR');
+    const errorLogs = this.logs.filter((log) => log.operation === 'AUTH_ERROR');
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
     const oneDay = 24 * oneHour;
@@ -841,7 +904,7 @@ class AuthLogger {
     let lastHourErrors = 0;
     let lastDayErrors = 0;
 
-    errorLogs.forEach(log => {
+    errorLogs.forEach((log) => {
       const errorType = log.details.errorType || 'unknown';
       const severity = log.details.errorClassification || 'unknown';
       const logTime = new Date(log.timestamp).getTime();
@@ -853,13 +916,15 @@ class AuthLogger {
       if (now - logTime < oneDay) lastDayErrors++;
     });
 
-    const mostCommonError = Object.entries(errorsByType)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'none';
+    const mostCommonError =
+      Object.entries(errorsByType).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      'none';
 
     const recentCriticalErrors = errorLogs
-      .filter(log => 
-        log.details.errorClassification === 'critical' &&
-        now - new Date(log.timestamp).getTime() < oneDay
+      .filter(
+        (log) =>
+          log.details.errorClassification === 'critical' &&
+          now - new Date(log.timestamp).getTime() < oneDay
       )
       .slice(-5);
 
@@ -902,7 +967,9 @@ class AuthLogger {
       };
     }
 
-    const redirectLogs = this.logs.filter(log => log.operation === 'REDIRECT');
+    const redirectLogs = this.logs.filter(
+      (log) => log.operation === 'REDIRECT'
+    );
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
@@ -910,7 +977,7 @@ class AuthLogger {
     const pathCounts: Record<string, number> = {};
     let loopPrevented = 0;
 
-    redirectLogs.forEach(log => {
+    redirectLogs.forEach((log) => {
       const reason = log.details.reason || 'unknown';
       const pathChange = log.details.pathChange || 'unknown';
 
@@ -922,11 +989,12 @@ class AuthLogger {
       }
     });
 
-    const mostCommonPath = Object.entries(pathCounts)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'none';
+    const mostCommonPath =
+      Object.entries(pathCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      'none';
 
     const recentRedirects = redirectLogs
-      .filter(log => now - new Date(log.timestamp).getTime() < oneHour)
+      .filter((log) => now - new Date(log.timestamp).getTime() < oneHour)
       .slice(-10);
 
     return {
@@ -936,7 +1004,15 @@ class AuthLogger {
       recentRedirects,
       redirectPatterns: {
         mostCommonPath,
-        averageRedirectsPerSession: redirectLogs.length / Math.max(1, this.logs.filter(log => log.operation === 'LOGIN_ATTEMPT' && log.status === 'success').length),
+        averageRedirectsPerSession:
+          redirectLogs.length /
+          Math.max(
+            1,
+            this.logs.filter(
+              (log) =>
+                log.operation === 'LOGIN_ATTEMPT' && log.status === 'success'
+            ).length
+          ),
       },
     };
   }

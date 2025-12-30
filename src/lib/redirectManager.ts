@@ -42,7 +42,10 @@ class RedirectManager {
     if (typeof window === 'undefined') return;
 
     try {
-      sessionStorage.setItem(RedirectManager.STORAGE_KEY, JSON.stringify(state));
+      sessionStorage.setItem(
+        RedirectManager.STORAGE_KEY,
+        JSON.stringify(state)
+      );
     } catch (error) {
       console.warn('Failed to save redirect state:', error);
     }
@@ -59,11 +62,16 @@ class RedirectManager {
     if (state.lastRedirect === targetPath) {
       // Check if we're within cooldown period
       if (now - state.lastRedirectTime < RedirectManager.REDIRECT_COOLDOWN) {
-        console.warn(`🚫 Redirect to ${targetPath} blocked - within cooldown period`);
-        
+        console.warn(
+          `🚫 Redirect to ${targetPath} blocked - within cooldown period`
+        );
+
         // Log prevented redirect loop
         authLogger.logRedirect({
-          from: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
+          from:
+            typeof window !== 'undefined'
+              ? window.location.pathname
+              : 'unknown',
           to: targetPath,
           reason: 'cooldown_period',
           method: 'safe_redirect',
@@ -71,17 +79,22 @@ class RedirectManager {
           wasAuthenticated: false, // Will be updated by caller if needed
           preventedLoop: true,
         });
-        
+
         return false;
       }
 
       // Check if we've exceeded max redirects
       if (state.redirectCount >= RedirectManager.MAX_REDIRECTS) {
-        console.warn(`🚫 Redirect to ${targetPath} blocked - max redirects exceeded`);
-        
+        console.warn(
+          `🚫 Redirect to ${targetPath} blocked - max redirects exceeded`
+        );
+
         // Log prevented redirect loop
         authLogger.logRedirect({
-          from: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
+          from:
+            typeof window !== 'undefined'
+              ? window.location.pathname
+              : 'unknown',
           to: targetPath,
           reason: 'max_redirects_exceeded',
           method: 'safe_redirect',
@@ -89,7 +102,7 @@ class RedirectManager {
           wasAuthenticated: false, // Will be updated by caller if needed
           preventedLoop: true,
         });
-        
+
         return false;
       }
     }
@@ -116,7 +129,9 @@ class RedirectManager {
     state.lastRedirectTime = now;
 
     this.saveRedirectState(state);
-    console.log(`📝 Recorded redirect to ${targetPath} (count: ${state.redirectCount})`);
+    console.log(
+      `📝 Recorded redirect to ${targetPath} (count: ${state.redirectCount})`
+    );
   }
 
   /**
@@ -136,17 +151,25 @@ class RedirectManager {
   /**
    * Safe redirect function that checks for loops
    */
-  safeRedirect(router: any, targetPath: string, reason?: string, isAuthenticated?: boolean): boolean {
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : 'unknown';
-    
+  safeRedirect(
+    router: any,
+    targetPath: string,
+    reason?: string,
+    isAuthenticated?: boolean
+  ): boolean {
+    const currentPath =
+      typeof window !== 'undefined' ? window.location.pathname : 'unknown';
+
     if (!this.canRedirect(targetPath)) {
       console.error(`🚫 Redirect to ${targetPath} blocked to prevent loop`);
       return false;
     }
 
-    console.log(`🔄 Safe redirect to ${targetPath}${reason ? ` (${reason})` : ''}`);
+    console.log(
+      `🔄 Safe redirect to ${targetPath}${reason ? ` (${reason})` : ''}`
+    );
     this.recordRedirect(targetPath);
-    
+
     // Log the redirect
     authLogger.logRedirect({
       from: currentPath,
@@ -157,7 +180,7 @@ class RedirectManager {
       wasAuthenticated: isAuthenticated || false,
       preventedLoop: false,
     });
-    
+
     router.push(targetPath);
     return true;
   }
@@ -179,15 +202,17 @@ class RedirectManager {
     // Define protected and public routes
     const protectedRoutes = ['/dashboard', '/upload', '/profile', '/orders'];
     const publicRoutes = ['/login', '/register', '/'];
-    
-    const isProtectedRoute = protectedRoutes.some(route => currentPath.startsWith(route));
-    const isPublicRoute = publicRoutes.some(route => currentPath === route);
+
+    const isProtectedRoute = protectedRoutes.some((route) =>
+      currentPath.startsWith(route)
+    );
+    const isPublicRoute = publicRoutes.some((route) => currentPath === route);
 
     // If user is not authenticated and on a protected route
     if (!isAuthenticated && isProtectedRoute) {
       return this.safeRedirect(
-        router, 
-        '/login', 
+        router,
+        '/login',
         'unauthenticated user on protected route',
         isAuthenticated
       );
@@ -196,8 +221,8 @@ class RedirectManager {
     // If user is authenticated and on login page
     if (isAuthenticated && currentPath === '/login') {
       return this.safeRedirect(
-        router, 
-        '/dashboard', 
+        router,
+        '/dashboard',
         'authenticated user on login page',
         isAuthenticated
       );

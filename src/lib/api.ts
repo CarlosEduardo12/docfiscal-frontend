@@ -2,7 +2,7 @@ import { authTokenManager } from './AuthTokenManager';
 import { ErrorHandler, AppError } from './errorHandler';
 import { CorsHandler } from './corsHandler';
 import { environmentConfig } from './environmentConfig';
-import { secureStorage } from './secureStorage';
+import { getSecurityHeaders } from './secureStorage';
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -28,7 +28,11 @@ interface EnhancedApiResponse<T = any> extends ApiResponse<T> {
 
 class ApiClient {
   private baseURL: string;
-  private corsConfig: { apiUrl: string; frontendUrl: string; environment: 'development' | 'production' | 'test' };
+  private corsConfig: {
+    apiUrl: string;
+    frontendUrl: string;
+    environment: 'development' | 'production' | 'test';
+  };
 
   constructor() {
     // Use environment configuration for all URLs and settings
@@ -39,7 +43,7 @@ class ApiClient {
       frontendUrl: envConfig.frontendUrl,
       environment: envConfig.environment,
     };
-    
+
     // Log configuration in development
     if (envConfig.isDevelopment) {
       console.log('🔧 API Client initialized with:', {
@@ -58,8 +62,8 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
 
     // Get security headers for HTTPS environments
-    const securityHeaders = secureStorage.getSecurityHeaders();
-    
+    const securityHeaders = getSecurityHeaders();
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -122,22 +126,27 @@ class ApiClient {
               const retryError = new Error(
                 retryErrorData.message || `HTTP ${retryResponse.status}`
               );
-              
+
               // Classify the retry error
-              const appError = ErrorHandler.classifyError(retryError, retryResponse);
+              const appError = ErrorHandler.classifyError(
+                retryError,
+                retryResponse
+              );
               ErrorHandler.logError(appError, 'API_RETRY');
-              
+
               throw retryError;
             }
           }
         }
 
-        const httpError = new Error(errorData.message || `HTTP ${response.status}`);
-        
+        const httpError = new Error(
+          errorData.message || `HTTP ${response.status}`
+        );
+
         // Classify the HTTP error
         const appError = ErrorHandler.classifyError(httpError, response);
         ErrorHandler.logError(appError, 'API_HTTP');
-        
+
         throw httpError;
       }
 
@@ -155,18 +164,21 @@ class ApiClient {
       return data;
     } catch (error) {
       console.error('💥 API Error:', error);
-      
+
       // Check for CORS issues first
       if (CorsHandler.detectCorsIssue(error, response)) {
         console.log('🚫 CORS issue detected');
         CorsHandler.logCorsError(this.corsConfig, error);
-        
+
         // Attempt CORS fallback in production
         const envConfig = environmentConfig.getConfig();
         if (envConfig.isProduction) {
           console.log('🔄 Attempting CORS fallback...');
-          const fallbackResult = await CorsHandler.attemptCorsFallback(url, config);
-          
+          const fallbackResult = await CorsHandler.attemptCorsFallback(
+            url,
+            config
+          );
+
           if (fallbackResult.success && fallbackResult.response) {
             console.log('✅ CORS fallback succeeded');
             const fallbackData = await fallbackResult.response.json();
@@ -175,24 +187,26 @@ class ApiClient {
             console.log('❌ CORS fallback failed:', fallbackResult.error);
           }
         }
-        
+
         const corsError = ErrorHandler.detectCorsError(error, response);
         if (corsError) {
           ErrorHandler.logError(corsError, 'API_CORS');
-          const enhancedError = new Error(ErrorHandler.getUserMessage(corsError));
+          const enhancedError = new Error(
+            ErrorHandler.getUserMessage(corsError)
+          );
           (enhancedError as any).appError = corsError;
           throw enhancedError;
         }
       }
-      
+
       // Classify the error using our error handler
       const appError = ErrorHandler.classifyError(error, response);
       ErrorHandler.logError(appError, 'API_REQUEST');
-      
+
       // Create enhanced error response
       const enhancedError = new Error(ErrorHandler.getUserMessage(appError));
       (enhancedError as any).appError = appError;
-      
+
       throw enhancedError;
     }
   }
@@ -222,7 +236,7 @@ class ApiClient {
 
     // Note: Token storage is now handled by AuthContext to ensure proper synchronization
     // The API client no longer stores tokens directly to avoid race conditions
-    
+
     return response;
   }
 
@@ -285,7 +299,7 @@ class ApiClient {
     orderId: string
   ): Promise<{ blob: Blob; filename?: string }> {
     const accessToken = await authTokenManager.getValidToken();
-    
+
     const response = await fetch(
       `${this.baseURL}/api/orders/${orderId}/download`,
       {
@@ -430,13 +444,15 @@ class ApiClient {
     try {
       // Test CORS configuration
       const corsTest = await CorsHandler.testCorsConfiguration(this.baseURL);
-      
+
       // Get diagnostic information
       const diagnostic = CorsHandler.diagnoseCorsIssues(this.corsConfig);
-      
+
       // Generate troubleshooting report
-      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(this.corsConfig);
-      
+      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(
+        this.corsConfig
+      );
+
       return {
         success: corsTest.success,
         corsTest,
@@ -445,9 +461,12 @@ class ApiClient {
       };
     } catch (error) {
       console.error('❌ CORS diagnostic failed:', error);
-      
-      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(this.corsConfig, error);
-      
+
+      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(
+        this.corsConfig,
+        error
+      );
+
       return {
         success: false,
         troubleshootingReport,

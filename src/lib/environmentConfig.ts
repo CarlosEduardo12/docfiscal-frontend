@@ -1,6 +1,6 @@
 /**
  * Environment Configuration Module
- * 
+ *
  * Handles environment-specific configurations including:
  * - API URLs based on environment
  * - Automatic environment detection
@@ -40,10 +40,10 @@ class EnvironmentConfigManager {
     // Primary environment detection
     const nodeEnv = process.env.NODE_ENV as Environment;
     const explicitEnv = process.env.NEXT_PUBLIC_ENVIRONMENT as Environment;
-    
+
     // Use explicit environment if set, otherwise fall back to NODE_ENV
     const environment: Environment = explicitEnv || nodeEnv || 'development';
-    
+
     console.log('🔧 Environment detection:', {
       nodeEnv,
       explicitEnv,
@@ -51,33 +51,49 @@ class EnvironmentConfigManager {
       envVars: {
         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
         NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
-      }
+      },
     });
-    
+
     // Detect if we're running in browser vs server
     const isBrowser = typeof window !== 'undefined';
-    
+
     // Auto-detect URLs based on environment
-    console.log('🔧 About to call getApiUrl with environment:', environment);
-    console.log('🔧 Current process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-    const apiUrl = this.getApiUrl(environment);
+    console.log(
+      '🔧 About to call getApiUrlForEnvironment with environment:',
+      environment
+    );
+    console.log(
+      '🔧 Current process.env.NEXT_PUBLIC_API_URL:',
+      process.env.NEXT_PUBLIC_API_URL
+    );
+    const apiUrl = this.getApiUrlForEnvironment(environment);
     console.log('🔧 getApiUrl returned:', apiUrl);
-    
-    console.log('🔧 About to call getFrontendUrl with environment:', environment);
-    console.log('🔧 Current process.env.NEXT_PUBLIC_FRONTEND_URL:', process.env.NEXT_PUBLIC_FRONTEND_URL);
-    const frontendUrl = this.getFrontendUrl(environment, isBrowser);
+
+    console.log(
+      '🔧 About to call getFrontendUrl with environment:',
+      environment
+    );
+    console.log(
+      '🔧 Current process.env.NEXT_PUBLIC_FRONTEND_URL:',
+      process.env.NEXT_PUBLIC_FRONTEND_URL
+    );
+    const frontendUrl = this.getFrontendUrlForEnvironment(
+      environment,
+      isBrowser
+    );
     console.log('🔧 getFrontendUrl returned:', frontendUrl);
-    
+
     console.log('🔧 Detected URLs:', { apiUrl, frontendUrl });
-    
+
     // Environment flags
     const isProduction = environment === 'production';
     const isDevelopment = environment === 'development';
     const isTest = environment === 'test';
-    
+
     // Protocol detection
-    const isHttps = apiUrl.startsWith('https://') || frontendUrl.startsWith('https://');
-    
+    const isHttps =
+      apiUrl.startsWith('https://') || frontendUrl.startsWith('https://');
+
     return {
       environment,
       apiUrl,
@@ -88,7 +104,7 @@ class EnvironmentConfigManager {
       isHttps,
       corsEnabled: this.shouldEnableCors(environment),
       secureStorage: isHttps && isProduction,
-      logLevel: this.getLogLevel(environment),
+      logLevel: this.getLogLevelForEnvironment(environment),
       enableAuthLogging: this.shouldEnableAuthLogging(environment),
     };
   }
@@ -96,19 +112,22 @@ class EnvironmentConfigManager {
   /**
    * Get API URL based on environment - COMPLETELY REWRITTEN
    */
-  private getApiUrl(environment: Environment): string {
+  private getApiUrlForEnvironment(environment: Environment): string {
     // COMPLETELY NEW IMPLEMENTATION
     console.log('🚨 NEW getApiUrl method called!');
     console.log('🚨 Environment:', environment);
-    console.log('🚨 process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-    
+    console.log(
+      '🚨 process.env.NEXT_PUBLIC_API_URL:',
+      process.env.NEXT_PUBLIC_API_URL
+    );
+
     // Direct environment variable check
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (apiUrl && apiUrl.length > 0) {
       console.log('🚨 Returning environment variable:', apiUrl);
       return apiUrl;
     }
-    
+
     // Fallback to defaults
     console.log('🚨 Using fallback for environment:', environment);
     if (environment === 'production') {
@@ -119,7 +138,7 @@ class EnvironmentConfigManager {
       return 'http://localhost:8000';
     }
   }
-  
+
   private getDefaultApiUrl(environment: Environment): string {
     switch (environment) {
       case 'production':
@@ -135,7 +154,10 @@ class EnvironmentConfigManager {
   /**
    * Get frontend URL based on environment
    */
-  private getFrontendUrl(environment: Environment, isBrowser: boolean): string {
+  private getFrontendUrlForEnvironment(
+    environment: Environment,
+    isBrowser: boolean
+  ): string {
     // In browser, we can detect current origin
     if (isBrowser && typeof window !== 'undefined') {
       const origin = window.location.origin;
@@ -148,12 +170,16 @@ class EnvironmentConfigManager {
 
     // Check for explicit frontend URL
     if (process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXTAUTH_URL) {
-      const url = process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXTAUTH_URL!;
+      const url =
+        process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXTAUTH_URL!;
       console.log('🔧 Using explicit frontend URL:', url);
       return url;
     }
 
-    console.log('🔧 No explicit frontend URL found, using environment default for:', environment);
+    console.log(
+      '🔧 No explicit frontend URL found, using environment default for:',
+      environment
+    );
     // Environment-specific defaults
     switch (environment) {
       case 'production':
@@ -171,9 +197,9 @@ class EnvironmentConfigManager {
    */
   private shouldEnableCors(environment: Environment): boolean {
     // CORS is typically needed when frontend and backend are on different domains
-    const apiUrl = this.getApiUrl(environment);
-    const frontendUrl = this.getFrontendUrl(environment, false);
-    
+    const apiUrl = this.getApiUrlForEnvironment(environment);
+    const frontendUrl = this.getFrontendUrlForEnvironment(environment, false);
+
     try {
       const apiDomain = new URL(apiUrl).origin;
       const frontendDomain = new URL(frontendUrl).origin;
@@ -187,7 +213,9 @@ class EnvironmentConfigManager {
   /**
    * Get appropriate log level for environment
    */
-  private getLogLevel(environment: Environment): 'debug' | 'info' | 'warn' | 'error' {
+  private getLogLevelForEnvironment(
+    environment: Environment
+  ): 'debug' | 'info' | 'warn' | 'error' {
     switch (environment) {
       case 'production':
         return 'warn';
@@ -242,15 +270,15 @@ class EnvironmentConfigManager {
       if (apiUrl.includes('localhost')) {
         console.warn('⚠️ Production environment using localhost API URL');
       }
-      
+
       if (frontendUrl.includes('localhost')) {
         console.warn('⚠️ Production environment using localhost frontend URL');
       }
-      
+
       if (!apiUrl.startsWith('https://')) {
         console.warn('⚠️ Production API URL should use HTTPS');
       }
-      
+
       if (!frontendUrl.startsWith('https://')) {
         console.warn('⚠️ Production frontend URL should use HTTPS');
       }
@@ -269,7 +297,7 @@ class EnvironmentConfigManager {
    */
   private logConfiguration(): void {
     const { logLevel } = this.config;
-    
+
     if (logLevel === 'debug' || logLevel === 'info') {
       console.log('🔧 Environment Configuration:', {
         environment: this.config.environment,
@@ -287,7 +315,7 @@ class EnvironmentConfigManager {
    */
   getConfig(): EnvironmentConfig {
     console.log('🔧 [DEBUG] getConfig called, this.config:', this.config);
-    
+
     if (!this.config) {
       console.log('🔧 [DEBUG] No config found, returning defaults');
       // Return safe defaults if config is not initialized
@@ -302,54 +330,37 @@ class EnvironmentConfigManager {
         corsEnabled: true,
         secureStorage: false,
         logLevel: 'debug',
+        enableAuthLogging: true,
       };
     }
-    
+
     // Ensure URLs are not empty
     const config = { ...this.config };
-    console.log('🔧 [DEBUG] Original config.apiUrl:', config.apiUrl, 'truthy:', !!config.apiUrl);
-    
+    console.log(
+      '🔧 [DEBUG] Original config.apiUrl:',
+      config.apiUrl,
+      'truthy:',
+      !!config.apiUrl
+    );
+
     if (!config.apiUrl) {
       console.log('🔧 [DEBUG] apiUrl is empty, applying fallback');
-      config.apiUrl = config.isProduction 
+      config.apiUrl = config.isProduction
         ? 'https://responsible-balance-production.up.railway.app'
         : 'http://localhost:8000';
     }
     if (!config.frontendUrl) {
       console.log('🔧 [DEBUG] frontendUrl is empty, applying fallback');
-      config.frontendUrl = config.isProduction 
+      config.frontendUrl = config.isProduction
         ? 'https://your-frontend-domain.com'
         : 'http://localhost:3000';
     }
-    
-    console.log('🔧 [DEBUG] Final config:', { apiUrl: config.apiUrl, frontendUrl: config.frontendUrl });
+
+    console.log('🔧 [DEBUG] Final config:', {
+      apiUrl: config.apiUrl,
+      frontendUrl: config.frontendUrl,
+    });
     return config;
-  }
-
-  /**
-   * Get API URL
-   */
-  getApiUrl(): string {
-    const url = this.config?.apiUrl;
-    if (!url) {
-      return this.config?.isProduction 
-        ? 'https://responsible-balance-production.up.railway.app'
-        : 'http://localhost:8000';
-    }
-    return url;
-  }
-
-  /**
-   * Get frontend URL
-   */
-  getFrontendUrl(): string {
-    const url = this.config?.frontendUrl;
-    if (!url) {
-      return this.config?.isProduction 
-        ? 'https://your-frontend-domain.com'
-        : 'http://localhost:3000';
-    }
-    return url;
   }
 
   /**
@@ -357,6 +368,37 @@ class EnvironmentConfigManager {
    */
   isProduction(): boolean {
     return this.config?.isProduction || false;
+  }
+
+  /**
+   * Get API URL (public interface)
+   */
+  getApiUrl(): string {
+    return (
+      this.config?.apiUrl ||
+      (this.config?.isProduction
+        ? 'https://responsible-balance-production.up.railway.app'
+        : 'http://localhost:8000')
+    );
+  }
+
+  /**
+   * Get frontend URL (public interface)
+   */
+  getFrontendUrl(): string {
+    return (
+      this.config?.frontendUrl ||
+      (this.config?.isProduction
+        ? 'https://your-frontend-domain.com'
+        : 'http://localhost:3000')
+    );
+  }
+
+  /**
+   * Get log level (public interface)
+   */
+  getLogLevel(): 'debug' | 'info' | 'warn' | 'error' {
+    return this.config?.logLevel || 'error';
   }
 
   /**
@@ -378,13 +420,6 @@ class EnvironmentConfigManager {
    */
   shouldUseSecureStorage(): boolean {
     return this.config?.secureStorage || false;
-  }
-
-  /**
-   * Get log level
-   */
-  getLogLevel(): 'debug' | 'info' | 'warn' | 'error' {
-    return this.config?.logLevel || 'error';
   }
 
   /**
@@ -413,10 +448,14 @@ class EnvironmentConfigManager {
     cancelUrl: string;
   } {
     const baseUrl = this.getFrontendUrl();
-    
+
     return {
-      returnUrl: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL || `${baseUrl}/payment/success`,
-      cancelUrl: process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL || `${baseUrl}/payment/cancel`,
+      returnUrl:
+        process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL ||
+        `${baseUrl}/payment/success`,
+      cancelUrl:
+        process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL ||
+        `${baseUrl}/payment/cancel`,
     };
   }
 
@@ -440,47 +479,47 @@ export const environmentConfig = {
     }
     return environmentConfigInstance;
   },
-  
+
   // For testing: reset the singleton
   reset(): void {
     environmentConfigInstance = null;
   },
-  
+
   getConfig() {
     return this.getInstance().getConfig();
   },
-  
+
   getApiUrl() {
     return this.getInstance().getApiUrl();
   },
-  
+
   getFrontendUrl() {
     return this.getInstance().getFrontendUrl();
   },
-  
+
   isProduction() {
     return this.getInstance().isProduction();
   },
-  
+
   isDevelopment() {
     return this.getInstance().isDevelopment();
   },
-  
+
   isHttps() {
     return this.getInstance().isHttps();
   },
-  
+
   getCorsConfig() {
     return this.getInstance().getCorsConfig();
   },
-  
+
   getPaymentUrls() {
     return this.getInstance().getPaymentUrls();
   },
-  
+
   refresh() {
     return this.getInstance().refresh();
-  }
+  },
 };
 
 // Export types and utilities

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { redirectManager } from '@/lib/redirectManager';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -23,7 +22,6 @@ import {
   type ValidationSchema,
   type ServerErrorMapping,
 } from './FormValidator';
-import type { LoginCredentials } from '@/types';
 
 // Login form data interface
 interface LoginFormData {
@@ -145,12 +143,9 @@ const LoginFormContent: React.FC = () => {
       if (!result.success) {
         // Handle login failure
         const errorMessage = result.error || 'Login failed';
-        
+
         // Map server errors to user-friendly messages
-        const mappedErrors = mapServerErrors(
-          errorMessage,
-          serverErrorMapping
-        );
+        const mappedErrors = mapServerErrors(errorMessage, serverErrorMapping);
 
         // Set server errors for display
         setServerErrors(mappedErrors.map((e) => e.message));
@@ -251,12 +246,6 @@ const LoginFormContent: React.FC = () => {
 
 // Main component with FormValidator wrapper
 export default function EnhancedLoginForm() {
-  const [isValid, setIsValid] = useState(false);
-
-  const handleValidationChange = (valid: boolean) => {
-    setIsValid(valid);
-  };
-
   return (
     <main
       className="min-h-screen flex items-center justify-center bg-gray-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
@@ -275,10 +264,7 @@ export default function EnhancedLoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FormValidator
-            schema={loginSchema}
-            onValidationChange={handleValidationChange}
-          >
+          <FormValidator schema={loginSchema}>
             <LoginFormContent />
           </FormValidator>
 

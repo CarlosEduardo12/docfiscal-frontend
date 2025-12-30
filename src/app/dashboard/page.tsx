@@ -64,10 +64,6 @@ export default function DashboardPage() {
 
   const handlePayment = async (orderId: string) => {
     console.log('🔄 Iniciando pagamento para order:', orderId);
-    console.log(
-      '🔑 Token atual:',
-      apiClient.currentAccessToken ? 'Presente' : 'Ausente'
-    );
     console.log('👤 Usuário atual:', user);
 
     setIsPaymentLoading(true);

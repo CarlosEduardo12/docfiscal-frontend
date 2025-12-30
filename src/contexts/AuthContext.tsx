@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useCallback,
   ReactNode,
 } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -49,37 +50,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [lastError, setLastError] = useState<AppError | null>(null);
   const router = useRouter();
 
-  // Initialize authentication state on mount
-  useEffect(() => {
-    initializeAuth();
-  }, []);
-
-  const initializeAuth = async () => {
+  const initializeAuth = useCallback(async () => {
     const startTime = Date.now();
-    
+
     try {
       setIsLoading(true);
       console.log('🔄 Initializing authentication on page load...');
 
       // Initialize token manager (includes migration)
       const hasValidSession = await authTokenManager.initialize();
-      console.log('📋 Token manager initialized, has valid session:', hasValidSession);
+      console.log(
+        '📋 Token manager initialized, has valid session:',
+        hasValidSession
+      );
 
       if (hasValidSession) {
         // Attempt to get a valid token (this will auto-refresh if needed)
         const validToken = await authTokenManager.getValidToken();
-        
+
         if (validToken) {
           console.log('✅ Valid token obtained, fetching user profile...');
-          
+
           // Fetch user profile with the valid token
           const userProfile = await fetchUserProfile(validToken);
-          
+
           if (userProfile) {
             setUser(userProfile);
             authLogger.setUserId(userProfile.id);
-            console.log('✅ Session restored successfully for user:', userProfile.email);
-            
+            console.log(
+              '✅ Session restored successfully for user:',
+              userProfile.email
+            );
+
             // Log successful session restoration
             authLogger.logSessionOperation({
               operation: 'restore',
@@ -92,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else {
             console.log('❌ Failed to fetch user profile, clearing tokens');
             await handleSessionFailure();
-            
+
             // Log session restoration failure
             authLogger.logSessionOperation({
               operation: 'restore',
@@ -106,7 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } else {
           console.log('❌ Could not obtain valid token, clearing session');
           await handleSessionFailure();
-          
+
           // Log session restoration failure
           authLogger.logSessionOperation({
             operation: 'restore',
@@ -121,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('ℹ️ No valid session found on page load');
         // Ensure clean state when no session exists
         setUser(null);
-        
+
         // Log no session found
         authLogger.logSessionOperation({
           operation: 'initialize',
@@ -132,7 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           duration: Date.now() - startTime,
         });
       }
-      
+
       // Log successful auth initialization
       authLogger.logAuthInitialization(
         'success',
@@ -143,62 +145,69 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('❌ Auth initialization failed:', error);
       await handleSessionFailure();
-      
+
       // Log failed auth initialization
       authLogger.logAuthInitialization(
         'failure',
         false,
-        error instanceof Error ? error : new Error('Unknown initialization error'),
+        error instanceof Error
+          ? error
+          : new Error('Unknown initialization error'),
         Date.now() - startTime
       );
     } finally {
       setIsLoading(false);
       console.log('✅ Auth initialization completed');
     }
-  };
+  }, []);
+
+  // Initialize authentication state on mount
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   const handleSessionFailure = async (appError?: AppError) => {
     console.log('🧹 Handling session failure - clearing all auth state');
-    
+
     if (appError) {
       setLastError(appError);
       setError(ErrorHandler.getUserMessage(appError));
       ErrorHandler.logError(appError, 'SESSION_FAILURE');
     }
-    
+
     authTokenManager.clearTokens();
     setUser(null);
-    
+
     // Clear any redirect state to prevent loops
     redirectManager.clearRedirectState();
   };
 
   const handleRefreshFailure = async (reason: string, appError?: AppError) => {
     console.log('🚨 Handling refresh failure, reason:', reason);
-    
+
     if (appError) {
       setLastError(appError);
       setError(ErrorHandler.getUserMessage(appError));
       ErrorHandler.logError(appError, 'REFRESH_FAILURE');
     }
-    
+
     // Clear all authentication state
     authTokenManager.clearTokens();
     setUser(null);
-    
+
     // Clear redirect state to prevent loops
     redirectManager.clearRedirectState();
-    
+
     // Only redirect to login if we're not already there and not loading
     if (typeof window !== 'undefined') {
       const currentPath = window.location.pathname;
       if (currentPath !== '/login' && !currentPath.startsWith('/login')) {
         console.log('🔄 Redirecting to login due to refresh failure');
-        
+
         // Use safe redirect to prevent loops
         redirectManager.safeRedirect(
-          router, 
-          '/login', 
+          router,
+          '/login',
           `session refresh failed: ${reason}`,
           false
         );
@@ -208,7 +217,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchUserProfile = async (token: string): Promise<User | null> => {
     const startTime = Date.now();
-    
+
     try {
       const response = await apiClient.getProfile();
 
@@ -218,7 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email: response.data.email,
           name: response.data.name,
         };
-        
+
         // Log successful profile fetch
         authLogger.logProfileFetch(
           'success',
@@ -226,12 +235,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
           undefined,
           Date.now() - startTime
         );
-        
+
         return user;
       }
     } catch (error) {
       console.error('❌ Failed to fetch user profile:', error);
-      
+
       // Log failed profile fetch
       authLogger.logProfileFetch(
         'failure',
@@ -239,11 +248,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error instanceof Error ? error : new Error('Profile fetch failed'),
         Date.now() - startTime
       );
-      
+
       // Check if this is an invalid token error
       const appError = (error as any).appError;
       if (appError && ErrorHandler.shouldClearTokens(appError)) {
-        console.log('🚨 Invalid token detected during profile fetch, cleaning up');
+        console.log(
+          '🚨 Invalid token detected during profile fetch, cleaning up'
+        );
         authTokenManager.cleanupInvalidTokens('invalid_token_profile_fetch');
       }
     }
@@ -256,7 +267,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     password: string
   ): Promise<{ success: boolean; error?: string; appError?: AppError }> => {
     const startTime = Date.now();
-    
+
     try {
       setIsLoading(true);
       setError(null);
@@ -267,13 +278,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.success && response.data) {
         // Handle the actual API response structure where tokens are nested
         const tokenData = response.data.tokens || response.data;
-        
+
         // Store tokens immediately and wait for completion
         const tokens: AuthTokens = {
           accessToken: tokenData.access_token,
           refreshToken: tokenData.refresh_token,
           // Default to 1 hour if expires_in is not provided
-          expiresAt: new Date(Date.now() + (tokenData.expires_in || 3600) * 1000),
+          expiresAt: new Date(
+            Date.now() + (tokenData.expires_in || 3600) * 1000
+          ),
         };
 
         console.log('🔐 Storing tokens from login response:', {
@@ -286,23 +299,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         // Store tokens synchronously to ensure immediate availability
         authTokenManager.storeTokens(tokens);
-        
+
         // Verify tokens were stored correctly
         const storedTokens = authTokenManager.getStoredTokens();
         if (!storedTokens.accessToken || !storedTokens.refreshToken) {
           console.error('❌ Token storage verification failed');
-          
+
           // Log failed login due to token storage
           authLogger.logLoginAttempt({
             email,
-            userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+            userAgent:
+              typeof window !== 'undefined'
+                ? window.navigator.userAgent
+                : undefined,
             timestamp: new Date().toISOString(),
             result: 'failure',
             failureReason: 'token_storage_failed',
             duration: Date.now() - startTime,
           });
-          
-          return { success: false, error: 'Failed to store authentication tokens' };
+
+          return {
+            success: false,
+            error: 'Failed to store authentication tokens',
+          };
         }
 
         // Set user data immediately after successful token storage
@@ -311,7 +330,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email: response.data.user.email,
           name: response.data.user.name,
         };
-        
+
         setUser(userData);
         authLogger.setUserId(userData.id);
 
@@ -321,34 +340,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.error('❌ Authentication state synchronization failed');
           authTokenManager.clearTokens();
           setUser(null);
-          
+
           // Log failed login due to state sync
           authLogger.logLoginAttempt({
             email,
-            userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+            userAgent:
+              typeof window !== 'undefined'
+                ? window.navigator.userAgent
+                : undefined,
             timestamp: new Date().toISOString(),
             result: 'failure',
             failureReason: 'state_synchronization_failed',
             duration: Date.now() - startTime,
           });
-          
-          return { success: false, error: 'Authentication state synchronization failed' };
+
+          return {
+            success: false,
+            error: 'Authentication state synchronization failed',
+          };
         }
 
-        console.log('✅ Login successful - tokens stored and state synchronized');
+        console.log(
+          '✅ Login successful - tokens stored and state synchronized'
+        );
         console.log('🔑 Access token stored:', !!storedTokens.accessToken);
         console.log('🔄 Refresh token stored:', !!storedTokens.refreshToken);
         console.log('👤 User state set:', !!userData);
-        
+
         // Log successful login
         authLogger.logLoginAttempt({
           email,
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+          userAgent:
+            typeof window !== 'undefined'
+              ? window.navigator.userAgent
+              : undefined,
           timestamp: new Date().toISOString(),
           result: 'success',
           duration: Date.now() - startTime,
         });
-        
+
         // Log authentication state change
         authLogger.logAuthStateChange(
           'unauthenticated',
@@ -356,66 +386,76 @@ export function AuthProvider({ children }: AuthProviderProps) {
           'successful_login',
           userData.id
         );
-        
+
         return { success: true };
       } else {
         const errorMessage = response.message || 'Login failed';
         console.error('❌ Login failed:', errorMessage);
         setError(errorMessage);
-        
+
         // Log failed login
         authLogger.logLoginAttempt({
           email,
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+          userAgent:
+            typeof window !== 'undefined'
+              ? window.navigator.userAgent
+              : undefined,
           timestamp: new Date().toISOString(),
           result: 'failure',
           failureReason: errorMessage,
           duration: Date.now() - startTime,
         });
-        
+
         return { success: false, error: errorMessage };
       }
     } catch (error) {
       console.error('❌ Login error:', error);
-      
+
       // Check if this is an enhanced error with appError
       const appError = (error as any).appError;
       if (appError) {
         setLastError(appError);
         setError(ErrorHandler.getUserMessage(appError));
         ErrorHandler.logError(appError, 'LOGIN');
-        
+
         // Log failed login with app error
         authLogger.logLoginAttempt({
           email,
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+          userAgent:
+            typeof window !== 'undefined'
+              ? window.navigator.userAgent
+              : undefined,
           timestamp: new Date().toISOString(),
           result: 'failure',
           failureReason: `${appError.code}: ${appError.message}`,
           duration: Date.now() - startTime,
         });
-        
-        return { 
-          success: false, 
+
+        return {
+          success: false,
           error: ErrorHandler.getUserMessage(appError),
-          appError 
+          appError,
         };
       }
-      
+
       // Fallback for non-enhanced errors
-      const errorMessage = error instanceof Error ? error.message : 'Network error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Network error';
       setError(errorMessage);
-      
+
       // Log failed login with generic error
       authLogger.logLoginAttempt({
         email,
-        userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+        userAgent:
+          typeof window !== 'undefined'
+            ? window.navigator.userAgent
+            : undefined,
         timestamp: new Date().toISOString(),
         result: 'failure',
         failureReason: errorMessage,
         duration: Date.now() - startTime,
       });
-      
+
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
@@ -425,7 +465,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async (): Promise<void> => {
     const startTime = Date.now();
     const currentUser = user;
-    
+
     try {
       setIsLoading(true);
 
@@ -447,7 +487,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       redirectManager.clearRedirectState();
 
       console.log('✅ Logout successful');
-      
+
       // Log successful logout
       authLogger.logLogout(
         'success',
@@ -456,7 +496,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         undefined,
         Date.now() - startTime
       );
-      
+
       // Log authentication state change
       authLogger.logAuthStateChange(
         'authenticated',
@@ -469,7 +509,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       redirectManager.safeRedirect(router, '/login', 'user logout', false);
     } catch (error) {
       console.error('❌ Logout error:', error);
-      
+
       // Log failed logout
       authLogger.logLogout(
         'failure',
@@ -478,12 +518,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error instanceof Error ? error : new Error('Logout failed'),
         Date.now() - startTime
       );
-      
+
       // Even if logout fails, clear local state
       authTokenManager.clearTokens();
       setUser(null);
       redirectManager.clearRedirectState();
-      redirectManager.safeRedirect(router, '/login', 'logout error fallback', false);
+      redirectManager.safeRedirect(
+        router,
+        '/login',
+        'logout error fallback',
+        false
+      );
     } finally {
       setIsLoading(false);
     }
@@ -492,17 +537,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const refreshSession = async (): Promise<boolean> => {
     try {
       console.log('🔄 Attempting session refresh...');
-      
+
       const refreshResult = await authTokenManager.refreshToken();
 
       if (refreshResult.success && refreshResult.tokens) {
-        console.log('✅ Session refresh successful, fetching updated user profile...');
-        
+        console.log(
+          '✅ Session refresh successful, fetching updated user profile...'
+        );
+
         // Fetch updated user profile with the new token
         const userProfile = await fetchUserProfile(
           refreshResult.tokens.accessToken
         );
-        
+
         if (userProfile) {
           setUser(userProfile);
           console.log('✅ User profile updated after session refresh');
@@ -515,14 +562,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         console.log('❌ Session refresh failed:', refreshResult.error);
         await handleRefreshFailure(
-          refreshResult.error || 'refresh_failed', 
+          refreshResult.error || 'refresh_failed',
           refreshResult.appError
         );
         return false;
       }
     } catch (error) {
       console.error('❌ Session refresh error:', error);
-      
+
       // Classify the error
       const appError = ErrorHandler.classifyError(error);
       await handleRefreshFailure('refresh_exception', appError);
@@ -557,13 +604,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error('❌ Auth check failed:', error);
-      
+
       // Classify the error
       const appError = ErrorHandler.classifyError(error);
       setLastError(appError);
       setError(ErrorHandler.getUserMessage(appError));
       ErrorHandler.logError(appError, 'AUTH_CHECK');
-      
+
       authTokenManager.clearTokens();
       setUser(null);
     } finally {
