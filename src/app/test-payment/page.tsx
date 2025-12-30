@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuthNew';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TestPaymentPage() {
   const { user } = useAuth();

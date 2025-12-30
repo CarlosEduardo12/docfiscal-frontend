@@ -1,6 +1,6 @@
 'use client';
 
-import { useRequireAuth } from '@/hooks/useAuthNew';
+import { useRequireAuth } from '@/contexts/AuthContext';
 import {
   useOrdersRefresh,
   usePendingPaymentsMonitor,

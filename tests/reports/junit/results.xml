@@ -1,1125 +1,442 @@
-<testsuites id="" name="" tests="20" failures="20" skipped="0" errors="0" time="45.362907">
-<testsuite name="flows/enhanced-workflows-integration.spec.ts" timestamp="2025-12-26T20:07:06.702Z" hostname="chromium" tests="4" failures="4" skipped="0" time="21.522" errors="0">
-<testcase name="Enhanced Workflows Integration › complete upload-to-download workflow with all improvements" classname="flows/enhanced-workflows-integration.spec.ts" time="12.886">
-<failure message="enhanced-workflows-integration.spec.ts:16:7 complete upload-to-download workflow with all improvements" type="FAILURE">
-<![CDATA[  [chromium] › flows/enhanced-workflows-integration.spec.ts:16:7 › Enhanced Workflows Integration › complete upload-to-download workflow with all improvements 
+<testsuites id="" name="" tests="10" failures="10" skipped="0" errors="0" time="20.384207999999997">
+<testsuite name="flows/complete-user-flow.spec.ts" timestamp="2025-12-30T20:40:15.514Z" hostname="chromium" tests="2" failures="2" skipped="0" time="3.372" errors="0">
+<testcase name="Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload" classname="flows/complete-user-flow.spec.ts" time="1.685">
+<failure message="complete-user-flow.spec.ts:98:7 should complete full user journey: register → login → dashboard → upload" type="FAILURE">
+<![CDATA[  [chromium] › flows/complete-user-flow.spec.ts:98:7 › Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload 
 
-    Error: Button with text "Criar Conta" not found or not clickable
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/ui-interactions.ts:80
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      78 |     
-      79 |     if (!clicked) {
-    > 80 |       throw new Error(`Button with text "${buttonText}" not found or not clickable`);
-         |             ^
-      81 |     }
-      82 |     
-      83 |     console.log(`✅ Successfully clicked button: "${buttonText}"`);
-        at UIInteractionHelper.clickButton (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/ui-interactions.ts:80:13)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:40:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-chromium/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/video.webm
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-chromium/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🚀 Testing enhanced upload-to-download workflow
-📍 Step 1: Enhanced form validation during registration
-📝 Filling form with data: [ [32m'name'[39m, [32m'email'[39m, [32m'password'[39m, [32m'confirmPassword'[39m ]
-✅ Form filled successfully
-🖱️ Clicking button: "Criar Conta"
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-chromium/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-chromium/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-chromium/video.webm]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Enhanced Workflows Integration › authentication persistence across different scenarios" classname="flows/enhanced-workflows-integration.spec.ts" time="2.887">
-<failure message="enhanced-workflows-integration.spec.ts:322:7 authentication persistence across different scenarios" type="FAILURE">
-<![CDATA[  [chromium] › flows/enhanced-workflows-integration.spec.ts:322:7 › Enhanced Workflows Integration › authentication persistence across different scenarios 
+<testcase name="Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically" classname="flows/complete-user-flow.spec.ts" time="1.687">
+<failure message="complete-user-flow.spec.ts:333:7 should handle login redirect issues specifically" type="FAILURE">
+<![CDATA[  [chromium] › flows/complete-user-flow.spec.ts:333:7 › Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically 
 
-    Error: Login failed: 
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:335:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-chromium/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/video.webm
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-chromium/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🔐 Testing authentication persistence across different scenarios
-📍 Scenario 1: Normal login and page refresh
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-chromium/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-chromium/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-chromium/video.webm]]
 ]]>
 </system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:335:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › payment flow with various success and failure conditions" classname="flows/enhanced-workflows-integration.spec.ts" time="2.831">
-<failure message="enhanced-workflows-integration.spec.ts:412:7 payment flow with various success and failure conditions" type="FAILURE">
-<![CDATA[  [chromium] › flows/enhanced-workflows-integration.spec.ts:412:7 › Enhanced Workflows Integration › payment flow with various success and failure conditions 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:424:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[💳 Testing payment flow with various conditions
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-chromium/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:424:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › error recovery and user guidance across workflows" classname="flows/enhanced-workflows-integration.spec.ts" time="2.918">
-<failure message="enhanced-workflows-integration.spec.ts:597:7 error recovery and user guidance across workflows" type="FAILURE">
-<![CDATA[  [chromium] › flows/enhanced-workflows-integration.spec.ts:597:7 › Enhanced Workflows Integration › error recovery and user guidance across workflows 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:608:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🛠️ Testing error recovery and user guidance
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-chromium/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:608:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
 </testcase>
 </testsuite>
-<testsuite name="flows/enhanced-workflows-integration.spec.ts" timestamp="2025-12-26T20:07:06.702Z" hostname="firefox" tests="4" failures="4" skipped="0" time="27.231" errors="0">
-<testcase name="Enhanced Workflows Integration › complete upload-to-download workflow with all improvements" classname="flows/enhanced-workflows-integration.spec.ts" time="15.546">
-<failure message="enhanced-workflows-integration.spec.ts:16:7 complete upload-to-download workflow with all improvements" type="FAILURE">
-<![CDATA[  [firefox] › flows/enhanced-workflows-integration.spec.ts:16:7 › Enhanced Workflows Integration › complete upload-to-download workflow with all improvements 
+<testsuite name="flows/complete-user-flow.spec.ts" timestamp="2025-12-30T20:40:15.514Z" hostname="firefox" tests="2" failures="2" skipped="0" time="5.093" errors="0">
+<testcase name="Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload" classname="flows/complete-user-flow.spec.ts" time="3.006">
+<failure message="complete-user-flow.spec.ts:98:7 should complete full user journey: register → login → dashboard → upload" type="FAILURE">
+<![CDATA[  [firefox] › flows/complete-user-flow.spec.ts:98:7 › Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload 
 
-    Error: Button with text "Criar Conta" not found or not clickable
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/ui-interactions.ts:80
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      78 |     
-      79 |     if (!clicked) {
-    > 80 |       throw new Error(`Button with text "${buttonText}" not found or not clickable`);
-         |             ^
-      81 |     }
-      82 |     
-      83 |     console.log(`✅ Successfully clicked button: "${buttonText}"`);
-        at UIInteractionHelper.clickButton (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/ui-interactions.ts:80:13)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:40:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-firefox/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/video.webm
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-firefox/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🚀 Testing enhanced upload-to-download workflow
-📍 Step 1: Enhanced form validation during registration
-📝 Filling form with data: [ [32m'name'[39m, [32m'email'[39m, [32m'password'[39m, [32m'confirmPassword'[39m ]
-✅ Form filled successfully
-🖱️ Clicking button: "Criar Conta"
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-firefox/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-firefox/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-firefox/video.webm]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Enhanced Workflows Integration › authentication persistence across different scenarios" classname="flows/enhanced-workflows-integration.spec.ts" time="4.702">
-<failure message="enhanced-workflows-integration.spec.ts:322:7 authentication persistence across different scenarios" type="FAILURE">
-<![CDATA[  [firefox] › flows/enhanced-workflows-integration.spec.ts:322:7 › Enhanced Workflows Integration › authentication persistence across different scenarios 
+<testcase name="Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically" classname="flows/complete-user-flow.spec.ts" time="2.087">
+<failure message="complete-user-flow.spec.ts:333:7 should handle login redirect issues specifically" type="FAILURE">
+<![CDATA[  [firefox] › flows/complete-user-flow.spec.ts:333:7 › Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically 
 
-    Error: Login failed: 
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:335:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-firefox/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/video.webm
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-firefox/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🔐 Testing authentication persistence across different scenarios
-📍 Scenario 1: Normal login and page refresh
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-firefox/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-firefox/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-firefox/video.webm]]
 ]]>
 </system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:335:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › payment flow with various success and failure conditions" classname="flows/enhanced-workflows-integration.spec.ts" time="4.511">
-<failure message="enhanced-workflows-integration.spec.ts:412:7 payment flow with various success and failure conditions" type="FAILURE">
-<![CDATA[  [firefox] › flows/enhanced-workflows-integration.spec.ts:412:7 › Enhanced Workflows Integration › payment flow with various success and failure conditions 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:424:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[💳 Testing payment flow with various conditions
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-firefox/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:424:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › error recovery and user guidance across workflows" classname="flows/enhanced-workflows-integration.spec.ts" time="2.472">
-<failure message="enhanced-workflows-integration.spec.ts:597:7 error recovery and user guidance across workflows" type="FAILURE">
-<![CDATA[  [firefox] › flows/enhanced-workflows-integration.spec.ts:597:7 › Enhanced Workflows Integration › error recovery and user guidance across workflows 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:608:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🛠️ Testing error recovery and user guidance
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-firefox/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:608:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
 </testcase>
 </testsuite>
-<testsuite name="flows/enhanced-workflows-integration.spec.ts" timestamp="2025-12-26T20:07:06.702Z" hostname="webkit" tests="4" failures="4" skipped="0" time="23.555" errors="0">
-<testcase name="Enhanced Workflows Integration › complete upload-to-download workflow with all improvements" classname="flows/enhanced-workflows-integration.spec.ts" time="14.251">
-<failure message="enhanced-workflows-integration.spec.ts:16:7 complete upload-to-download workflow with all improvements" type="FAILURE">
-<![CDATA[  [webkit] › flows/enhanced-workflows-integration.spec.ts:16:7 › Enhanced Workflows Integration › complete upload-to-download workflow with all improvements 
+<testsuite name="flows/complete-user-flow.spec.ts" timestamp="2025-12-30T20:40:15.514Z" hostname="webkit" tests="2" failures="2" skipped="0" time="7.876" errors="0">
+<testcase name="Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload" classname="flows/complete-user-flow.spec.ts" time="3.938">
+<failure message="complete-user-flow.spec.ts:98:7 should complete full user journey: register → login → dashboard → upload" type="FAILURE">
+<![CDATA[  [webkit] › flows/complete-user-flow.spec.ts:98:7 › Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload 
 
-    Error: Button with text "Criar Conta" not found or not clickable
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/ui-interactions.ts:80
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      78 |     
-      79 |     if (!clicked) {
-    > 80 |       throw new Error(`Button with text "${buttonText}" not found or not clickable`);
-         |             ^
-      81 |     }
-      82 |     
-      83 |     console.log(`✅ Successfully clicked button: "${buttonText}"`);
-        at UIInteractionHelper.clickButton (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/ui-interactions.ts:80:13)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:40:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-webkit/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/video.webm
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-webkit/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🚀 Testing enhanced upload-to-download workflow
-📍 Step 1: Enhanced form validation during registration
-📝 Filling form with data: [ [32m'name'[39m, [32m'email'[39m, [32m'password'[39m, [32m'confirmPassword'[39m ]
-✅ Form filled successfully
-🖱️ Clicking button: "Criar Conta"
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-webkit/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-webkit/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-webkit/video.webm]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Enhanced Workflows Integration › authentication persistence across different scenarios" classname="flows/enhanced-workflows-integration.spec.ts" time="4.2">
-<failure message="enhanced-workflows-integration.spec.ts:322:7 authentication persistence across different scenarios" type="FAILURE">
-<![CDATA[  [webkit] › flows/enhanced-workflows-integration.spec.ts:322:7 › Enhanced Workflows Integration › authentication persistence across different scenarios 
+<testcase name="Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically" classname="flows/complete-user-flow.spec.ts" time="3.938">
+<failure message="complete-user-flow.spec.ts:333:7 should handle login redirect issues specifically" type="FAILURE">
+<![CDATA[  [webkit] › flows/complete-user-flow.spec.ts:333:7 › Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically 
 
-    Error: Login failed: 
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:335:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-webkit/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/video.webm
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-webkit/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🔐 Testing authentication persistence across different scenarios
-📍 Scenario 1: Normal login and page refresh
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-webkit/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-webkit/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-webkit/video.webm]]
 ]]>
 </system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:335:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › payment flow with various success and failure conditions" classname="flows/enhanced-workflows-integration.spec.ts" time="2.578">
-<failure message="enhanced-workflows-integration.spec.ts:412:7 payment flow with various success and failure conditions" type="FAILURE">
-<![CDATA[  [webkit] › flows/enhanced-workflows-integration.spec.ts:412:7 › Enhanced Workflows Integration › payment flow with various success and failure conditions 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:424:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[💳 Testing payment flow with various conditions
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-webkit/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:424:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › error recovery and user guidance across workflows" classname="flows/enhanced-workflows-integration.spec.ts" time="2.526">
-<failure message="enhanced-workflows-integration.spec.ts:597:7 error recovery and user guidance across workflows" type="FAILURE">
-<![CDATA[  [webkit] › flows/enhanced-workflows-integration.spec.ts:597:7 › Enhanced Workflows Integration › error recovery and user guidance across workflows 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:608:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🛠️ Testing error recovery and user guidance
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-webkit/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:608:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
 </testcase>
 </testsuite>
-<testsuite name="flows/enhanced-workflows-integration.spec.ts" timestamp="2025-12-26T20:07:06.702Z" hostname="Mobile Chrome" tests="4" failures="4" skipped="0" time="15.902" errors="0">
-<testcase name="Enhanced Workflows Integration › complete upload-to-download workflow with all improvements" classname="flows/enhanced-workflows-integration.spec.ts" time="11.614">
-<failure message="enhanced-workflows-integration.spec.ts:16:7 complete upload-to-download workflow with all improvements" type="FAILURE">
-<![CDATA[  [Mobile Chrome] › flows/enhanced-workflows-integration.spec.ts:16:7 › Enhanced Workflows Integration › complete upload-to-download workflow with all improvements 
+<testsuite name="flows/complete-user-flow.spec.ts" timestamp="2025-12-30T20:40:15.514Z" hostname="Mobile Chrome" tests="2" failures="2" skipped="0" time="3.848" errors="0">
+<testcase name="Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload" classname="flows/complete-user-flow.spec.ts" time="1.937">
+<failure message="complete-user-flow.spec.ts:98:7 should complete full user journey: register → login → dashboard → upload" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › flows/complete-user-flow.spec.ts:98:7 › Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload 
 
-    Error: Button with text "Criar Conta" not found or not clickable
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/ui-interactions.ts:80
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      78 |     
-      79 |     if (!clicked) {
-    > 80 |       throw new Error(`Button with text "${buttonText}" not found or not clickable`);
-         |             ^
-      81 |     }
-      82 |     
-      83 |     console.log(`✅ Successfully clicked button: "${buttonText}"`);
-        at UIInteractionHelper.clickButton (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/ui-interactions.ts:80:13)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:40:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Chrome/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/video.webm
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Chrome/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🚀 Testing enhanced upload-to-download workflow
-📍 Step 1: Enhanced form validation during registration
-📝 Filling form with data: [ [32m'name'[39m, [32m'email'[39m, [32m'password'[39m, [32m'confirmPassword'[39m ]
-✅ Form filled successfully
-🖱️ Clicking button: "Criar Conta"
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Chrome/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Chrome/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Chrome/video.webm]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Enhanced Workflows Integration › authentication persistence across different scenarios" classname="flows/enhanced-workflows-integration.spec.ts" time="1.644">
-<failure message="enhanced-workflows-integration.spec.ts:322:7 authentication persistence across different scenarios" type="FAILURE">
-<![CDATA[  [Mobile Chrome] › flows/enhanced-workflows-integration.spec.ts:322:7 › Enhanced Workflows Integration › authentication persistence across different scenarios 
+<testcase name="Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically" classname="flows/complete-user-flow.spec.ts" time="1.911">
+<failure message="complete-user-flow.spec.ts:333:7 should handle login redirect issues specifically" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › flows/complete-user-flow.spec.ts:333:7 › Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically 
 
-    Error: Login failed: Login successful! Redirecting to dashboard...
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:335:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Chrome/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/video.webm
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Chrome/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🔐 Testing authentication persistence across different scenarios
-📍 Scenario 1: Normal login and page refresh
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Chrome/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Chrome/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: Login successful! Redirecting to dashboard...
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:335:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › payment flow with various success and failure conditions" classname="flows/enhanced-workflows-integration.spec.ts" time="1.672">
-<failure message="enhanced-workflows-integration.spec.ts:412:7 payment flow with various success and failure conditions" type="FAILURE">
-<![CDATA[  [Mobile Chrome] › flows/enhanced-workflows-integration.spec.ts:412:7 › Enhanced Workflows Integration › payment flow with various success and failure conditions 
-
-    Error: Login failed: Login successful! Redirecting to dashboard...
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:424:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[💳 Testing payment flow with various conditions
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Chrome/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: Login successful! Redirecting to dashboard...
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:424:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › error recovery and user guidance across workflows" classname="flows/enhanced-workflows-integration.spec.ts" time="0.972">
-<failure message="enhanced-workflows-integration.spec.ts:597:7 error recovery and user guidance across workflows" type="FAILURE">
-<![CDATA[  [Mobile Chrome] › flows/enhanced-workflows-integration.spec.ts:597:7 › Enhanced Workflows Integration › error recovery and user guidance across workflows 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:608:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🛠️ Testing error recovery and user guidance
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Chrome/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:608:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-</testsuite>
-<testsuite name="flows/enhanced-workflows-integration.spec.ts" timestamp="2025-12-26T20:07:06.702Z" hostname="Mobile Safari" tests="4" failures="4" skipped="0" time="15.81" errors="0">
-<testcase name="Enhanced Workflows Integration › complete upload-to-download workflow with all improvements" classname="flows/enhanced-workflows-integration.spec.ts" time="11.728">
-<failure message="enhanced-workflows-integration.spec.ts:16:7 complete upload-to-download workflow with all improvements" type="FAILURE">
-<![CDATA[  [Mobile Safari] › flows/enhanced-workflows-integration.spec.ts:16:7 › Enhanced Workflows Integration › complete upload-to-download workflow with all improvements 
-
-    Error: Button with text "Criar Conta" not found or not clickable
-
-       at helpers/ui-interactions.ts:80
-
-      78 |     
-      79 |     if (!clicked) {
-    > 80 |       throw new Error(`Button with text "${buttonText}" not found or not clickable`);
-         |             ^
-      81 |     }
-      82 |     
-      83 |     console.log(`✅ Successfully clicked button: "${buttonText}"`);
-        at UIInteractionHelper.clickButton (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/ui-interactions.ts:80:13)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:40:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🚀 Testing enhanced upload-to-download workflow
-📍 Step 1: Enhanced form validation during registration
-📝 Filling form with data: [ [32m'name'[39m, [32m'email'[39m, [32m'password'[39m, [32m'confirmPassword'[39m ]
-✅ Form filled successfully
-🖱️ Clicking button: "Criar Conta"
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-a0fde-kflow-with-all-improvements-Mobile-Safari/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Chrome/video.webm]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="Enhanced Workflows Integration › authentication persistence across different scenarios" classname="flows/enhanced-workflows-integration.spec.ts" time="1.317">
-<failure message="enhanced-workflows-integration.spec.ts:322:7 authentication persistence across different scenarios" type="FAILURE">
-<![CDATA[  [Mobile Safari] › flows/enhanced-workflows-integration.spec.ts:322:7 › Enhanced Workflows Integration › authentication persistence across different scenarios 
+</testsuite>
+<testsuite name="flows/complete-user-flow.spec.ts" timestamp="2025-12-30T20:40:15.514Z" hostname="Mobile Safari" tests="2" failures="2" skipped="0" time="1.698" errors="0">
+<testcase name="Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload" classname="flows/complete-user-flow.spec.ts" time="0.849">
+<failure message="complete-user-flow.spec.ts:98:7 should complete full user journey: register → login → dashboard → upload" type="FAILURE">
+<![CDATA[  [Mobile Safari] › flows/complete-user-flow.spec.ts:98:7 › Complete User Flow - Account Creation to File Upload › should complete full user journey: register → login → dashboard → upload 
 
-    Error: Login failed: 
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:335:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Safari/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/video.webm
+    reports/test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Safari/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[🔐 Testing authentication persistence across different scenarios
-📍 Scenario 1: Normal login and page refresh
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Safari/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-35f21--across-different-scenarios-Mobile-Safari/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-d8dc6--login-→-dashboard-→-upload-Mobile-Safari/video.webm]]
 ]]>
 </system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:335:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
 </testcase>
-<testcase name="Enhanced Workflows Integration › payment flow with various success and failure conditions" classname="flows/enhanced-workflows-integration.spec.ts" time="1.482">
-<failure message="enhanced-workflows-integration.spec.ts:412:7 payment flow with various success and failure conditions" type="FAILURE">
-<![CDATA[  [Mobile Safari] › flows/enhanced-workflows-integration.spec.ts:412:7 › Enhanced Workflows Integration › payment flow with various success and failure conditions 
+<testcase name="Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically" classname="flows/complete-user-flow.spec.ts" time="0.849">
+<failure message="complete-user-flow.spec.ts:333:7 should handle login redirect issues specifically" type="FAILURE">
+<![CDATA[  [Mobile Safari] › flows/complete-user-flow.spec.ts:333:7 › Complete User Flow - Account Creation to File Upload › should handle login redirect issues specifically 
 
-    Error: Login failed: 
+    TypeError: networkLogger.startMonitoring is not a function
 
-       at helpers/auth.ts:79
+      32 |     
+      33 |     // Start network monitoring
+    > 34 |     await networkLogger.startMonitoring();
+         |                         ^
+      35 |     
+      36 |     // Add console logging to debug authentication issues
+      37 |     page.on('console', (msg) => {
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:34:25
 
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:424:5
+    TypeError: networkLogger.stopMonitoring is not a function
+
+      66 |   test.afterEach(async ({ page }) => {
+      67 |     // Stop network monitoring and get logs
+    > 68 |     const networkLogs = await networkLogger.stopMonitoring();
+         |                                             ^
+      69 |     
+      70 |     // Log network activity for debugging
+      71 |     console.log('\n=== NETWORK ACTIVITY ===');
+        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/complete-user-flow.spec.ts:68:45
 
     attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/test-failed-1.png
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Safari/test-failed-1.png
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
     attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/video.webm
+    reports/test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Safari/video.webm
     ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[💳 Testing payment flow with various conditions
-🔐 Logging in with email: test@docfiscal.com
+<![CDATA[
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Safari/test-failed-1.png]]
 
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-b76ba-cess-and-failure-conditions-Mobile-Safari/error-context.md]]
+[[ATTACHMENT|../test-results/flows-complete-user-flow-C-a1e3c-edirect-issues-specifically-Mobile-Safari/video.webm]]
 ]]>
 </system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:424:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
-</testcase>
-<testcase name="Enhanced Workflows Integration › error recovery and user guidance across workflows" classname="flows/enhanced-workflows-integration.spec.ts" time="1.283">
-<failure message="enhanced-workflows-integration.spec.ts:597:7 error recovery and user guidance across workflows" type="FAILURE">
-<![CDATA[  [Mobile Safari] › flows/enhanced-workflows-integration.spec.ts:597:7 › Enhanced Workflows Integration › error recovery and user guidance across workflows 
-
-    Error: Login failed: 
-
-       at helpers/auth.ts:79
-
-      77 |         if (errorElement) {
-      78 |           const errorText = await errorElement.textContent();
-    > 79 |           throw new Error(`Login failed: ${errorText}`);
-         |                 ^
-      80 |         } else {
-      81 |           throw new Error('Login failed: Unknown error');
-      82 |         }
-        at AuthHelper.login (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:79:17)
-        at AuthHelper.loginWithValidUser (/Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/helpers/auth.ts:95:5)
-        at /Users/carlos/Documents/Github_Projects/docfiscal-frontend/tests/flows/enhanced-workflows-integration.spec.ts:608:5
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: reports/test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[🛠️ Testing error recovery and user guidance
-🔐 Logging in with email: test@docfiscal.com
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/test-failed-1.png]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/video.webm]]
-
-[[ATTACHMENT|../test-results/flows-enhanced-workflows-i-d1e3f-r-guidance-across-workflows-Mobile-Safari/error-context.md]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[❌ Login failed: Error: Login failed: 
-    at AuthHelper.login [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:79:17[90m)[39m
-[90m    at runNextTicks (node:internal/process/task_queues:60:5)[39m
-[90m    at processImmediate (node:internal/timers:449:9)[39m
-[90m    at process.callbackTrampoline (node:internal/async_hooks:130:17)[39m
-    at AuthHelper.loginWithValidUser [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/helpers/auth.ts:95:5[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mtests/flows/enhanced-workflows-integration.spec.ts:608:5
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:322:9
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:311:11
-    at TimeoutManager.withRunnable [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/timeoutManager.js:67:14[90m)[39m
-    at TestInfoImpl._runWithTimeout [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/testInfo.js:309:7[90m)[39m
-    at [90m/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:320:7
-    at WorkerMain._runTest [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:295:5[90m)[39m
-    at WorkerMain.runTestGroup [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/worker/workerMain.js:199:11[90m)[39m
-    at process.<anonymous> [90m(/Users/carlos/Documents/Github_Projects/docfiscal-frontend/[39mnode_modules/[4mplaywright[24m/lib/common/process.js:65:22[90m)[39m
-]]>
-</system-err>
 </testcase>
 </testsuite>
 </testsuites>

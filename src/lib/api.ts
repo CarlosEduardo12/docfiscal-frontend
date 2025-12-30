@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { authTokenManager } from './AuthTokenManager';
+import { ErrorHandler, AppError } from './errorHandler';
+import { CorsHandler } from './corsHandler';
+import { environmentConfig } from './environmentConfig';
+import { secureStorage } from './secureStorage';
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -18,48 +22,71 @@ interface ApiError {
   request_id?: string;
 }
 
+interface EnhancedApiResponse<T = any> extends ApiResponse<T> {
+  appError?: AppError;
+}
+
 class ApiClient {
   private baseURL: string;
-  private accessToken: string | null = null;
-  private refreshToken: string | null = null;
+  private corsConfig: { apiUrl: string; frontendUrl: string; environment: 'development' | 'production' | 'test' };
 
   constructor() {
-    this.baseURL = API_BASE_URL;
-
-    // Initialize tokens from localStorage if available
-    if (typeof window !== 'undefined') {
-      this.accessToken = localStorage.getItem('access_token');
-      this.refreshToken = localStorage.getItem('refresh_token');
+    // Use environment configuration for all URLs and settings
+    const envConfig = environmentConfig.getConfig();
+    this.baseURL = envConfig.apiUrl;
+    this.corsConfig = {
+      apiUrl: envConfig.apiUrl,
+      frontendUrl: envConfig.frontendUrl,
+      environment: envConfig.environment,
+    };
+    
+    // Log configuration in development
+    if (envConfig.isDevelopment) {
+      console.log('🔧 API Client initialized with:', {
+        baseURL: this.baseURL,
+        environment: envConfig.environment,
+        isHttps: envConfig.isHttps,
+        corsEnabled: envConfig.corsEnabled,
+      });
     }
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit & { skipAuth?: boolean } = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<EnhancedApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
 
+    // Get security headers for HTTPS environments
+    const securityHeaders = secureStorage.getSecurityHeaders();
+    
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...securityHeaders, // Add security headers
         ...options.headers,
       },
       ...options,
     };
 
     // Add auth header if token exists and not explicitly skipped
-    if (this.accessToken && !options.skipAuth) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${this.accessToken}`,
-      };
+    if (!options.skipAuth) {
+      const accessToken = await authTokenManager.getValidToken();
+      if (accessToken) {
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${accessToken}`,
+        };
+      }
     }
+
+    let response: Response | undefined;
 
     try {
       console.log('🔄 Making request to:', url);
       console.log('📦 Request config:', config);
 
-      const response = await fetch(url, config);
+      response = await fetch(url, config);
       console.log('📡 Response status:', response.status);
 
       if (!response.ok) {
@@ -77,13 +104,13 @@ class ApiClient {
         }
 
         // Handle token refresh on 401
-        if (response.status === 401 && this.refreshToken && !options.skipAuth) {
-          const refreshed = await this.refreshAccessToken();
-          if (refreshed) {
+        if (response.status === 401 && !options.skipAuth) {
+          const refreshResult = await authTokenManager.refreshToken();
+          if (refreshResult.success && refreshResult.tokens) {
             // Retry original request with new token
             config.headers = {
               ...config.headers,
-              Authorization: `Bearer ${this.accessToken}`,
+              Authorization: `Bearer ${refreshResult.tokens.accessToken}`,
             };
             const retryResponse = await fetch(url, config);
             if (retryResponse.ok) {
@@ -92,14 +119,26 @@ class ApiClient {
               return retryData;
             } else {
               const retryErrorData = await retryResponse.json();
-              throw new Error(
+              const retryError = new Error(
                 retryErrorData.message || `HTTP ${retryResponse.status}`
               );
+              
+              // Classify the retry error
+              const appError = ErrorHandler.classifyError(retryError, retryResponse);
+              ErrorHandler.logError(appError, 'API_RETRY');
+              
+              throw retryError;
             }
           }
         }
 
-        throw new Error(errorData.message || `HTTP ${response.status}`);
+        const httpError = new Error(errorData.message || `HTTP ${response.status}`);
+        
+        // Classify the HTTP error
+        const appError = ErrorHandler.classifyError(httpError, response);
+        ErrorHandler.logError(appError, 'API_HTTP');
+        
+        throw httpError;
       }
 
       const data = await response.json();
@@ -116,12 +155,45 @@ class ApiClient {
       return data;
     } catch (error) {
       console.error('💥 API Error:', error);
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error(
-          'Network error: Unable to connect to server. Please check if the backend is running.'
-        );
+      
+      // Check for CORS issues first
+      if (CorsHandler.detectCorsIssue(error, response)) {
+        console.log('🚫 CORS issue detected');
+        CorsHandler.logCorsError(this.corsConfig, error);
+        
+        // Attempt CORS fallback in production
+        const envConfig = environmentConfig.getConfig();
+        if (envConfig.isProduction) {
+          console.log('🔄 Attempting CORS fallback...');
+          const fallbackResult = await CorsHandler.attemptCorsFallback(url, config);
+          
+          if (fallbackResult.success && fallbackResult.response) {
+            console.log('✅ CORS fallback succeeded');
+            const fallbackData = await fallbackResult.response.json();
+            return fallbackData;
+          } else {
+            console.log('❌ CORS fallback failed:', fallbackResult.error);
+          }
+        }
+        
+        const corsError = ErrorHandler.detectCorsError(error, response);
+        if (corsError) {
+          ErrorHandler.logError(corsError, 'API_CORS');
+          const enhancedError = new Error(ErrorHandler.getUserMessage(corsError));
+          (enhancedError as any).appError = corsError;
+          throw enhancedError;
+        }
       }
-      throw error;
+      
+      // Classify the error using our error handler
+      const appError = ErrorHandler.classifyError(error, response);
+      ErrorHandler.logError(appError, 'API_REQUEST');
+      
+      // Create enhanced error response
+      const enhancedError = new Error(ErrorHandler.getUserMessage(appError));
+      (enhancedError as any).appError = appError;
+      
+      throw enhancedError;
     }
   }
 
@@ -148,53 +220,20 @@ class ApiClient {
       skipAuth: true,
     });
 
-    if (response.success && (response.data as any)?.access_token) {
-      this.setTokens(
-        (response.data as any).access_token,
-        (response.data as any).refresh_token
-      );
-    }
-
+    // Note: Token storage is now handled by AuthContext to ensure proper synchronization
+    // The API client no longer stores tokens directly to avoid race conditions
+    
     return response;
-  }
-
-  async refreshAccessToken(): Promise<boolean> {
-    if (!this.refreshToken) return false;
-
-    try {
-      const response = await this.request('/api/auth/refresh', {
-        method: 'POST',
-        body: JSON.stringify({ refresh_token: this.refreshToken }),
-        skipAuth: true,
-      });
-
-      if (response.success && (response.data as any)?.access_token) {
-        this.setTokens(
-          (response.data as any).access_token,
-          (response.data as any).refresh_token || this.refreshToken
-        );
-        return true;
-      }
-    } catch (error) {
-      console.error('Token refresh failed:', error);
-      this.clearTokens();
-    }
-
-    return false;
-  }
-
-  async logout(): Promise<void> {
-    try {
-      await this.request('/api/auth/logout', { method: 'POST' });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      this.clearTokens();
-    }
   }
 
   async getProfile(): Promise<ApiResponse> {
     return this.request('/api/auth/me');
+  }
+
+  async logout(): Promise<ApiResponse> {
+    return this.request('/api/auth/logout', {
+      method: 'POST',
+    });
   }
 
   // File upload
@@ -245,11 +284,13 @@ class ApiClient {
   async downloadOrder(
     orderId: string
   ): Promise<{ blob: Blob; filename?: string }> {
+    const accessToken = await authTokenManager.getValidToken();
+    
     const response = await fetch(
       `${this.baseURL}/api/orders/${orderId}/download`,
       {
         headers: {
-          Authorization: `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -310,9 +351,11 @@ class ApiClient {
       cancel_url?: string;
     }
   ): Promise<ApiResponse> {
+    // Use environment-aware payment URLs
+    const paymentUrls = environmentConfig.getPaymentUrls();
     const defaultOptions = {
-      return_url: process.env.NEXT_PUBLIC_PAYMENT_RETURN_URL,
-      cancel_url: process.env.NEXT_PUBLIC_PAYMENT_CANCEL_URL,
+      return_url: paymentUrls.returnUrl,
+      cancel_url: paymentUrls.cancelUrl,
       ...options,
     };
 
@@ -377,34 +420,51 @@ class ApiClient {
     });
   }
 
-  // Token management
-  private setTokens(accessToken: string, refreshToken: string): void {
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-    }
-  }
-
-  private clearTokens(): void {
-    this.accessToken = null;
-    this.refreshToken = null;
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+  // CORS diagnostic
+  async diagnoseCors(): Promise<{
+    success: boolean;
+    corsTest?: any;
+    diagnostic?: any;
+    troubleshootingReport?: string;
+  }> {
+    try {
+      // Test CORS configuration
+      const corsTest = await CorsHandler.testCorsConfiguration(this.baseURL);
+      
+      // Get diagnostic information
+      const diagnostic = CorsHandler.diagnoseCorsIssues(this.corsConfig);
+      
+      // Generate troubleshooting report
+      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(this.corsConfig);
+      
+      return {
+        success: corsTest.success,
+        corsTest,
+        diagnostic,
+        troubleshootingReport,
+      };
+    } catch (error) {
+      console.error('❌ CORS diagnostic failed:', error);
+      
+      const troubleshootingReport = CorsHandler.generateTroubleshootingReport(this.corsConfig, error);
+      
+      return {
+        success: false,
+        troubleshootingReport,
+      };
     }
   }
 
   // Getters
   get isAuthenticated(): boolean {
-    return !!this.accessToken;
+    // Use synchronous check - this will be used for quick checks
+    // For more thorough checks, components should use AuthContext
+    const tokens = authTokenManager.getStoredTokens();
+    return !!(tokens.accessToken && tokens.refreshToken);
   }
 
-  get currentAccessToken(): string | null {
-    return this.accessToken;
+  async getValidToken(): Promise<string | null> {
+    return authTokenManager.getValidToken();
   }
 }
 

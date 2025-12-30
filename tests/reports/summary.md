@@ -2,9 +2,9 @@
 # E2E Test Summary Report
 
 ## 📊 Test Results
-- **Total Tests**: 0
+- **Total Tests**: 10
 - **Passed**: 0
-- **Failed**: 0
+- **Failed**: 10
 - **Success Rate**: 0.0%
 
 ## 🐛 Issues Found
@@ -21,4 +21,4 @@
 - ✅ Excellent! No critical issues detected. All core flows are working correctly.
 
 ---
-Generated on 12/25/2025, 7:08:02 PM
+Generated on 12/30/2025, 5:40:31 PM

@@ -17,7 +17,7 @@ import DashboardPage from '@/app/dashboard/page';
 import { apiClient } from '@/lib/api';
 
 // Mock the hooks and components
-jest.mock('@/hooks/useAuthNew', () => ({
+jest.mock('@/contexts/AuthContext', () => ({
   useRequireAuth: () => ({
     user: {
       id: 'test-user-123',

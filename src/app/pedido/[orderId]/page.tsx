@@ -1,6 +1,6 @@
 'use client';
 
-import { useRequireAuth } from '@/hooks/useAuthNew';
+import { useRequireAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { OrderStatusCard } from '@/components/order/OrderStatusCard';

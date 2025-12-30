@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { useAuth } from '@/hooks/useAuthNew';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TestUploadPage() {
   const [result, setResult] = useState<string>('');

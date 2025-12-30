@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { apiClient } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { redirectManager } from '@/lib/redirectManager';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -106,6 +107,7 @@ const LoginFormContent: React.FC = () => {
   const [serverErrors, setServerErrors] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const router = useRouter();
+  const { login } = useAuth();
 
   const { validateForm, focusFirstError, clearErrors } = useFormValidator();
 
@@ -138,16 +140,15 @@ const LoginFormContent: React.FC = () => {
     }
 
     try {
-      const result = await apiClient.login({
-        email: formData.email.trim(),
-        password: formData.password,
-      });
+      const result = await login(formData.email.trim(), formData.password);
 
       if (!result.success) {
+        // Handle login failure
+        const errorMessage = result.error || 'Login failed';
+        
         // Map server errors to user-friendly messages
-        const errorResult = result as any; // Cast to handle error properties
         const mappedErrors = mapServerErrors(
-          errorResult.error || result.message,
+          errorMessage,
           serverErrorMapping
         );
 
@@ -159,10 +160,13 @@ const LoginFormContent: React.FC = () => {
       // Show success message
       setSuccessMessage('Login successful! Redirecting to dashboard...');
 
-      // Redirect to dashboard
+      // Clear any previous redirect state to prevent loops
+      redirectManager.clearRedirectState();
+
+      // Wait a moment for token storage to complete, then redirect safely
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+        redirectManager.safeRedirect(router, '/dashboard', 'successful login');
+      }, 500); // Reduced from 1500ms to 500ms for better UX
     } catch (error) {
       console.error('Login error:', error);
 

@@ -9,6 +9,7 @@ import {
   ErrorBoundary,
   handleErrorBoundaryError,
 } from '@/components/error/ErrorBoundary';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 // Navigation state initialization component
 function NavigationStateInitializer({
@@ -44,12 +45,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ErrorBoundary onError={handleErrorBoundaryError}>
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
-          <NavigationStateInitializer>
-            {children}
-            {process.env.NODE_ENV === 'development' && (
-              <ReactQueryDevtools initialIsOpen={false} />
-            )}
-          </NavigationStateInitializer>
+          <AuthProvider>
+            <NavigationStateInitializer>
+              {children}
+              {process.env.NODE_ENV === 'development' && (
+                <ReactQueryDevtools initialIsOpen={false} />
+              )}
+            </NavigationStateInitializer>
+          </AuthProvider>
         </QueryClientProvider>
       </SessionProvider>
     </ErrorBoundary>
