@@ -41,6 +41,15 @@ Este plano implementa a correção do problema de redirecionamento após login e
   - [x] 3.3 Escrever teste de propriedade para integridade de armazenamento de tokens
     - **Property 1: Token Storage and Synchronization Integrity**
     - **Validates: Requirements 1.2, 3.1, 3.2**
+    - **Status**: ✅ CONCLUÍDO - Implementado com dependency injection para melhor testabilidade
+    - **Detalhes**: 
+      - ✅ Testes de armazenamento e recuperação de tokens funcionando
+      - ✅ Testes de expiração e refresh de tokens funcionando
+      - ✅ Testes de limpeza completa de tokens funcionando
+      - ✅ Testes de tratamento de erros de localStorage funcionando (corrigido com dependency injection)
+      - ✅ Testes de migração de tokens antigos funcionando (corrigido com dependency injection)
+      - ✅ Testes de integridade em múltiplas operações funcionando
+      - ✅ AuthTokenManager refatorado para usar dependency injection, melhorando testabilidade
 
   - [x] 3.4 Escrever teste de propriedade para comportamento de redirecionamento
     - **Property 3: Correct Redirect Behavior**

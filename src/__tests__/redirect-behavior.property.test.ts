@@ -81,16 +81,21 @@ describe('Redirect Behavior Property Tests', () => {
             // Property: First redirect should always succeed (with clean state)
             expect(successfulRedirects).toBeGreaterThanOrEqual(1);
             
-            // Property: Should not exceed max redirects limit
-            expect(successfulRedirects).toBeLessThanOrEqual(3); // Max redirects limit
+            // Property: Should not exceed max redirects limit (3)
+            expect(successfulRedirects).toBeLessThanOrEqual(3);
             
-            // Property: After max redirects, subsequent attempts should be blocked
+            // Property: If we have more attempts than max redirects, some should be blocked
             if (testData.attempts > 3) {
               expect(blockedRedirects).toBeGreaterThan(0);
             }
             
             // Property: Total attempts should equal successful + blocked
             expect(successfulRedirects + blockedRedirects).toBe(testData.attempts);
+            
+            // Property: After first redirect, subsequent rapid attempts should be blocked by cooldown
+            if (testData.attempts > 1) {
+              expect(blockedRedirects).toBeGreaterThan(0);
+            }
           }
         ),
         { numRuns: 100 }
