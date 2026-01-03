@@ -131,25 +131,56 @@ export class AuthTokenManager {
       const envConfig = environmentConfig.getConfig();
       const useSecureStorage = envConfig.isHttps && secureStorage.isSecure();
 
+      console.log('🔒 Storage decision:', {
+        isHttps: envConfig.isHttps,
+        isSecure: secureStorage.isSecure(),
+        useSecureStorage,
+        environment: envConfig.environment,
+      });
+
       try {
         if (useSecureStorage) {
-          // Store tokens with encryption in secure environments
-          secureStorage.setItem(
-            AuthTokenManager.ACCESS_TOKEN_KEY,
-            tokens.accessToken,
-            { encrypt: true, secure: true }
-          );
-          secureStorage.setItem(
-            AuthTokenManager.REFRESH_TOKEN_KEY,
-            tokens.refreshToken,
-            { encrypt: true, secure: true }
-          );
-          secureStorage.setItem(
-            AuthTokenManager.EXPIRES_AT_KEY,
-            tokens.expiresAt.toISOString(),
-            { encrypt: false, secure: true } // Date doesn't need encryption
-          );
+          console.log('🔒 Attempting secure storage...');
+          try {
+            // Store tokens with encryption in secure environments
+            secureStorage.setItem(
+              AuthTokenManager.ACCESS_TOKEN_KEY,
+              tokens.accessToken,
+              { encrypt: true, secure: true }
+            );
+            secureStorage.setItem(
+              AuthTokenManager.REFRESH_TOKEN_KEY,
+              tokens.refreshToken,
+              { encrypt: true, secure: true }
+            );
+            secureStorage.setItem(
+              AuthTokenManager.EXPIRES_AT_KEY,
+              tokens.expiresAt.toISOString(),
+              { encrypt: false, secure: true } // Date doesn't need encryption
+            );
+            console.log('✅ Secure storage successful');
+          } catch (secureStorageError) {
+            console.error(
+              '❌ Secure storage failed, falling back to regular localStorage:',
+              secureStorageError
+            );
+            // Fallback to regular localStorage if secure storage fails
+            this.storage.setItem(
+              AuthTokenManager.ACCESS_TOKEN_KEY,
+              tokens.accessToken
+            );
+            this.storage.setItem(
+              AuthTokenManager.REFRESH_TOKEN_KEY,
+              tokens.refreshToken
+            );
+            this.storage.setItem(
+              AuthTokenManager.EXPIRES_AT_KEY,
+              tokens.expiresAt.toISOString()
+            );
+            console.log('✅ Fallback to regular localStorage successful');
+          }
         } else {
+          console.log('🔒 Using regular localStorage...');
           // Fallback to regular localStorage for development
           this.storage.setItem(
             AuthTokenManager.ACCESS_TOKEN_KEY,
@@ -163,6 +194,7 @@ export class AuthTokenManager {
             AuthTokenManager.EXPIRES_AT_KEY,
             tokens.expiresAt.toISOString()
           );
+          console.log('✅ Regular localStorage successful');
         }
 
         // Verify tokens were stored successfully
@@ -265,20 +297,78 @@ export class AuthTokenManager {
       const envConfig = environmentConfig.getConfig();
       const useSecureStorage = envConfig.isHttps && secureStorage.isSecure();
 
-      let accessToken: string | null;
-      let refreshToken: string | null;
-      let expiresAtStr: string | null;
+      let accessToken: string | null = null;
+      let refreshToken: string | null = null;
+      let expiresAtStr: string | null = null;
+
+      console.log('🔍 Retrieving tokens, useSecureStorage:', useSecureStorage);
 
       if (useSecureStorage) {
-        accessToken = secureStorage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
-        refreshToken = secureStorage.getItem(
-          AuthTokenManager.REFRESH_TOKEN_KEY
-        );
-        expiresAtStr = secureStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+        try {
+          accessToken = secureStorage.getItem(
+            AuthTokenManager.ACCESS_TOKEN_KEY
+          );
+          refreshToken = secureStorage.getItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY
+          );
+          expiresAtStr = secureStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+          console.log('🔒 Secure storage retrieval:', {
+            hasAccess: !!accessToken,
+            hasRefresh: !!refreshToken,
+            hasExpires: !!expiresAtStr,
+          });
+        } catch (secureStorageError) {
+          console.error(
+            '❌ Secure storage retrieval failed, trying regular localStorage:',
+            secureStorageError
+          );
+          // Fallback to regular localStorage if secure storage fails
+          accessToken = this.storage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
+          refreshToken = this.storage.getItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY
+          );
+          expiresAtStr = this.storage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+          console.log('🔒 Regular localStorage fallback retrieval:', {
+            hasAccess: !!accessToken,
+            hasRefresh: !!refreshToken,
+            hasExpires: !!expiresAtStr,
+          });
+        }
       } else {
         accessToken = this.storage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
         refreshToken = this.storage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
         expiresAtStr = this.storage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+        console.log('🔒 Regular localStorage retrieval:', {
+          hasAccess: !!accessToken,
+          hasRefresh: !!refreshToken,
+          hasExpires: !!expiresAtStr,
+        });
+      }
+
+      // If secure storage didn't work, also try regular localStorage as final fallback
+      if (
+        useSecureStorage &&
+        (!accessToken || !refreshToken || !expiresAtStr)
+      ) {
+        console.log(
+          '🔄 Secure storage incomplete, trying regular localStorage as final fallback...'
+        );
+        const fallbackAccess = this.storage.getItem(
+          AuthTokenManager.ACCESS_TOKEN_KEY
+        );
+        const fallbackRefresh = this.storage.getItem(
+          AuthTokenManager.REFRESH_TOKEN_KEY
+        );
+        const fallbackExpires = this.storage.getItem(
+          AuthTokenManager.EXPIRES_AT_KEY
+        );
+
+        if (fallbackAccess && fallbackRefresh && fallbackExpires) {
+          accessToken = fallbackAccess;
+          refreshToken = fallbackRefresh;
+          expiresAtStr = fallbackExpires;
+          console.log('✅ Final fallback successful');
+        }
       }
 
       // Return null values if any token is missing or empty
