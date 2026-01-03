@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query';
 
@@ -18,7 +18,7 @@ export function useOrdersRefresh({
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const refreshOrders = () => {
+  const refreshOrders = useCallback(() => {
     if (!userId) return;
 
     // Invalidar todas as queries relacionadas a pedidos
@@ -32,7 +32,7 @@ export function useOrdersRefresh({
     });
 
     console.log('🔄 Lista de pedidos atualizada automaticamente');
-  };
+  }, [userId, queryClient]);
 
   const forceRefresh = () => {
     refreshOrders();
@@ -50,7 +50,7 @@ export function useOrdersRefresh({
         clearInterval(intervalRef.current);
       }
     };
-  }, [userId, interval, enabled]);
+  }, [userId, interval, enabled, refreshOrders]);
 
   // Cleanup no unmount
   useEffect(() => {
@@ -74,7 +74,7 @@ export function useOrderStatusMonitor(
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const checkOrderStatus = async () => {
+  const checkOrderStatus = useCallback(async () => {
     if (!orderId) return;
 
     try {
@@ -90,7 +90,7 @@ export function useOrderStatusMonitor(
     } catch (error) {
       console.error('Erro ao verificar status do pedido:', error);
     }
-  };
+  }, [orderId, queryClient]);
 
   useEffect(() => {
     if (!enabled || !orderId) return;
@@ -103,7 +103,7 @@ export function useOrderStatusMonitor(
         clearInterval(intervalRef.current);
       }
     };
-  }, [orderId, enabled]);
+  }, [orderId, enabled, checkOrderStatus]);
 
   return {
     checkOrderStatus,
@@ -118,7 +118,7 @@ export function usePendingPaymentsMonitor(
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const checkPendingPayments = async () => {
+  const checkPendingPayments = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -147,7 +147,7 @@ export function usePendingPaymentsMonitor(
     } catch (error) {
       console.error('Erro ao verificar pagamentos pendentes:', error);
     }
-  };
+  }, [userId, queryClient]);
 
   useEffect(() => {
     if (!enabled || !userId) return;
@@ -160,7 +160,7 @@ export function usePendingPaymentsMonitor(
         clearInterval(intervalRef.current);
       }
     };
-  }, [userId, enabled]);
+  }, [userId, enabled, checkPendingPayments]);
 
   return {
     checkPendingPayments,

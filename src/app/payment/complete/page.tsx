@@ -28,31 +28,38 @@ function PaymentCompleteContent() {
   const paymentId = searchParams.get('payment_id');
   const orderId = searchParams.get('order_id');
 
-  const checkPaymentStatus = useCallback(async () => {
-    if (!paymentId) return;
+  const handleDownload = useCallback(
+    async (orderData?: any) => {
+      const targetOrder = orderData || order;
+      if (!orderId || !targetOrder) return;
 
-    try {
-      const response = await apiClient.getPaymentStatus(paymentId);
-
-      if (response.success) {
-        const status = response.data.status;
-
-        if (status === 'completed') {
-          setProcessingStatus('processing');
-          startProcessingMonitoring();
-        } else if (status === 'pending') {
-          setProcessingStatus('waiting');
-          // Continue checking
-          setTimeout(checkPaymentStatus, 3000);
-        } else {
-          setProcessingStatus('failed');
+      try {
+        const { blob, filename } = await apiClient.downloadOrder(orderId);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download =
+          filename ||
+          `${
+            targetOrder.filename?.replace('.pdf', '') || 'converted'
+          }_converted.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Download failed:', error);
+        // Handle download link expiration (410 error)
+        if (
+          error instanceof Error &&
+          error.message.includes('Download link expired')
+        ) {
+          setMessage('Link de download expirado. Tente novamente.');
         }
       }
-    } catch (error) {
-      console.error('Failed to check payment status:', error);
-      setProcessingStatus('failed');
-    }
-  }, [paymentId]);
+    },
+    [orderId, order]
+  );
 
   const startProcessingMonitoring = useCallback(() => {
     if (!orderId) return;
@@ -103,35 +110,33 @@ function PaymentCompleteContent() {
       clearInterval(progressInterval);
       clearInterval(statusInterval);
     }, 600000);
-  }, [orderId, queryClient]);
+  }, [orderId, queryClient, handleDownload]);
 
-  const handleDownload = async (orderData?: any) => {
-    const targetOrder = orderData || order;
-    if (!orderId || !targetOrder) return;
+  const checkPaymentStatus = useCallback(async () => {
+    if (!paymentId) return;
 
     try {
-      const { blob, filename } = await apiClient.downloadOrder(orderId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download =
-        filename ||
-        `${targetOrder.filename?.replace('.pdf', '') || 'converted'}_converted.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Download failed:', error);
-      // Handle download link expiration (410 error)
-      if (
-        error instanceof Error &&
-        error.message.includes('Download link expired')
-      ) {
-        setMessage('Link de download expirado. Tente novamente.');
+      const response = await apiClient.getPaymentStatus(paymentId);
+
+      if (response.success) {
+        const status = response.data.status;
+
+        if (status === 'completed') {
+          setProcessingStatus('processing');
+          startProcessingMonitoring();
+        } else if (status === 'pending') {
+          setProcessingStatus('waiting');
+          // Continue checking
+          setTimeout(checkPaymentStatus, 3000);
+        } else {
+          setProcessingStatus('failed');
+        }
       }
+    } catch (error) {
+      console.error('Failed to check payment status:', error);
+      setProcessingStatus('failed');
     }
-  };
+  }, [paymentId, startProcessingMonitoring]);
 
   useEffect(() => {
     if (paymentId || orderId) {

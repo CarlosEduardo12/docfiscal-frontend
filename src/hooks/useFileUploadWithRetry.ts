@@ -137,6 +137,23 @@ export function useFileUploadWithRetry(
     []
   );
 
+  const isRetryableError = useCallback((error: any): boolean => {
+    // Define which errors are retryable
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      return (
+        message.includes('network') ||
+        message.includes('timeout') ||
+        message.includes('connection') ||
+        message.includes('server error') ||
+        message.includes('503') ||
+        message.includes('502') ||
+        message.includes('500')
+      );
+    }
+    return true; // Default to retryable for unknown errors
+  }, []);
+
   const uploadFileWithRetry = useCallback(
     async (file: File, currentRetryCount: number = 0): Promise<void> => {
       // Reset progress and error for new attempt
@@ -195,25 +212,9 @@ export function useFileUploadWithRetry(
       onError,
       maxRetries,
       calculateRetryDelay,
+      isRetryableError,
     ]
   );
-
-  const isRetryableError = useCallback((error: any): boolean => {
-    // Define which errors are retryable
-    if (error instanceof Error) {
-      const message = error.message.toLowerCase();
-      return (
-        message.includes('network') ||
-        message.includes('timeout') ||
-        message.includes('connection') ||
-        message.includes('server error') ||
-        message.includes('503') ||
-        message.includes('502') ||
-        message.includes('500')
-      );
-    }
-    return true; // Default to retryable for unknown errors
-  }, []);
 
   const uploadFile = useCallback(
     async (file: File): Promise<void> => {

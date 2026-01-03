@@ -46,12 +46,16 @@ export class AuthTokenManager {
    */
   constructor(storage?: StorageInterface) {
     // Default to localStorage if no storage provided and we're in browser environment
-    this.storage = storage || (typeof window !== 'undefined' ? window.localStorage : {
-      getItem: () => null,
-      setItem: () => {},
-      removeItem: () => {},
-      clear: () => {}
-    });
+    this.storage =
+      storage ||
+      (typeof window !== 'undefined'
+        ? window.localStorage
+        : {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+            clear: () => {},
+          });
   }
 
   /**
@@ -683,7 +687,11 @@ export class AuthTokenManager {
     }
 
     // Reject specific test malformed tokens
-    if (token === 'not.a.jwt' || token === 'also.not.jwt' || token === 'invalid-token') {
+    if (
+      token === 'not.a.jwt' ||
+      token === 'also.not.jwt' ||
+      token === 'invalid-token'
+    ) {
       return false;
     }
 
@@ -710,7 +718,7 @@ export class AuthTokenManager {
 
     // Validate base64-like format
     const base64Pattern = /^[A-Za-z0-9+/=_-]*$/;
-    return parts.every(part => base64Pattern.test(part));
+    return parts.every((part) => base64Pattern.test(part));
   }
 
   /**

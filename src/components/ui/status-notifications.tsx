@@ -150,22 +150,22 @@ export function StatusNotification({
     }
   };
 
-  const handleDismiss = () => {
+  const handleDismiss = useCallback(() => {
     setIsVisible(false);
     setTimeout(() => {
       onDismiss?.(notification.id);
     }, 300);
-  };
+  }, [onDismiss, notification.id]);
 
-  const handleMarkAsRead = () => {
+  const handleMarkAsRead = useCallback(() => {
     onMarkAsRead?.(notification.id);
-  };
+  }, [onMarkAsRead, notification.id]);
 
   useEffect(() => {
     if (!notification.read) {
       handleMarkAsRead();
     }
-  }, [notification.read]);
+  }, [notification.read, handleMarkAsRead]);
 
   // Auto-dismiss non-persistent notifications after 5 seconds
   useEffect(() => {
@@ -176,7 +176,7 @@ export function StatusNotification({
 
       return () => clearTimeout(timer);
     }
-  }, [notification.persistent]);
+  }, [notification.persistent, handleDismiss]);
 
   if (!isVisible) return null;
 
