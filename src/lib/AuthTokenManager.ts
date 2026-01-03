@@ -62,7 +62,7 @@ export class AuthTokenManager {
    * Store authentication tokens securely in localStorage
    * Enhanced with validation, error handling, and HTTPS security
    */
-  storeTokens(tokens: AuthTokens): void {
+  storeTokens(tokens: AuthTokens): boolean {
     const startTime = Date.now();
 
     try {
@@ -78,7 +78,7 @@ export class AuthTokenManager {
           duration: Date.now() - startTime,
         });
 
-        return;
+        return false;
       }
 
       // Validate token format before storing
@@ -94,7 +94,7 @@ export class AuthTokenManager {
           duration: Date.now() - startTime,
         });
 
-        return;
+        return false;
       }
 
       if (!this.isValidTokenFormat(tokens.refreshToken)) {
@@ -109,7 +109,7 @@ export class AuthTokenManager {
           duration: Date.now() - startTime,
         });
 
-        return;
+        return false;
       }
 
       if (!tokens.expiresAt || !(tokens.expiresAt instanceof Date)) {
@@ -124,63 +124,100 @@ export class AuthTokenManager {
           duration: Date.now() - startTime,
         });
 
-        return;
+        return false;
       }
 
       // Use secure storage for HTTPS environments
       const envConfig = environmentConfig.getConfig();
       const useSecureStorage = envConfig.isHttps && secureStorage.isSecure();
 
-      if (useSecureStorage) {
-        // Store tokens with encryption in secure environments
-        secureStorage.setItem(
-          AuthTokenManager.ACCESS_TOKEN_KEY,
-          tokens.accessToken,
-          { encrypt: true, secure: true }
-        );
-        secureStorage.setItem(
-          AuthTokenManager.REFRESH_TOKEN_KEY,
-          tokens.refreshToken,
-          { encrypt: true, secure: true }
-        );
-        secureStorage.setItem(
-          AuthTokenManager.EXPIRES_AT_KEY,
-          tokens.expiresAt.toISOString(),
-          { encrypt: false, secure: true } // Date doesn't need encryption
-        );
-      } else {
-        // Fallback to regular localStorage for development
-        this.storage.setItem(
-          AuthTokenManager.ACCESS_TOKEN_KEY,
-          tokens.accessToken
-        );
-        this.storage.setItem(
-          AuthTokenManager.REFRESH_TOKEN_KEY,
-          tokens.refreshToken
-        );
-        this.storage.setItem(
-          AuthTokenManager.EXPIRES_AT_KEY,
-          tokens.expiresAt.toISOString()
-        );
+      try {
+        if (useSecureStorage) {
+          // Store tokens with encryption in secure environments
+          secureStorage.setItem(
+            AuthTokenManager.ACCESS_TOKEN_KEY,
+            tokens.accessToken,
+            { encrypt: true, secure: true }
+          );
+          secureStorage.setItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY,
+            tokens.refreshToken,
+            { encrypt: true, secure: true }
+          );
+          secureStorage.setItem(
+            AuthTokenManager.EXPIRES_AT_KEY,
+            tokens.expiresAt.toISOString(),
+            { encrypt: false, secure: true } // Date doesn't need encryption
+          );
+        } else {
+          // Fallback to regular localStorage for development
+          this.storage.setItem(
+            AuthTokenManager.ACCESS_TOKEN_KEY,
+            tokens.accessToken
+          );
+          this.storage.setItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY,
+            tokens.refreshToken
+          );
+          this.storage.setItem(
+            AuthTokenManager.EXPIRES_AT_KEY,
+            tokens.expiresAt.toISOString()
+          );
+        }
+
+        // Verify tokens were stored successfully
+        const verification = this.getStoredTokens();
+        if (!verification.accessToken || !verification.refreshToken) {
+          console.error('❌ Token storage verification failed');
+
+          // Log token storage failure
+          authLogger.logTokenOperation({
+            operation: 'store',
+            tokenType: 'both',
+            result: 'failure',
+            reason: 'storage_verification_failed',
+            duration: Date.now() - startTime,
+          });
+
+          return false;
+        }
+
+        console.log('✅ Tokens stored and verified successfully', {
+          accessTokenLength: tokens.accessToken.length,
+          refreshTokenLength: tokens.refreshToken.length,
+          expiresAt: tokens.expiresAt.toISOString(),
+          secureStorage: useSecureStorage,
+          encrypted: useSecureStorage && secureStorage.isEncryptionEnabled(),
+        });
+
+        // Log successful token storage
+        authLogger.logTokenOperation({
+          operation: 'store',
+          tokenType: 'both',
+          result: 'success',
+          tokenLength: tokens.accessToken.length + tokens.refreshToken.length,
+          expiresAt: tokens.expiresAt.toISOString(),
+          duration: Date.now() - startTime,
+        });
+
+        return true;
+      } catch (storageError) {
+        console.error('❌ Storage operation failed:', storageError);
+
+        // Log token storage failure
+        authLogger.logTokenOperation({
+          operation: 'store',
+          tokenType: 'both',
+          result: 'failure',
+          reason:
+            storageError instanceof Error
+              ? storageError.message
+              : 'storage_operation_failed',
+          duration: Date.now() - startTime,
+        });
+
+        return false;
       }
-
-      console.log('✅ Tokens stored successfully', {
-        accessTokenLength: tokens.accessToken.length,
-        refreshTokenLength: tokens.refreshToken.length,
-        expiresAt: tokens.expiresAt.toISOString(),
-        secureStorage: useSecureStorage,
-        encrypted: useSecureStorage && secureStorage.isEncryptionEnabled(),
-      });
-
-      // Log successful token storage
-      authLogger.logTokenOperation({
-        operation: 'store',
-        tokenType: 'both',
-        result: 'success',
-        tokenLength: tokens.accessToken.length + tokens.refreshToken.length,
-        expiresAt: tokens.expiresAt.toISOString(),
-        duration: Date.now() - startTime,
-      });
     } catch (error) {
       console.error('❌ Failed to store tokens:', error);
 
@@ -195,6 +232,7 @@ export class AuthTokenManager {
 
       // Gracefully handle storage errors - don't throw, just log
       // This ensures the application doesn't crash on localStorage quota exceeded
+      return false;
     }
   }
 

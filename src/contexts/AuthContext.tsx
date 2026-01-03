@@ -14,6 +14,7 @@ import { apiClient } from '@/lib/api';
 import { redirectManager } from '@/lib/redirectManager';
 import { ErrorHandler, AppError } from '@/lib/errorHandler';
 import { authLogger } from '@/lib/authLogger';
+import { environmentConfig } from '@/lib/environmentConfig';
 
 interface User {
   id: string;
@@ -298,12 +299,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
         // Store tokens synchronously to ensure immediate availability
-        authTokenManager.storeTokens(tokens);
-
-        // Verify tokens were stored correctly
-        const storedTokens = authTokenManager.getStoredTokens();
-        if (!storedTokens.accessToken || !storedTokens.refreshToken) {
-          console.error('❌ Token storage verification failed');
+        const storageSuccess = authTokenManager.storeTokens(tokens);
+        if (!storageSuccess) {
+          console.error('❌ Token storage failed');
 
           // Log failed login due to token storage
           authLogger.logLoginAttempt({
@@ -334,10 +332,54 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(userData);
         authLogger.setUserId(userData.id);
 
-        // Double-check authentication state is synchronized
-        const isAuthenticated = await authTokenManager.isAuthenticated();
+        // Double-check authentication state is synchronized with retry logic
+        let isAuthenticated = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        while (retryCount < maxRetries && !isAuthenticated) {
+          // Add small delay to ensure storage operations complete
+          if (retryCount > 0) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, 200 * retryCount)
+            );
+          }
+
+          isAuthenticated = await authTokenManager.isAuthenticated();
+
+          if (!isAuthenticated) {
+            console.warn(
+              `⚠️ Authentication sync check failed (attempt ${
+                retryCount + 1
+              }/${maxRetries})`
+            );
+
+            // Debug logging for sync failure
+            console.log('🔍 Debugging sync failure:', {
+              attempt: retryCount + 1,
+              storedTokens: await authTokenManager.getStoredTokens(),
+              validToken: await authTokenManager.getValidToken(),
+              environment: environmentConfig.getConfig(),
+              localStorage:
+                typeof window !== 'undefined'
+                  ? {
+                      access: localStorage.getItem('docfiscal_access_token'),
+                      refresh: localStorage.getItem('docfiscal_refresh_token'),
+                      expires: localStorage.getItem(
+                        'docfiscal_token_expires_at'
+                      ),
+                    }
+                  : 'server-side',
+            });
+          }
+
+          retryCount++;
+        }
+
         if (!isAuthenticated) {
-          console.error('❌ Authentication state synchronization failed');
+          console.error(
+            '❌ Authentication state synchronization failed after retries'
+          );
           authTokenManager.clearTokens();
           setUser(null);
 
@@ -350,7 +392,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 : undefined,
             timestamp: new Date().toISOString(),
             result: 'failure',
-            failureReason: 'state_synchronization_failed',
+            failureReason: 'state_synchronization_failed_after_retries',
             duration: Date.now() - startTime,
           });
 
@@ -363,8 +405,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log(
           '✅ Login successful - tokens stored and state synchronized'
         );
-        console.log('🔑 Access token stored:', !!storedTokens.accessToken);
-        console.log('🔄 Refresh token stored:', !!storedTokens.refreshToken);
+        console.log('🔑 Access token stored: true');
+        console.log('🔄 Refresh token stored: true');
         console.log('👤 User state set:', !!userData);
 
         // Log successful login
