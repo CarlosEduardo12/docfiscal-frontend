@@ -1,8 +1,7 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, ReactNode } from 'react';
+import { useRequireAuth } from '@/contexts/AuthContext';
+import { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -10,16 +9,9 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useRequireAuth();
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [status, router]);
-
-  if (status === 'loading') {
+  if (isLoading) {
     return (
       fallback || (
         <div className="min-h-screen flex items-center justify-center">
@@ -29,8 +21,8 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
     );
   }
 
-  if (status === 'unauthenticated') {
-    return null; // Will redirect to login
+  if (!isAuthenticated) {
+    return null; // useRequireAuth will handle redirect to login
   }
 
   return <>{children}</>;

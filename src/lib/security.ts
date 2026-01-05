@@ -154,14 +154,6 @@ export function auditSecurity(): {
     if (!currentConfig.enforceHttps) {
       issues.push('HTTPS enforcement is disabled in production');
     }
-
-    if (!process.env.NEXTAUTH_SECRET) {
-      issues.push('NEXTAUTH_SECRET is not configured');
-    }
-
-    if (!process.env.NEXTAUTH_URL?.startsWith('https://')) {
-      issues.push('NEXTAUTH_URL should use HTTPS in production');
-    }
   }
 
   return {

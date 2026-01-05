@@ -1,6 +1,5 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from '@/lib/react-query';
@@ -43,18 +42,16 @@ function NavigationStateInitializer({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary onError={handleErrorBoundaryError}>
-      <SessionProvider>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <NavigationStateInitializer>
-              {children}
-              {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools initialIsOpen={false} />
-              )}
-            </NavigationStateInitializer>
-          </AuthProvider>
-        </QueryClientProvider>
-      </SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <NavigationStateInitializer>
+            {children}
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </NavigationStateInitializer>
+        </AuthProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

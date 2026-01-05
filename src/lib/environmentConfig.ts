@@ -169,9 +169,8 @@ class EnvironmentConfigManager {
     }
 
     // Check for explicit frontend URL
-    if (process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXTAUTH_URL) {
-      const url =
-        process.env.NEXT_PUBLIC_FRONTEND_URL || process.env.NEXTAUTH_URL!;
+    if (process.env.NEXT_PUBLIC_FRONTEND_URL) {
+      const url = process.env.NEXT_PUBLIC_FRONTEND_URL;
       console.log('🔧 Using explicit frontend URL:', url);
       return url;
     }
