@@ -37,7 +37,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     return () => {
       clearInterval(refreshInterval);
     };
-  }, [auth.isAuthenticated, auth.refreshSession, persistence.isRefreshing]);
+  }, [auth, persistence.isRefreshing]);
 
   useEffect(() => {
     // Handle page visibility change - refresh session when page becomes visible
@@ -60,11 +60,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [
-    auth.isAuthenticated,
-    auth.refreshSession,
-    persistence.lastRefreshAttempt,
-  ]);
+  }, [auth, persistence.lastRefreshAttempt]);
 
   useEffect(() => {
     // Handle storage events (for multi-tab synchronization)
@@ -85,7 +81,7 @@ export function SessionPersistence({ children }: SessionPersistenceProps) {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [auth.isAuthenticated, auth.logout, persistence.clearSession]);
+  }, [auth, persistence]);
 
   // Show loading state while initializing
   if (!persistence.isInitialized) {

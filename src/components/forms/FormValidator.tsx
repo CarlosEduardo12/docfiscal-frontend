@@ -211,15 +211,12 @@ export function FormValidator<T extends Record<string, any>>({
     setErrors([]);
   }, []);
 
-  const clearFieldError = useCallback(
-    (fieldName: string) => {
-      setErrors((prevErrors) => {
-        const newErrors = prevErrors.filter((e) => e.field !== fieldName);
-        return newErrors;
-      });
-    },
-    []
-  );
+  const clearFieldError = useCallback((fieldName: string) => {
+    setErrors((prevErrors) => {
+      const newErrors = prevErrors.filter((e) => e.field !== fieldName);
+      return newErrors;
+    });
+  }, []);
 
   const getFieldError = useCallback(
     (fieldName: string): string | undefined => {
