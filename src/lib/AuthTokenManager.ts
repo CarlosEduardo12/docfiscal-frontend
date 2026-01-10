@@ -811,6 +811,9 @@ export class AuthTokenManager {
    */
   private isValidTokenFormat(token: string): boolean {
     if (!token || typeof token !== 'string') {
+      console.log(
+        '🔍 Token validation failed: token is null, undefined, or not a string'
+      );
       return false;
     }
 
@@ -820,19 +823,36 @@ export class AuthTokenManager {
       token === 'also.not.jwt' ||
       token === 'invalid-token'
     ) {
+      console.log(
+        '🔍 Token validation failed: token is a known test malformed token'
+      );
       return false;
     }
 
     // Basic JWT format check (3 parts separated by dots)
     const parts = token.split('.');
-    if (parts.length !== 3 || !parts.every((part) => part.length > 0)) {
+    if (parts.length !== 3) {
+      console.log(
+        `🔍 Token validation failed: expected 3 parts, got ${parts.length}. Token: ${token.substring(0, 100)}...`
+      );
+      return false;
+    }
+
+    if (!parts.every((part) => part.length > 0)) {
+      console.log('🔍 Token validation failed: one or more parts are empty');
+      console.log(
+        'Parts lengths:',
+        parts.map((p) => p.length)
+      );
       return false;
     }
 
     // Skip strict validation in test environment to allow mock tokens
     const config = environmentConfig.getConfig();
     if (config.isTest) {
-      // Allow test tokens that have proper JWT structure
+      console.log(
+        '🔍 Token validation: test environment, allowing token with proper JWT structure'
+      );
       return true;
     }
 
@@ -840,13 +860,63 @@ export class AuthTokenManager {
     const [header, payload, signature] = parts;
 
     // Check minimum realistic lengths for JWT parts
-    if (header.length < 10 || payload.length < 20 || signature.length < 10) {
+    if (header.length < 10) {
+      console.log(
+        `🔍 Token validation failed: header too short (${header.length} < 10)`
+      );
+      return false;
+    }
+
+    if (payload.length < 20) {
+      console.log(
+        `🔍 Token validation failed: payload too short (${payload.length} < 20)`
+      );
+      return false;
+    }
+
+    if (signature.length < 10) {
+      console.log(
+        `🔍 Token validation failed: signature too short (${signature.length} < 10)`
+      );
       return false;
     }
 
     // Validate base64-like format
     const base64Pattern = /^[A-Za-z0-9+/=_-]*$/;
-    return parts.every((part) => base64Pattern.test(part));
+    const headerValid = base64Pattern.test(header);
+    const payloadValid = base64Pattern.test(payload);
+    const signatureValid = base64Pattern.test(signature);
+
+    if (!headerValid) {
+      console.log(
+        '🔍 Token validation failed: header contains invalid base64 characters'
+      );
+      console.log('Header:', header);
+    }
+
+    if (!payloadValid) {
+      console.log(
+        '🔍 Token validation failed: payload contains invalid base64 characters'
+      );
+      console.log('Payload:', payload.substring(0, 100) + '...');
+    }
+
+    if (!signatureValid) {
+      console.log(
+        '🔍 Token validation failed: signature contains invalid base64 characters'
+      );
+      console.log('Signature:', signature);
+    }
+
+    const isValid = headerValid && payloadValid && signatureValid;
+
+    if (isValid) {
+      console.log('✅ Token validation passed');
+    } else {
+      console.log('❌ Token validation failed: base64 pattern check failed');
+    }
+
+    return isValid;
   }
 
   /**
@@ -873,6 +943,10 @@ export class AuthTokenManager {
 
       // Check access token
       if (accessToken) {
+        console.log(
+          '🔍 Checking access token:',
+          accessToken.substring(0, 50) + '...'
+        );
         if (accessToken.trim() === '') {
           details.push('Access token is empty string');
           hasCorrupted = true;
@@ -884,6 +958,10 @@ export class AuthTokenManager {
 
       // Check refresh token
       if (refreshToken) {
+        console.log(
+          '🔍 Checking refresh token:',
+          refreshToken.substring(0, 50) + '...'
+        );
         if (refreshToken.trim() === '') {
           details.push('Refresh token is empty string');
           hasCorrupted = true;
@@ -895,6 +973,7 @@ export class AuthTokenManager {
 
       // Check expiration date
       if (expiresAtStr) {
+        console.log('🔍 Checking expiration date:', expiresAtStr);
         if (expiresAtStr.trim() === '') {
           details.push('Expiration date is empty string');
           hasCorrupted = true;
@@ -902,10 +981,17 @@ export class AuthTokenManager {
           try {
             const expiresAt = new Date(expiresAtStr);
             if (isNaN(expiresAt.getTime())) {
+              console.log(
+                '🔍 Expiration date parse failed - invalid date:',
+                expiresAtStr
+              );
               details.push('Expiration date is invalid');
               hasCorrupted = true;
+            } else {
+              console.log('🔍 Expiration date parsed successfully:', expiresAt);
             }
           } catch (error) {
+            console.log('🔍 Expiration date parse error:', error);
             details.push('Expiration date cannot be parsed');
             hasCorrupted = true;
           }
