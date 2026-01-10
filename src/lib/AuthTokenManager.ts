@@ -970,15 +970,41 @@ export class AuthTokenManager {
         return { hasCorrupted: false, details: [] };
       }
 
-      const accessToken = this.storage.getItem(
-        AuthTokenManager.ACCESS_TOKEN_KEY
-      );
-      const refreshToken = this.storage.getItem(
-        AuthTokenManager.REFRESH_TOKEN_KEY
-      );
-      const expiresAtStr = this.storage.getItem(
-        AuthTokenManager.EXPIRES_AT_KEY
-      );
+      // Use the same secure storage retrieval logic as getStoredTokens
+      const config = environmentConfig.getConfig();
+      const useSecureStorage = config.secureStorage;
+
+      let accessToken: string | null = null;
+      let refreshToken: string | null = null;
+      let expiresAtStr: string | null = null;
+
+      if (useSecureStorage) {
+        try {
+          accessToken = secureStorage.getItem(
+            AuthTokenManager.ACCESS_TOKEN_KEY
+          );
+          refreshToken = secureStorage.getItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY
+          );
+          expiresAtStr = secureStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+
+          // Apply the same extraction logic
+          accessToken = this.extractValueFromSecureData(accessToken);
+          refreshToken = this.extractValueFromSecureData(refreshToken);
+          expiresAtStr = this.extractValueFromSecureData(expiresAtStr);
+        } catch (secureStorageError) {
+          // Fallback to regular localStorage
+          accessToken = this.storage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
+          refreshToken = this.storage.getItem(
+            AuthTokenManager.REFRESH_TOKEN_KEY
+          );
+          expiresAtStr = this.storage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+        }
+      } else {
+        accessToken = this.storage.getItem(AuthTokenManager.ACCESS_TOKEN_KEY);
+        refreshToken = this.storage.getItem(AuthTokenManager.REFRESH_TOKEN_KEY);
+        expiresAtStr = this.storage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+      }
 
       // Check access token
       if (accessToken) {
