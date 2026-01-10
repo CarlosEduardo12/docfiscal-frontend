@@ -33,7 +33,7 @@ export function middleware(req: NextRequest) {
   if (process.env.NODE_ENV !== 'development') {
     response.headers.set('Content-Security-Policy', csp);
   }
-  
+
   // Add additional security headers
   response.headers.set('X-Robots-Tag', 'noindex, nofollow'); // Prevent indexing of sensitive pages
   response.headers.set('X-DNS-Prefetch-Control', 'on');
