@@ -74,6 +74,16 @@ export function FormValidator<T extends Record<string, any>>({
   const [isValid, setIsValid] = useState(true);
   const fieldRefs = useRef<Record<string, HTMLElement>>({});
 
+  // Update validation state when errors change
+  useEffect(() => {
+    const newIsValid = errors.length === 0;
+    setIsValid(newIsValid);
+
+    if (onValidationChange) {
+      onValidationChange(newIsValid, errors);
+    }
+  }, [errors, onValidationChange]);
+
   const validateSingleField = useCallback(
     (
       fieldName: string,
@@ -144,17 +154,10 @@ export function FormValidator<T extends Record<string, any>>({
           ? [...filteredErrors, { field: fieldName, message: error }]
           : filteredErrors;
 
-        const newIsValid = newErrors.length === 0;
-        setIsValid(newIsValid);
-
-        if (onValidationChange) {
-          onValidationChange(newIsValid, newErrors);
-        }
-
         return newErrors;
       });
     },
-    [schema.fields, validateSingleField, onValidationChange]
+    [schema.fields, validateSingleField]
   );
 
   const validateForm = useCallback(
@@ -198,40 +201,24 @@ export function FormValidator<T extends Record<string, any>>({
       };
 
       setErrors(fieldErrors);
-      setIsValid(result.isValid);
-
-      if (onValidationChange) {
-        onValidationChange(result.isValid, fieldErrors);
-      }
 
       return result;
     },
-    [schema, validateSingleField, onValidationChange]
+    [schema, validateSingleField]
   );
 
   const clearErrors = useCallback(() => {
     setErrors([]);
-    setIsValid(true);
-    if (onValidationChange) {
-      onValidationChange(true, []);
-    }
-  }, [onValidationChange]);
+  }, []);
 
   const clearFieldError = useCallback(
     (fieldName: string) => {
       setErrors((prevErrors) => {
         const newErrors = prevErrors.filter((e) => e.field !== fieldName);
-        const newIsValid = newErrors.length === 0;
-        setIsValid(newIsValid);
-
-        if (onValidationChange) {
-          onValidationChange(newIsValid, newErrors);
-        }
-
         return newErrors;
       });
     },
-    [onValidationChange]
+    []
   );
 
   const getFieldError = useCallback(
