@@ -91,9 +91,9 @@ class SecureStorageManager {
         "default-src 'self'",
         `connect-src 'self' ${envConfig.apiUrl}`,
         "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-        "style-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "img-src 'self' data: https:",
-        "font-src 'self' data:",
+        "font-src 'self' data: https://fonts.gstatic.com",
         "frame-ancestors 'none'",
       ].join('; ');
 

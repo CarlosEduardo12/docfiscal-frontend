@@ -20,9 +20,9 @@ export function middleware(req: NextRequest) {
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
-    "style-src 'self' 'unsafe-inline' data:", // Tailwind and Next.js styles
+    "style-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com", // Tailwind, Next.js styles, and Google Fonts
     "img-src 'self' data: https: blob:",
-    "font-src 'self' data:",
+    "font-src 'self' data: https://fonts.gstatic.com", // Allow Google Fonts
     isDevelopment
       ? "connect-src 'self' https: http: ws: wss:" // Allow all connections in development
       : "connect-src 'self' https: http://localhost:8000", // Restrict in production
@@ -33,7 +33,14 @@ export function middleware(req: NextRequest) {
   if (process.env.NODE_ENV !== 'development') {
     response.headers.set('Content-Security-Policy', csp);
   }
+  
+  // Add additional security headers
   response.headers.set('X-Robots-Tag', 'noindex, nofollow'); // Prevent indexing of sensitive pages
+  response.headers.set('X-DNS-Prefetch-Control', 'on');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   return response;
 }
