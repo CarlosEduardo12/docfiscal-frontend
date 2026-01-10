@@ -312,6 +312,13 @@ export class AuthTokenManager {
             AuthTokenManager.REFRESH_TOKEN_KEY
           );
           expiresAtStr = secureStorage.getItem(AuthTokenManager.EXPIRES_AT_KEY);
+
+          // Safety check: if secure storage returns JSON objects instead of plain values,
+          // extract the value property
+          accessToken = this.extractValueFromSecureData(accessToken);
+          refreshToken = this.extractValueFromSecureData(refreshToken);
+          expiresAtStr = this.extractValueFromSecureData(expiresAtStr);
+
           console.log('🔒 Secure storage retrieval:', {
             hasAccess: !!accessToken,
             hasRefresh: !!refreshToken,
@@ -804,6 +811,38 @@ export class AuthTokenManager {
       console.error('❌ Error checking token expiration:', error);
       return true; // Assume expired on error
     }
+  }
+
+  /**
+   * Extract value from secure storage data format
+   * Handles cases where secure storage returns JSON objects instead of plain values
+   */
+  private extractValueFromSecureData(data: string | null): string | null {
+    if (!data) {
+      return null;
+    }
+
+    // If it's already a plain string (not JSON), return as-is
+    if (!data.startsWith('{')) {
+      return data;
+    }
+
+    try {
+      // Try to parse as JSON object from secure storage
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed === 'object' && parsed.value) {
+        console.log(
+          '🔧 Extracted value from secure storage JSON:',
+          parsed.value.substring(0, 50) + '...'
+        );
+        return parsed.value;
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to parse secure storage data as JSON:', error);
+    }
+
+    // Fallback to original data
+    return data;
   }
 
   /**
